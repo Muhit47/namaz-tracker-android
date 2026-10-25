@@ -1,0 +1,1313 @@
+package com.example.ui.screens
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.data.model.*
+import com.example.ui.theme.*
+import com.example.ui.viewmodel.NamazUiState
+import com.example.ui.viewmodel.NamazViewModel
+import com.example.util.DateUtil
+import com.example.util.TransliterationUtil
+
+private enum class HadithTabMode {
+    CATEGORIES,  // বিষয়ভিত্তিক তালিকা (৮টি ক্যাটাগরি)
+    BOOKS,       // গ্রন্থসমূহ (সহীহ বুখারী, মুসলিম, তিরমিযী...)
+    SEARCH,      // সরাসরি অনুসন্ধান
+    BOOKMARKS    // বুকমার্কস
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HadithScreen(
+    uiState: NamazUiState,
+    viewModel: NamazViewModel,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val isBangla = uiState.isBangla
+
+    var activeTab by remember { mutableStateOf(HadithTabMode.CATEGORIES) }
+    var selectedCategoryForDetail by remember { mutableStateOf<HadithCategoryEntity?>(null) }
+    var selectedBookForChapters by remember { mutableStateOf<HadithBookEntity?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    val allHadiths = remember(uiState.allHadiths) { uiState.allHadiths }
+
+    // Handle system back button for drill-down screens
+    BackHandler(enabled = uiState.selectedHadithChapter != null || selectedBookForChapters != null || selectedCategoryForDetail != null) {
+        if (uiState.selectedHadithChapter != null) {
+            viewModel.closeHadithChapter()
+        } else if (selectedBookForChapters != null) {
+            selectedBookForChapters = null
+        } else if (selectedCategoryForDetail != null) {
+            selectedCategoryForDetail = null
+        }
+    }
+
+    Scaffold(
+        containerColor = Slate50,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = if (isBangla) "হাদীস শরীফ" else "Hadith Sharif",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                        Text(
+                            text = if (isBangla) "সহিহ হাদীস সম্ভার ও প্রধান গ্রন্থসমূহ" else "Authentic Hadith Collections",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp,
+                            color = Slate600
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = GlassCardWhite)
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Tab row
+            Surface(
+                color = Slate100,
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, Slate200),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TabCapsuleButton(
+                        label = if (isBangla) "বিষয়ভিত্তিক" else "Categories",
+                        isSelected = activeTab == HadithTabMode.CATEGORIES && selectedCategoryForDetail == null,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            activeTab = HadithTabMode.CATEGORIES
+                            selectedCategoryForDetail = null
+                            selectedBookForChapters = null
+                            viewModel.closeHadithChapter()
+                        }
+                    )
+
+                    TabCapsuleButton(
+                        label = if (isBangla) "গ্রন্থসমূহ" else "Books",
+                        isSelected = activeTab == HadithTabMode.BOOKS && selectedBookForChapters == null && uiState.selectedHadithChapter == null,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            activeTab = HadithTabMode.BOOKS
+                            selectedCategoryForDetail = null
+                            selectedBookForChapters = null
+                            viewModel.closeHadithChapter()
+                        }
+                    )
+
+                    TabCapsuleButton(
+                        label = if (isBangla) "অনুসন্ধান" else "Search",
+                        isSelected = activeTab == HadithTabMode.SEARCH,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            activeTab = HadithTabMode.SEARCH
+                            selectedCategoryForDetail = null
+                            selectedBookForChapters = null
+                            viewModel.closeHadithChapter()
+                        }
+                    )
+
+                    TabCapsuleButton(
+                        label = if (isBangla) "বুকমার্ক (${DateUtil.toBanglaDigits(uiState.hadithBookmarks.size.toString())})" else "Saved (${uiState.hadithBookmarks.size})",
+                        isSelected = activeTab == HadithTabMode.BOOKMARKS,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            activeTab = HadithTabMode.BOOKMARKS
+                            selectedCategoryForDetail = null
+                            selectedBookForChapters = null
+                            viewModel.closeHadithChapter()
+                        }
+                    )
+                }
+            }
+
+            // Body Content
+            when (activeTab) {
+                HadithTabMode.CATEGORIES -> {
+                    if (selectedCategoryForDetail == null) {
+                        CategoriesListView(
+                            categories = uiState.hadithCategories,
+                            allHadiths = allHadiths,
+                            isBangla = isBangla,
+                            onSelectCategory = { cat -> selectedCategoryForDetail = cat }
+                        )
+                    } else {
+                        val cat = selectedCategoryForDetail!!
+                        val categoryHadiths = remember(allHadiths, cat.id) {
+                            allHadiths.filter { it.categoryId == cat.id }
+                        }
+                        CategoryDetailHadithsView(
+                            category = cat,
+                            hadiths = categoryHadiths,
+                            bookmarks = uiState.hadithBookmarks,
+                            isBangla = isBangla,
+                            onBack = { selectedCategoryForDetail = null },
+                            onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
+                            onCopy = { hadith -> copyHadithToClipboard(context, hadith) }
+                        )
+                    }
+                }
+
+                HadithTabMode.BOOKS -> {
+                    if (uiState.selectedHadithChapter != null) {
+                        // Chapter Full Hadiths View
+                        ChapterFullHadithsView(
+                            chapter = uiState.selectedHadithChapter!!,
+                            fullHadiths = uiState.selectedHadithChapterFullHadiths,
+                            lastRead = uiState.hadithLastRead,
+                            isBangla = isBangla,
+                            onBack = { viewModel.closeHadithChapter() },
+                            onSetLastRead = { bookId, chNo, hNo ->
+                                viewModel.setHadithLastRead(bookId, chNo, hNo, context)
+                            },
+                            onCopyText = { text -> copyToClipboard(context, text) }
+                        )
+                    } else if (selectedBookForChapters != null) {
+                        // Book Chapters List View
+                        val book = selectedBookForChapters!!
+                        BookChaptersListView(
+                            book = book,
+                            chapters = uiState.selectedHadithBookChapters,
+                            isBangla = isBangla,
+                            onBack = { selectedBookForChapters = null },
+                            onSelectChapter = { ch ->
+                                viewModel.openHadithChapter(book.id, ch.chapterNo)
+                            }
+                        )
+                    } else {
+                        // Books List View
+                        BooksListView(
+                            books = uiState.hadithBooks,
+                            lastRead = uiState.hadithLastRead,
+                            isBangla = isBangla,
+                            onSelectBook = { book ->
+                                selectedBookForChapters = book
+                                viewModel.selectHadithBook(book.id)
+                            }
+                        )
+                    }
+                }
+
+                HadithTabMode.SEARCH -> {
+                    HadithSearchListView(
+                        allHadiths = allHadiths,
+                        searchQuery = searchQuery,
+                        bookmarks = uiState.hadithBookmarks,
+                        isBangla = isBangla,
+                        onSearchChange = { searchQuery = it },
+                        onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
+                        onCopy = { hadith -> copyHadithToClipboard(context, hadith) }
+                    )
+                }
+
+                HadithTabMode.BOOKMARKS -> {
+                    val bookmarkedHadiths = remember(allHadiths, uiState.hadithBookmarks) {
+                        allHadiths.filter { h -> uiState.hadithBookmarks.any { b -> b.hadithId == h.id } }
+                    }
+                    BookmarksListView(
+                        hadiths = bookmarkedHadiths,
+                        isBangla = isBangla,
+                        onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
+                        onCopy = { hadith -> copyHadithToClipboard(context, hadith) },
+                        onExploreAll = { activeTab = HadithTabMode.CATEGORIES }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabCapsuleButton(
+    label: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = if (isSelected) Emerald500 else Color.Transparent,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 2.dp)
+        ) {
+            Text(
+                text = label,
+                fontSize = 11.5.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) Color.White else Slate700,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 1. CATEGORIES LIST VIEW
+// -------------------------------------------------------------
+@Composable
+private fun CategoriesListView(
+    categories: List<HadithCategoryEntity>,
+    allHadiths: List<HadithEntity>,
+    isBangla: Boolean,
+    onSelectCategory: (HadithCategoryEntity) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        item {
+            Text(
+                text = if (isBangla) "বিষয়ভিত্তিক হাদীস ক্যাটাগরি" else "Hadith Categories",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Slate700,
+                modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
+            )
+        }
+
+        items(categories, key = { it.id }) { cat ->
+            val count = allHadiths.count { it.categoryId == cat.id }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+                    .clickable { onSelectCategory(cat) },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                border = BorderStroke(1.dp, GlassBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Surface(
+                            color = Emerald50,
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, Emerald100),
+                            modifier = Modifier.size(46.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(text = cat.icon, fontSize = 22.sp)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(14.dp))
+
+                        Column {
+                            Text(
+                                text = cat.nameBn,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Slate900
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = if (isBangla) "${DateUtil.toBanglaDigits(count.toString())}টি নির্বাচিত সহীহ হাদীস"
+                                else "$count Selected Authentic Hadiths",
+                                fontSize = 12.sp,
+                                color = Slate600
+                            )
+                        }
+                    }
+
+                    Surface(
+                        color = Slate100,
+                        shape = CircleShape,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = "Open Category",
+                                tint = Slate600,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 2. BOOKS LIST VIEW
+// -------------------------------------------------------------
+@Composable
+private fun BooksListView(
+    books: List<HadithBookEntity>,
+    lastRead: HadithLastReadEntity?,
+    isBangla: Boolean,
+    onSelectBook: (HadithBookEntity) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        // Last Read Hero
+        if (lastRead != null) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Cyan50),
+                    border = BorderStroke(1.dp, Cyan100)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = "Last Read",
+                            tint = Cyan700,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = if (isBangla) "সর্বশেষ পঠিত হাদীস" else "Last Read Position",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.5.sp,
+                                color = Cyan700
+                            )
+                            Text(
+                                text = "কিতাব: ${lastRead.bookId.uppercase()} • অধ্যায় ${lastRead.chapterNo} • হাদীস নং ${lastRead.hadithNo}",
+                                fontSize = 12.sp,
+                                color = Slate700
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            Text(
+                text = if (isBangla) "প্রধান হাদীস গ্রন্থসমূহ (৮টি কিতাব)" else "Major Hadith Collections",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Slate700,
+                modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
+            )
+        }
+
+        items(books, key = { it.id }) { book ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+                    .clickable { onSelectBook(book) },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                border = BorderStroke(1.dp, GlassBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = book.nameBn,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Slate900
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                color = Emerald50,
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Text(
+                                    text = book.nameAr,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Emerald700,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (isBangla) "সকল অধ্যায় ও সহীহ সনদসহ পড়া যাবে" else "Browse chapters & full Hadith text",
+                            fontSize = 12.sp,
+                            color = Slate600
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = "Open Book",
+                        tint = Slate600,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 3. BOOK CHAPTERS LIST VIEW
+// -------------------------------------------------------------
+@Composable
+private fun BookChaptersListView(
+    book: HadithBookEntity,
+    chapters: List<HadithChapterEntity>,
+    isBangla: Boolean,
+    onBack: () -> Unit,
+    onSelectChapter: (HadithChapterEntity) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Emerald700
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Column {
+                    Text(
+                        text = book.nameBn,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Slate900
+                    )
+                    Text(
+                        text = if (isBangla) "মোট ${DateUtil.toBanglaDigits(chapters.size.toString())}টি অধ্যায়"
+                        else "${chapters.size} Chapters available",
+                        fontSize = 11.5.sp,
+                        color = Slate600
+                    )
+                }
+            }
+        }
+
+        items(chapters, key = { it.id }) { ch ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .clickable { onSelectChapter(ch) },
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                border = BorderStroke(1.dp, GlassBorder)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Emerald50),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (isBangla) DateUtil.toBanglaDigits(ch.chapterNo.toString()) else ch.chapterNo.toString(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Emerald700
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = ch.nameBn,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.5.sp,
+                                color = Slate900
+                            )
+                            if (!ch.nameAr.isNull_or_blank()) {
+                                Text(
+                                    text = ch.nameAr!!,
+                                    fontSize = 12.sp,
+                                    color = Slate600
+                                )
+                            }
+                        }
+                    }
+
+                    if (ch.totalHadith > 0) {
+                        Surface(
+                            color = Slate100,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = if (isBangla) "${DateUtil.toBanglaDigits(ch.totalHadith.toString())}টি" else "${ch.totalHadith}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Slate700,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 4. CHAPTER FULL HADITHS VIEW
+// -------------------------------------------------------------
+@Composable
+private fun ChapterFullHadithsView(
+    chapter: HadithChapterEntity,
+    fullHadiths: List<HadithFullEntity>,
+    lastRead: HadithLastReadEntity?,
+    isBangla: Boolean,
+    onBack: () -> Unit,
+    onSetLastRead: (String, Int, Int) -> Unit,
+    onCopyText: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Emerald700
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Column {
+                    Text(
+                        text = chapter.nameBn,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Slate900
+                    )
+                    Text(
+                        text = "অধ্যায় নং ${chapter.chapterNo} • মোট ${fullHadiths.size}টি হাদীস",
+                        fontSize = 11.5.sp,
+                        color = Slate600
+                    )
+                }
+            }
+        }
+
+        items(fullHadiths, key = { it.id }) { item ->
+            val isLastRead = lastRead?.bookId == item.bookId && lastRead.chapterNo == item.chapterNo && lastRead.hadithNo == item.hadithNo
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                border = BorderStroke(1.dp, if (isLastRead) Emerald500 else GlassBorder)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            color = Emerald50,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "হাদীস নং ${item.hadithNo}",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Emerald700,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (!item.gradeBn.isNull_or_blank()) {
+                                Surface(
+                                    color = Amber50,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = item.gradeBn!!,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Amber700,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+
+                            IconButton(
+                                onClick = { onSetLastRead(item.bookId, item.chapterNo, item.hadithNo) },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isLastRead) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                    contentDescription = "Bookmark last read",
+                                    tint = if (isLastRead) Emerald700 else Slate400,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    if (!item.textAr.isNull_or_blank()) {
+                        Text(
+                            text = item.textAr!!,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900,
+                            textAlign = TextAlign.End,
+                            lineHeight = 30.sp,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Auto Transliteration
+                    val translit = item.translitBn ?: TransliterationUtil.transliterateArabicToBangla(item.textAr)
+                    if (translit.isNotBlank()) {
+                        Text(
+                            text = "উচ্চারণ: $translit",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Cyan700,
+                            lineHeight = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
+                    Text(
+                        text = item.textBn,
+                        fontSize = 13.5.sp,
+                        color = Slate700,
+                        lineHeight = 21.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Slate100,
+                            border = BorderStroke(0.8.dp, Slate200),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onCopyText(item.textBn) }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copy",
+                                    tint = Slate600,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "কপি",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Slate700
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 5. SEARCH & BOOKMARKS LIST VIEWS
+// -------------------------------------------------------------
+@Composable
+private fun HadithSearchListView(
+    allHadiths: List<HadithEntity>,
+    searchQuery: String,
+    bookmarks: List<HadithBookmarkEntity>,
+    isBangla: Boolean,
+    onSearchChange: (String) -> Unit,
+    onToggleBookmark: (Long) -> Unit,
+    onCopy: (HadithEntity) -> Unit
+) {
+    val searchResults = remember(allHadiths, searchQuery) {
+        if (searchQuery.isBlank()) emptyList()
+        else allHadiths.filter { h ->
+            h.textBn.contains(searchQuery, ignoreCase = true) ||
+                    h.textAr.contains(searchQuery, ignoreCase = true) ||
+                    h.chapterBn.contains(searchQuery, ignoreCase = true) ||
+                    h.narratorBn.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        item {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchChange,
+                placeholder = {
+                    Text(
+                        if (isBangla) "হাদীস খুঁজুন (যেমন: নামায, নিয়ত, বুখারী...)" else "Search Hadiths...",
+                        color = Slate400,
+                        fontSize = 13.sp
+                    )
+                },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Slate400)
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchChange("") }) {
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Slate400)
+                        }
+                    }
+                },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = GlassCardWhite,
+                    unfocusedContainerColor = GlassCardWhite,
+                    focusedBorderColor = Emerald500,
+                    unfocusedBorderColor = Slate200
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("input_hadith_search"),
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (searchQuery.isBlank()) {
+            item {
+                EmptyStateCard(
+                    icon = "🔍",
+                    title = if (isBangla) "হাদীস খুঁজুন" else "Search Hadith Collection",
+                    subtitle = if (isBangla) "যেকোনো বিষয়ে সহীহ হাদীস দ্রুত খুজতে উপরে সার্চ কীওয়ার্ড লিখুন।" else "Type any word above to search across all Hadiths.",
+                    buttonLabel = if (isBangla) "উদাহরণ: নামায" else "Example: Prayer",
+                    onAction = { onSearchChange("নামাজ") }
+                )
+            }
+        } else if (searchResults.isEmpty()) {
+            item {
+                EmptyStateCard(
+                    icon = "❌",
+                    title = if (isBangla) "কোন হাদীস পাওয়া যায়নি" else "No Results Found",
+                    subtitle = if (isBangla) "অন্য শব্দ দিয়ে চেষ্টা করুন।" else "Try different search terms.",
+                    buttonLabel = if (isBangla) "ক্লিয়ার করুন" else "Clear Search",
+                    onAction = { onSearchChange("") }
+                )
+            }
+        } else {
+            items(searchResults, key = { it.id }) { hadith ->
+                val isBookmarked = bookmarks.any { it.hadithId == hadith.id }
+                HadithCardItem(
+                    hadith = hadith,
+                    isBookmarked = isBookmarked,
+                    isBangla = isBangla,
+                    onToggleBookmark = { onToggleBookmark(hadith.id) },
+                    onCopy = { onCopy(hadith) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookmarksListView(
+    hadiths: List<HadithEntity>,
+    isBangla: Boolean,
+    onToggleBookmark: (Long) -> Unit,
+    onCopy: (HadithEntity) -> Unit,
+    onExploreAll: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp)
+    ) {
+        if (hadiths.isEmpty()) {
+            item {
+                EmptyStateCard(
+                    icon = "⭐",
+                    title = if (isBangla) "কোন বুকমার্ক করা হাদীস নেই" else "No Bookmarked Hadiths",
+                    subtitle = if (isBangla) "পছন্দের হাদীস সেভ করে রাখতে স্টারে (⭐) ট্যাপ করুন।"
+                    else "Tap the star (⭐) on any Hadith card to bookmark it.",
+                    buttonLabel = if (isBangla) "সব হাদীস দেখুন" else "Explore Hadiths",
+                    onAction = onExploreAll
+                )
+            }
+        } else {
+            item {
+                Text(
+                    text = if (isBangla) "বুকমার্ক করা হাদীস (${DateUtil.toBanglaDigits(hadiths.size.toString())}টি)"
+                    else "Saved Hadiths (${hadiths.size})",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Slate700,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
+                )
+            }
+
+            items(hadiths, key = { it.id }) { hadith ->
+                HadithCardItem(
+                    hadith = hadith,
+                    isBookmarked = true,
+                    isBangla = isBangla,
+                    onToggleBookmark = { onToggleBookmark(hadith.id) },
+                    onCopy = { onCopy(hadith) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryDetailHadithsView(
+    category: HadithCategoryEntity,
+    hadiths: List<HadithEntity>,
+    bookmarks: List<HadithBookmarkEntity>,
+    isBangla: Boolean,
+    onBack: () -> Unit,
+    onToggleBookmark: (Long) -> Unit,
+    onCopy: (HadithEntity) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+    ) {
+        item {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = GlassCardWhite,
+                border = BorderStroke(1.dp, GlassBorder),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Emerald700
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Column {
+                        Text(
+                            text = "${category.icon} ${if (isBangla) category.nameBn else category.nameEn}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                        Text(
+                            text = if (isBangla) "মোট ${DateUtil.toBanglaDigits(hadiths.size.toString())}টি হাদীস সংকলিত"
+                            else "${hadiths.size} Hadiths compiled",
+                            fontSize = 11.5.sp,
+                            color = Slate600
+                        )
+                    }
+                }
+            }
+        }
+
+        items(hadiths, key = { it.id }) { hadith ->
+            val isBookmarked = bookmarks.any { it.hadithId == hadith.id }
+            HadithCardItem(
+                hadith = hadith,
+                isBookmarked = isBookmarked,
+                isBangla = isBangla,
+                onToggleBookmark = { onToggleBookmark(hadith.id) },
+                onCopy = { onCopy(hadith) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun HadithCardItem(
+    hadith: HadithEntity,
+    isBookmarked: Boolean,
+    isBangla: Boolean = true,
+    onToggleBookmark: () -> Unit,
+    onCopy: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+            .testTag("hadith_card_${hadith.id}"),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f, fill = false)
+                ) {
+                    Surface(
+                        color = Cyan50,
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(0.8.dp, Cyan100)
+                    ) {
+                        Text(
+                            text = if (isBangla) hadith.bookNameBn else (hadith.bookNameEn ?: hadith.bookNameBn),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Cyan700,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "• ${if (isBangla) hadith.chapterBn else (if (hadith.chapterEn.isNullOrBlank()) hadith.chapterBn else hadith.chapterEn!!)}",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Slate600,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = Emerald50,
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(0.8.dp, Emerald100)
+                    ) {
+                        Text(
+                            text = if (isBangla) hadith.gradeBn else (if (hadith.gradeEn.isNullOrBlank()) hadith.gradeBn else hadith.gradeEn!!),
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Emerald700,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    IconButton(
+                        onClick = onToggleBookmark,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Default.Star else Icons.Default.StarBorder,
+                            contentDescription = "Bookmark",
+                            tint = if (isBookmarked) Amber600 else Slate400,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (hadith.textAr.isNotBlank()) {
+                Text(
+                    text = hadith.textAr,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Slate900,
+                    lineHeight = 31.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            // Auto Phonetic Transliteration
+            val translit = if (isBangla) (hadith.translitBn ?: TransliterationUtil.transliterateArabicToBangla(hadith.textAr))
+            else TransliterationUtil.transliterateArabicToEnglish(hadith.textAr)
+
+            if (translit.isNotBlank()) {
+                Text(
+                    text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}$translit",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Cyan700,
+                    lineHeight = 18.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
+            val narrator = if (isBangla) hadith.narratorBn else (if (hadith.narratorEn.isNullOrBlank()) hadith.narratorBn else hadith.narratorEn!!)
+            if (narrator.isNotBlank()) {
+                Text(
+                    text = if (isBangla) "$narrator বর্ণনা করেন:" else "Narrated by $narrator:",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Emerald700
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            Text(
+                text = if (isBangla) hadith.textBn else (if (hadith.textEn.isNullOrBlank()) hadith.textBn else hadith.textEn!!),
+                fontSize = 13.5.sp,
+                color = Slate700,
+                lineHeight = 21.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val ref = if (isBangla) hadith.referenceBn else (if (hadith.referenceEn.isNullOrBlank()) hadith.referenceBn else hadith.referenceEn!!)
+                Text(
+                    text = "${if (isBangla) "হাদিস নং: " else "Hadith No: "}$ref",
+                    fontSize = 11.5.sp,
+                    color = Slate500
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Slate100,
+                    border = BorderStroke(0.8.dp, Slate200),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onCopy() }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Copy",
+                            tint = Slate600,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isBangla) "কপি করুন" else "Copy",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Slate700
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyStateCard(
+    icon: String,
+    title: String,
+    subtitle: String,
+    buttonLabel: String,
+    onAction: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = icon, fontSize = 36.sp)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Slate900
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = subtitle,
+                fontSize = 12.5.sp,
+                color = Slate600,
+                textAlign = TextAlign.Center,
+                lineHeight = 18.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onAction,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Emerald500)
+            ) {
+                Text(
+                    text = buttonLabel,
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()
+
+private fun copyToClipboard(context: Context, text: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("Hadith", text)
+    clipboard.setPrimaryClip(clip)
+    Toast.makeText(context, "টেক্সট কপি করা হয়েছে", Toast.LENGTH_SHORT).show()
+}
+
+private fun copyHadithToClipboard(context: Context, hadith: HadithEntity) {
+    val shareText = buildString {
+        append("[হাদীস শরীফ • ${hadith.bookNameBn} | ${hadith.referenceBn}]\n")
+        append("বিষয়: ${hadith.chapterBn}\n")
+        append("বর্ণনাকারী: ${hadith.narratorBn}\n\n")
+        if (hadith.textAr.isNotBlank()) {
+            append("${hadith.textAr}\n\n")
+        }
+        append("${hadith.textBn}\n\n")
+        append("মান: ${hadith.gradeBn}")
+    }
+    copyToClipboard(context, shareText)
+}
