@@ -125,29 +125,12 @@ fun HomeScreen(
                             ),
                             shape = RoundedCornerShape(10.dp),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                            modifier = Modifier.height(34.dp).padding(end = 4.dp)
+                            modifier = Modifier
+                                .height(34.dp)
+                                .padding(end = 8.dp)
                         ) {
                             Text(if (isBangla) "🕌 জুমু'আ" else "🕌 Jumu'ah", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
                         }
-                    }
-
-                    FilledTonalButton(
-                        onClick = { viewModel.toggleLanguage() },
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = Slate100,
-                            contentColor = Slate900
-                        ),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
-                        modifier = Modifier
-                            .height(34.dp)
-                            .testTag("btn_toggle_language")
-                    ) {
-                        Text(
-                            text = if (isBangla) "English" else "বাংলা",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
