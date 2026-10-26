@@ -115,7 +115,7 @@ object BackupRestoreHelper {
         context.startActivity(shareIntent)
     }
 
-    fun copyToClipboard(context: Context, text: String, isBangla: Boolean = true) {
+    fun copyToClipboard(context: Context, text: String, isBangla: Boolean = false) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Namaz Tracker Backup", text)
         clipboard.setPrimaryClip(clip)

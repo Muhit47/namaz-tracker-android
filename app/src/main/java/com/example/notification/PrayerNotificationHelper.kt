@@ -43,7 +43,7 @@ object PrayerNotificationHelper {
         context: Context,
         prayerKey: String,
         timeStr: String,
-        isBangla: Boolean = true
+        isBangla: Boolean = false
     ) {
         createNotificationChannel(context)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -93,7 +93,7 @@ object PrayerNotificationHelper {
         notificationManager.notify(prayerType.ordinal + 100, notification)
     }
 
-    fun showTestNotification(context: Context, isBangla: Boolean = true) {
+    fun showTestNotification(context: Context, isBangla: Boolean = false) {
         createNotificationChannel(context)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

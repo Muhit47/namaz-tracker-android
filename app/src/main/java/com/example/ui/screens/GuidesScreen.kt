@@ -28,7 +28,7 @@ import com.example.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuidesScreen(
-    isBangla: Boolean = true,
+    isBangla: Boolean = false,
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {

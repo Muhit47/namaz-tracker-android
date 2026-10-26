@@ -1073,7 +1073,7 @@ private fun CategoryDetailHadithsView(
 private fun HadithCardItem(
     hadith: HadithEntity,
     isBookmarked: Boolean,
-    isBangla: Boolean = true,
+    isBangla: Boolean = false,
     onToggleBookmark: () -> Unit,
     onCopy: () -> Unit
 ) {
@@ -1309,14 +1309,14 @@ private fun EmptyStateCard(
 
 private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()
 
-private fun copyToClipboard(context: Context, text: String, isBangla: Boolean = true) {
+private fun copyToClipboard(context: Context, text: String, isBangla: Boolean = false) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clip = ClipData.newPlainText("Hadith", text)
     clipboard.setPrimaryClip(clip)
     Toast.makeText(context, if (isBangla) "টেক্সট কপি করা হয়েছে" else "Text copied to clipboard", Toast.LENGTH_SHORT).show()
 }
 
-private fun copyHadithToClipboard(context: Context, hadith: HadithEntity, isBangla: Boolean = true) {
+private fun copyHadithToClipboard(context: Context, hadith: HadithEntity, isBangla: Boolean = false) {
     val shareText = if (isBangla) {
         buildString {
             append("[হাদীস শরীফ • ${hadith.bookNameBn} | ${hadith.referenceBn}]\n")
