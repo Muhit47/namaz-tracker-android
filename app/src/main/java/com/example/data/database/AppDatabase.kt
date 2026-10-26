@@ -28,7 +28,7 @@ import java.util.zip.GZIPInputStream
         SettingEntity::class,
         TasbihCounterEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -43,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun settingsDao(): SettingsDao
 
     companion object {
-        private const val CURRENT_DB_VERSION = 3 // Version 3: Pristine Room-validated schema with 34,932 Hadiths
+        private const val CURRENT_DB_VERSION = 4 // Version 4: Aligned Room-validated schema with 114 Surahs, 6236 Ayahs, 34932 Hadiths
         private const val PREFS_NAME = "namaz_tracker_db_meta"
         private const val KEY_INSTALLED_VERSION = "installed_db_version"
 
@@ -56,7 +56,24 @@ abstract class AppDatabase : RoomDatabase() {
                 val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 val installedVer = prefs.getInt(KEY_INSTALLED_VERSION, 0)
 
-                if (!dbFile.exists() || installedVer < CURRENT_DB_VERSION) {
+                var needExtract = !dbFile.exists() || installedVer < CURRENT_DB_VERSION
+                if (!needExtract && dbFile.exists()) {
+                    try {
+                        val checkDb = android.database.sqlite.SQLiteDatabase.openDatabase(
+                            dbFile.path, null, android.database.sqlite.SQLiteDatabase.OPEN_READONLY
+                        )
+                        val cursor = checkDb.rawQuery("SELECT count(*) FROM quran_surahs", null)
+                        if (cursor.moveToFirst() && cursor.getInt(0) == 0) {
+                            needExtract = true
+                        }
+                        cursor.close()
+                        checkDb.close()
+                    } catch (e: Exception) {
+                        needExtract = true
+                    }
+                }
+
+                if (needExtract) {
                     val extracted = extractCompressedDb(context, dbFile)
                     if (extracted) {
                         prefs.edit().putInt(KEY_INSTALLED_VERSION, CURRENT_DB_VERSION).apply()
