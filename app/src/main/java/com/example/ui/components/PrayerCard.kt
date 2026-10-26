@@ -33,6 +33,7 @@ fun PrayerCard(
     onStatusSelected: (String) -> Unit,
     onToggleSunnah: () -> Unit,
     onSaveNotes: (String) -> Unit,
+    isActiveWaqt: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val currentStatusCode = log?.status ?: "pending"
@@ -49,12 +50,16 @@ fun PrayerCard(
             .padding(vertical = 5.dp)
             .testTag("prayer_card_${prayerType.keyName}"),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (currentStatusCode != "pending") currentStatus.activeBorder.copy(alpha = 0.5f) else GlassBorder
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActiveWaqt && currentStatusCode == "pending") Emerald50.copy(alpha = 0.5f) else GlassCardWhite
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isCompleted) 1.dp else 2.dp)
+        border = androidx.compose.foundation.BorderStroke(
+            if (isActiveWaqt) 1.5.dp else 1.dp,
+            if (isActiveWaqt) Emerald500
+            else if (currentStatusCode != "pending") currentStatus.activeBorder.copy(alpha = 0.5f)
+            else GlassBorder
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isActiveWaqt) 3.dp else if (isCompleted) 1.dp else 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -76,14 +81,14 @@ fun PrayerCard(
                             .size(38.dp)
                             .clip(CircleShape)
                             .background(
-                                if (isCompleted) Emerald50 else Slate100
+                                if (isCompleted || isActiveWaqt) Emerald50 else Slate100
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = prayerType.arabicName.take(1),
                             fontWeight = FontWeight.Bold,
-                            color = if (isCompleted) Emerald600 else Slate600,
+                            color = if (isCompleted || isActiveWaqt) Emerald600 else Slate600,
                             fontSize = 17.sp
                         )
                     }
@@ -110,6 +115,32 @@ fun PrayerCard(
                                         fontWeight = FontWeight.Bold,
                                         color = Emerald700
                                     )
+                                }
+                            }
+                            if (isActiveWaqt) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    color = Emerald500,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(5.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.White)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = if (isBangla) "চলতি ওয়াক্ত" else "Active",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                             }
                         }

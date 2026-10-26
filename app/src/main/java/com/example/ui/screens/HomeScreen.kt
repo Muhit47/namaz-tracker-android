@@ -60,6 +60,12 @@ fun HomeScreen(
     val calendar = remember(uiState.selectedDate) { DateUtil.getCalendarFromIso(uiState.selectedDate) }
     val isFriday = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY
 
+    val activeWaqt = if (isToday) {
+        remember(uiState.prayerTimes, calendar) {
+            PrayerTimeCalculator.getActiveWaqt(Calendar.getInstance(), uiState.prayerTimes)
+        }
+    } else null
+
     val fardhPrayers = listOf(
         PrayerType.FAJR,
         PrayerType.DHUHR,
@@ -169,6 +175,7 @@ fun HomeScreen(
                 RamadanBentoCard(
                     uiState = uiState,
                     isBangla = isBangla,
+                    isToday = isToday,
                     onToggleRoza = { viewModel.toggleRoza() },
                     onOpenDua = { showRamadanDuaDialog = true }
                 )
@@ -231,6 +238,7 @@ fun HomeScreen(
                     timeString = timeStr,
                     log = log,
                     isBangla = isBangla,
+                    isActiveWaqt = isToday && prayer == activeWaqt,
                     onStatusSelected = { status ->
                         viewModel.updatePrayerStatus(prayer.keyName, status, context)
                     },
@@ -272,9 +280,16 @@ fun HomeScreen(
 private fun RamadanBentoCard(
     uiState: NamazUiState,
     isBangla: Boolean,
+    isToday: Boolean,
     onToggleRoza: () -> Unit,
     onOpenDua: () -> Unit
 ) {
+    val countdown = if (isToday) {
+        remember(uiState.prayerTimes) {
+            PrayerTimeCalculator.getRamadanCountdown(Calendar.getInstance(), uiState.prayerTimes)
+        }
+    } else null
+
     Card(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
@@ -323,6 +338,51 @@ private fun RamadanBentoCard(
                         color = Emerald700,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
+                }
+            }
+
+            if (countdown != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (countdown.isFastingHours) Amber50 else Emerald50,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (countdown.isFastingHours) Amber200 else Emerald100
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = if (countdown.isFastingHours) "🌅" else "🌌",
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (countdown.isFastingHours) {
+                                    if (isBangla) "ইফতারের বাকি:" else "Time to Iftar:"
+                                } else {
+                                    if (isBangla) "সেহরি শেষ হতে বাকি:" else "Sehri ends in:"
+                                },
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (countdown.isFastingHours) Amber700 else Emerald700
+                            )
+                        }
+                        Text(
+                            text = PrayerTimeCalculator.formatCountdown(countdown.minutesLeft, isBangla),
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (countdown.isFastingHours) Amber700 else Emerald700
+                        )
+                    }
                 }
             }
 

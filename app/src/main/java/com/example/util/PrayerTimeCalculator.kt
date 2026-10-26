@@ -1,5 +1,6 @@
 package com.example.util
 
+import com.example.data.model.PrayerType
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.*
@@ -21,6 +22,12 @@ data class DailyPrayerTimes(
     val maghrib: String,
     val isha: String,
     val tahajjudEnd: String
+)
+
+data class RamadanCountdown(
+    val isFastingHours: Boolean,
+    val minutesLeft: Int,
+    val targetTime: String
 )
 
 object PrayerTimeCalculator {
@@ -134,5 +141,90 @@ object PrayerTimeCalculator {
         }
 
         return String.format(Locale.getDefault(), "%02d:%02d %s", hour12, minute, ampm)
+    }
+
+    fun parseTimeToMinutes(timeStr: String): Int? {
+        return try {
+            val parts = timeStr.trim().split(" ")
+            if (parts.size != 2) return null
+            val timeParts = parts[0].split(":")
+            if (timeParts.size != 2) return null
+            var hour = timeParts[0].toInt()
+            val minute = timeParts[1].toInt()
+            val ampm = parts[1].uppercase(Locale.US)
+            if (ampm == "PM" && hour < 12) hour += 12
+            if (ampm == "AM" && hour == 12) hour = 0
+            hour * 60 + minute
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun getActiveWaqt(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): PrayerType? {
+        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val fajrMin = parseTimeToMinutes(times.fajr) ?: return null
+        val sunriseMin = parseTimeToMinutes(times.sunrise) ?: return null
+        val dhuhrMin = parseTimeToMinutes(times.dhuhr) ?: return null
+        val asrMin = parseTimeToMinutes(times.asr) ?: return null
+        val maghribMin = parseTimeToMinutes(times.maghrib) ?: return null
+        val ishaMin = parseTimeToMinutes(times.isha) ?: return null
+
+        return when {
+            currentMinutes in fajrMin until sunriseMin -> PrayerType.FAJR
+            currentMinutes in dhuhrMin until asrMin -> PrayerType.DHUHR
+            currentMinutes in asrMin until maghribMin -> PrayerType.ASR
+            currentMinutes in maghribMin until ishaMin -> PrayerType.MAGHRIB
+            currentMinutes >= ishaMin || currentMinutes < fajrMin -> PrayerType.ISHA
+            else -> null
+        }
+    }
+
+    fun getRamadanCountdown(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): RamadanCountdown? {
+        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val fajrMin = parseTimeToMinutes(times.fajr) ?: return null
+        val maghribMin = parseTimeToMinutes(times.maghrib) ?: return null
+
+        return when {
+            currentMinutes in fajrMin until maghribMin -> {
+                RamadanCountdown(
+                    isFastingHours = true,
+                    minutesLeft = maghribMin - currentMinutes,
+                    targetTime = times.maghrib
+                )
+            }
+            currentMinutes < fajrMin -> {
+                RamadanCountdown(
+                    isFastingHours = false,
+                    minutesLeft = fajrMin - currentMinutes,
+                    targetTime = times.fajr
+                )
+            }
+            else -> {
+                val minutesUntilMidnight = (24 * 60) - currentMinutes
+                RamadanCountdown(
+                    isFastingHours = false,
+                    minutesLeft = minutesUntilMidnight + fajrMin,
+                    targetTime = times.fajr
+                )
+            }
+        }
+    }
+
+    fun formatCountdown(minutesLeft: Int, isBangla: Boolean): String {
+        val hours = minutesLeft / 60
+        val mins = minutesLeft % 60
+        return if (isBangla) {
+            if (hours > 0) {
+                "${DateUtil.toBanglaDigits(hours.toString())} ঘণ্টা ${DateUtil.toBanglaDigits(mins.toString())} মিনিট"
+            } else {
+                "${DateUtil.toBanglaDigits(mins.toString())} মিনিট"
+            }
+        } else {
+            if (hours > 0) {
+                "$hours hr $mins min"
+            } else {
+                "$mins min"
+            }
+        }
     }
 }
