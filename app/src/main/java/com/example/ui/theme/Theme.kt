@@ -71,7 +71,13 @@ data class FinancyColorTokens(
     val roseSoft: Color,
     val navBackground: Color,
     val navBorder: Color
-)
+) {
+    val surfaceCard: Color get() = card
+    val surfaceSubtle: Color get() = cardSubtle
+    val borderSubtle: Color get() = border
+    val neonGreen: Color get() = emerald
+    val emeraldPrimary: Color get() = emeraldDark
+}
 
 val LightFinancyTokens = FinancyColorTokens(
     isDark = false,

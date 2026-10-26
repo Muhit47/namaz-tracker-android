@@ -33,10 +33,10 @@ enum class NamazNavTab(
     val testTag: String
 ) {
     HOME("Prayers", "নামায", Icons.Default.AccessTime, "nav_tab_home"),
-    QURAN("Qur'an", "কুরআন", Icons.AutoMirrored.Filled.MenuBook, "nav_tab_quran"),
-    HADITH("Hadith", "হাদীস", Icons.AutoMirrored.Filled.LibraryBooks, "nav_tab_hadith"),
-    QAZA("Qaza", "কাযা", Icons.Default.History, "nav_tab_qaza"),
-    MORE("Settings", "সেটিংস", Icons.Default.Settings, "nav_tab_more")
+    QURAN_HADITH("Qur'an & Hadith", "কুরআন ও হাদীস", Icons.AutoMirrored.Filled.MenuBook, "nav_tab_quran_hadith"),
+    IBADAH("Ibadah", "ইবাদাত", Icons.Default.Spa, "nav_tab_ibadah"),
+    TRACKER("Tracker", "ট্র্যাকার", Icons.Default.BarChart, "nav_tab_tracker"),
+    SETTINGS("Settings", "সেটিংস", Icons.Default.Settings, "nav_tab_settings")
 }
 
 class MainActivity : ComponentActivity() {
@@ -79,7 +79,7 @@ fun NamazAppRoot(
                 isBangla = uiState.isBangla,
                 onTabSelected = { tab ->
                     currentTab = tab
-                    if (tab == NamazNavTab.MORE) {
+                    if (tab == NamazNavTab.SETTINGS) {
                         moreSubScreen = MoreSubScreen.INDEX
                     }
                 }
@@ -91,24 +91,25 @@ fun NamazAppRoot(
             NamazNavTab.HOME -> HomeScreen(
                 uiState = uiState,
                 viewModel = viewModel,
+                onNavigateToTab = { currentTab = it },
                 modifier = modifier
             )
-            NamazNavTab.QURAN -> QuranScreen(
+            NamazNavTab.QURAN_HADITH -> QuranHadithScreen(
                 uiState = uiState,
                 viewModel = viewModel,
                 modifier = modifier
             )
-            NamazNavTab.HADITH -> HadithScreen(
+            NamazNavTab.IBADAH -> IbadahScreen(
                 uiState = uiState,
                 viewModel = viewModel,
                 modifier = modifier
             )
-            NamazNavTab.QAZA -> QazaScreen(
+            NamazNavTab.TRACKER -> TrackerScreen(
                 uiState = uiState,
                 viewModel = viewModel,
                 modifier = modifier
             )
-            NamazNavTab.MORE -> MoreScreen(
+            NamazNavTab.SETTINGS -> MoreScreen(
                 uiState = uiState,
                 viewModel = viewModel,
                 activeSubScreen = moreSubScreen,

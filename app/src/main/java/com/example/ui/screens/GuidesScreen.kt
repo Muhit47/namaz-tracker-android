@@ -29,10 +29,11 @@ import com.example.ui.theme.*
 @Composable
 fun GuidesScreen(
     isBangla: Boolean = false,
+    initialSection: Int = 0,
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    var selectedSection by remember { mutableStateOf(0) } // 0 = Prayer Steps, 1 = Wudu, 2 = Dua Vault
+    var selectedSection by remember(initialSection) { mutableStateOf(initialSection) }
     val colors = FinancyTheme.colors
 
     Scaffold(

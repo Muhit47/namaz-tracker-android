@@ -115,7 +115,7 @@ fun MoreScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = if (isBangla) "সেটিংস ও প্রয়ােজনীয় টুলস" else "Settings & Islamic Tools",
+                                text = if (isBangla) "অ্যাপ সেটিংস" else "Settings",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.textPrimary
@@ -158,16 +158,16 @@ fun MoreScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = if (isBangla) "ডার্ক মোড (Financy Dark)" else "Financy Dark Theme",
+                                            text = if (isBangla) "ডার্ক থিম" else "Dark Theme",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
                                             color = colors.textPrimary
                                         )
                                         Text(
                                             text = if (uiState.isDarkMode)
-                                                (if (isBangla) "গাঢ় অন্ধকার ইন্টারফেস সক্রিয়" else "Dark mode active")
+                                                (if (isBangla) "গাঢ় থিম সক্রিয়" else "Dark theme active")
                                             else
-                                                (if (isBangla) "উজ্জ্বল হালকা ইন্টারফেস সক্রিয়" else "Light mode active"),
+                                                (if (isBangla) "উজ্জ্বল হালকা থিম সক্রিয়" else "Light theme active"),
                                             fontSize = 11.5.sp,
                                             color = colors.textSecondary
                                         )

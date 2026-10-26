@@ -29,7 +29,9 @@ data class ActiveWaqtInfo(
     val nextPrayer: PrayerType,
     val minutesRemaining: Int,
     val startTime: String,
-    val endTime: String
+    val endTime: String,
+    val startTimeMinutes: Int? = null,
+    val endTimeMinutes: Int? = null
 )
 
 object PrayerTimeCalculator {
@@ -193,7 +195,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.DHUHR,
                     minutesRemaining = sunriseMin - currentMinutes,
                     startTime = times.fajr,
-                    endTime = times.sunrise
+                    endTime = times.sunrise,
+                    startTimeMinutes = fajrMin,
+                    endTimeMinutes = sunriseMin
                 )
             }
             currentMinutes in sunriseMin until dhuhrMin -> {
@@ -202,7 +206,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.DHUHR,
                     minutesRemaining = dhuhrMin - currentMinutes,
                     startTime = times.sunrise,
-                    endTime = times.dhuhr
+                    endTime = times.dhuhr,
+                    startTimeMinutes = sunriseMin,
+                    endTimeMinutes = dhuhrMin
                 )
             }
             currentMinutes in dhuhrMin until asrMin -> {
@@ -211,7 +217,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.ASR,
                     minutesRemaining = asrMin - currentMinutes,
                     startTime = times.dhuhr,
-                    endTime = times.asr
+                    endTime = times.asr,
+                    startTimeMinutes = dhuhrMin,
+                    endTimeMinutes = asrMin
                 )
             }
             currentMinutes in asrMin until maghribMin -> {
@@ -220,7 +228,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.MAGHRIB,
                     minutesRemaining = maghribMin - currentMinutes,
                     startTime = times.asr,
-                    endTime = times.maghrib
+                    endTime = times.maghrib,
+                    startTimeMinutes = asrMin,
+                    endTimeMinutes = maghribMin
                 )
             }
             currentMinutes in maghribMin until ishaMin -> {
@@ -229,7 +239,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.ISHA,
                     minutesRemaining = ishaMin - currentMinutes,
                     startTime = times.maghrib,
-                    endTime = times.isha
+                    endTime = times.isha,
+                    startTimeMinutes = maghribMin,
+                    endTimeMinutes = ishaMin
                 )
             }
             else -> {
@@ -243,7 +255,9 @@ object PrayerTimeCalculator {
                     nextPrayer = PrayerType.FAJR,
                     minutesRemaining = remaining,
                     startTime = times.isha,
-                    endTime = times.fajr
+                    endTime = times.fajr,
+                    startTimeMinutes = ishaMin,
+                    endTimeMinutes = fajrMin
                 )
             }
         }

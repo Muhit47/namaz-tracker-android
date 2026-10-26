@@ -65,7 +65,13 @@ enum class PrayerType(
         isFardh = false,
         rakahInfoEn = "3 Wajib",
         rakahInfoBn = "৩ ওয়াজিব"
-    )
+    );
+
+    companion object {
+        fun fromKey(key: String): PrayerType? {
+            return entries.find { it.keyName.equals(key, ignoreCase = true) || it.name.equals(key, ignoreCase = true) }
+        }
+    }
 }
 
 enum class PrayerStatus(

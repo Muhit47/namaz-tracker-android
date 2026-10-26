@@ -278,7 +278,7 @@ fun TasbihScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            viewModel.resetTasbih(activeTasbih.id)
+                            viewModel.resetTasbih(activeTasbih.id, context)
                         },
                         shape = RoundedCornerShape(14.dp),
                         border = BorderStroke(1.dp, colors.border),

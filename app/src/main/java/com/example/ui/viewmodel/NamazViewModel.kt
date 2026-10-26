@@ -501,6 +501,28 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun addCustomTasbih(
+        title: String,
+        arabic: String,
+        translit: String,
+        meaning: String,
+        target: Int
+    ) {
+        viewModelScope.launch {
+            repository.addCustomTasbih(
+                TasbihCounterEntity(
+                    title = title,
+                    arabicText = arabic,
+                    transliteration = translit,
+                    translationBn = meaning,
+                    translationEn = meaning,
+                    targetCount = target,
+                    isPreset = false
+                )
+            )
+        }
+    }
+
     fun addCustomTasbih(item: TasbihCounterEntity) {
         viewModelScope.launch {
             repository.addCustomTasbih(item)

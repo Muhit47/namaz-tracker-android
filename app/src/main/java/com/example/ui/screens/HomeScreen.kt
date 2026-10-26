@@ -54,6 +54,7 @@ import java.util.Calendar
 fun HomeScreen(
     uiState: NamazUiState,
     viewModel: NamazViewModel,
+    onNavigateToTab: ((com.example.NamazNavTab) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = FinancyTheme.colors
@@ -143,19 +144,6 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    // Quick Dark / Light Mode Toggle Pill
-                    IconButton(
-                        onClick = { viewModel.toggleDarkMode() },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (uiState.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "Toggle Theme",
-                            tint = if (uiState.isDarkMode) Color(0xFFFBBF24) else colors.textSecondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
                     if (isFriday) {
                         FilledTonalButton(
                             onClick = { showJumuahDialog = true },
@@ -221,7 +209,10 @@ fun HomeScreen(
                     uiState = uiState,
                     isBangla = isBangla,
                     onToggleRoza = { viewModel.toggleRoza() },
-                    onOpenRamadanDua = { showRamadanDuaDialog = true }
+                    onOpenRamadanDua = { showRamadanDuaDialog = true },
+                    onNavigateToQibla = { onNavigateToTab?.invoke(com.example.NamazNavTab.IBADAH) },
+                    onNavigateToTasbih = { onNavigateToTab?.invoke(com.example.NamazNavTab.IBADAH) },
+                    onNavigateToTracker = { onNavigateToTab?.invoke(com.example.NamazNavTab.TRACKER) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -593,7 +584,10 @@ private fun FinancyBentoGrid(
     uiState: NamazUiState,
     isBangla: Boolean,
     onToggleRoza: () -> Unit,
-    onOpenRamadanDua: () -> Unit
+    onOpenRamadanDua: () -> Unit,
+    onNavigateToQibla: (() -> Unit)? = null,
+    onNavigateToTasbih: (() -> Unit)? = null,
+    onNavigateToTracker: (() -> Unit)? = null
 ) {
     val colors = FinancyTheme.colors
 
@@ -610,7 +604,8 @@ private fun FinancyBentoGrid(
                 value = "${uiState.qiblaBearing.toInt()}°",
                 subtitle = if (isBangla) "মক্কাভিমুখী" else "Facing Kaaba",
                 badge = if (uiState.isAlignedWithQibla) "✓ সঠিক" else "কম্পাস",
-                badgeColor = colors.emerald
+                badgeColor = colors.emerald,
+                onClick = onNavigateToQibla
             )
 
             // Tile 2: Digital Tasbih
@@ -621,7 +616,8 @@ private fun FinancyBentoGrid(
                 value = if (isBangla) "সুবহানাল্লাহ" else "SubhanAllah",
                 subtitle = if (isBangla) "দৈনিক যিকির" else "Daily Dhikr",
                 badge = "হ্যাপটিক",
-                badgeColor = colors.cyan
+                badgeColor = colors.cyan,
+                onClick = onNavigateToTasbih
             )
         }
 
@@ -639,7 +635,8 @@ private fun FinancyBentoGrid(
                 subtitle = if (isBangla) "${DateUtil.toBanglaDigits(uiState.weeklyCompletionRate.toString())}% সাপ্তাহিক হার"
                 else "${uiState.weeklyCompletionRate}% weekly rate",
                 badge = "ধারাবাহিক",
-                badgeColor = colors.amber
+                badgeColor = colors.amber,
+                onClick = onNavigateToTracker
             )
 
             // Tile 4: Ramadan Sehri / Iftar

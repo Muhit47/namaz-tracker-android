@@ -49,21 +49,21 @@ object QuranAudioPlayer {
                 )
                 setDataSource(audioUrl)
                 setOnPreparedListener { mp ->
-                    isLoading = false
-                    isPlaying = true
+                    QuranAudioPlayer.isLoading = false
+                    QuranAudioPlayer.isPlaying = true
                     mp.start()
                     Log.d(TAG, "Playing Ayah audio: $audioUrl")
                     onStart()
                 }
                 setOnCompletionListener {
-                    isPlaying = false
-                    isLoading = false
+                    QuranAudioPlayer.isPlaying = false
+                    QuranAudioPlayer.isLoading = false
                     Log.d(TAG, "Completed Ayah $surahNo:$ayahNo")
                     onCompletionListener?.invoke()
                 }
                 setOnErrorListener { _, what, extra ->
-                    isLoading = false
-                    isPlaying = false
+                    QuranAudioPlayer.isLoading = false
+                    QuranAudioPlayer.isPlaying = false
                     Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
                     onErrorListener?.invoke("Unable to play recitation. Please check your internet connection.")
                     true
