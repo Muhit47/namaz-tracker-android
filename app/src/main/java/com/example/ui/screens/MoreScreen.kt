@@ -72,6 +72,7 @@ fun MoreScreen(
         )
         MoreSubScreen.QIBLA -> QiblaScreen(
             uiState = uiState,
+            viewModel = viewModel,
             onBack = { onNavigateSub(MoreSubScreen.INDEX) },
             modifier = modifier
         )

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.CompassCalibration
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
+import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.DateUtil
 import kotlin.math.cos
 import kotlin.math.sin
@@ -38,9 +40,16 @@ import kotlin.math.sin
 @Composable
 fun QiblaScreen(
     uiState: NamazUiState,
+    viewModel: NamazViewModel? = null,
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    DisposableEffect(viewModel) {
+        viewModel?.startCompass()
+        onDispose {
+            viewModel?.stopCompass()
+        }
+    }
     val isBangla = uiState.isBangla
     val heading = uiState.compassHeading
     val qiblaBearing = uiState.qiblaBearing

@@ -12,6 +12,7 @@ import com.example.util.DateUtil
 import com.example.util.HapticUtil
 import com.example.util.PrayerTimeCalculator
 import com.example.util.QiblaHelper
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -204,8 +205,14 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Compass heading
-        viewModelScope.launch {
+        // Streak & analytics observed on init
+    }
+
+    private var compassJob: Job? = null
+
+    fun startCompass() {
+        if (compassJob?.isActive == true) return
+        compassJob = viewModelScope.launch {
             QiblaHelper.getCompassHeading(application).collect { heading ->
                 _uiState.update { current ->
                     val bearing = current.qiblaBearing
@@ -218,6 +225,11 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+
+    fun stopCompass() {
+        compassJob?.cancel()
+        compassJob = null
     }
 
     private fun observePrayersForDate() {
