@@ -2,7 +2,11 @@ import sqlite3
 import os
 import re
 
-src_path = '/tmp/namaz-tracker/namaz_tracker.db'
+import sys
+
+src_path = 'namaz_tracker.db' if os.path.exists('namaz_tracker.db') else ('temp_main_db.db' if os.path.exists('temp_main_db.db') else '/tmp/repo_check/namaz_tracker.db')
+if len(sys.argv) > 1:
+    src_path = sys.argv[1]
 dst_path = 'app/src/main/assets/namaz_tracker.db'
 
 # Find Room generated identity_hash
