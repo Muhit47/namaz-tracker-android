@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -72,22 +73,24 @@ fun GuidesScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 PrimaryTabRow(
                     selectedTabIndex = selectedSection,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = GlassCardWhite,
+                    contentColor = Emerald700
                 ) {
                     Tab(
                         selected = selectedSection == 0,
                         onClick = { selectedSection = 0 },
-                        text = { Text(if (isBangla) "নামাজের নিয়ম" else "Salah Steps", fontWeight = FontWeight.Bold, fontSize = 12.5.sp) }
+                        text = { Text(if (isBangla) "নামাজের নিয়ম" else "Salah Steps", fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = if (selectedSection == 0) Emerald700 else Slate600) }
                     )
                     Tab(
                         selected = selectedSection == 1,
                         onClick = { selectedSection = 1 },
-                        text = { Text(if (isBangla) "ওজু ও পবিত্রতা" else "Wudu & Purity", fontWeight = FontWeight.Bold, fontSize = 12.5.sp) }
+                        text = { Text(if (isBangla) "ওজু ও পবিত্রতা" else "Wudu & Purity", fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = if (selectedSection == 1) Emerald700 else Slate600) }
                     )
                     Tab(
                         selected = selectedSection == 2,
                         onClick = { selectedSection = 2 },
-                        text = { Text(if (isBangla) "দোয়া ভান্ডার" else "Dua Vault", fontWeight = FontWeight.Bold, fontSize = 12.5.sp) }
+                        text = { Text(if (isBangla) "দোয়া ভান্ডার" else "Dua Vault", fontWeight = FontWeight.Bold, fontSize = 12.5.sp, color = if (selectedSection == 2) Emerald700 else Slate600) }
                     )
                 }
                 Spacer(modifier = Modifier.height(14.dp))
@@ -315,8 +318,9 @@ private fun GuideStepCard(stepNum: String, title: String, desc: String) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -328,16 +332,16 @@ private fun GuideStepCard(stepNum: String, title: String, desc: String) {
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(Emerald500),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = stepNum, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, color = Slate900)
                 Spacer(modifier = Modifier.height(3.dp))
-                Text(text = desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 18.sp)
+                Text(text = desc, style = MaterialTheme.typography.bodySmall, color = Slate600, lineHeight = 18.sp)
             }
         }
     }
@@ -348,15 +352,17 @@ private fun RakahSummaryCard(isBangla: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(if (isBangla) "🌅 ফজর: ২ সুন্নাত + ২ ফরয = ৪ রাকাত" else "🌅 Fajr: 2 Sunnah + 2 Fardh = 4 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-            Text(if (isBangla) "☀️ যোহর: ৪ সুন্নাত + ৪ ফরয + ২ সুন্নাত + ২ নফল = ১২ রাকাত" else "☀️ Dhuhr: 4 Sunnah + 4 Fardh + 2 Sunnah + 2 Nafl = 12 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-            Text(if (isBangla) "⛅ আসর: ৪ সুন্নাত + ৪ ফরয = ৮ রাকাত" else "⛅ Asr: 4 Sunnah + 4 Fardh = 8 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-            Text(if (isBangla) "🌇 মাগরিব: ৩ ফরয + ২ সুন্নাত + ২ নফল = ৭ রাকাত" else "🌇 Maghrib: 3 Fardh + 2 Sunnah + 2 Nafl = 7 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-            Text(if (isBangla) "🌌 ইশা: ৪ সুন্নাত + ৪ ফরয + ২ সুন্নাত + ২ নফল + ৩ বিতর = ১৫ রাকাত" else "🌌 Isha: 4 Sunnah + 4 Fardh + 2 Sunnah + 2 Nafl + 3 Witr = 15 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-            Text(if (isBangla) "🕌 জুমু'আ: ৪ কাবলাল জুমু'আ + ২ ফরয + ৪ বা'দাল জুমু'আ = ১০ রাকাত" else "🕌 Jumu'ah: 4 Qablal Jumu'ah + 2 Fardh + 4 Ba'dal Jumu'ah = 10 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
+            Text(if (isBangla) "🌅 ফজর: ২ সুন্নাত + ২ ফরয = ৪ রাকাত" else "🌅 Fajr: 2 Sunnah + 2 Fardh = 4 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
+            Text(if (isBangla) "☀️ যোহর: ৪ সুন্নাত + ৪ ফরয + ২ সুন্নাত + ২ নফল = ১২ রাকাত" else "☀️ Dhuhr: 4 Sunnah + 4 Fardh + 2 Sunnah + 2 Nafl = 12 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
+            Text(if (isBangla) "⛅ আসর: ৪ সুন্নাত + ৪ ফরয = ৮ রাকাত" else "⛅ Asr: 4 Sunnah + 4 Fardh = 8 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
+            Text(if (isBangla) "🌇 মাগরিব: ৩ ফরয + ২ সুন্নাত + ২ নফল = ৭ রাকাত" else "🌇 Maghrib: 3 Fardh + 2 Sunnah + 2 Nafl = 7 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
+            Text(if (isBangla) "🌌 ইশা: ৪ সুন্নাত + ৪ ফরয + ২ সুন্নাত + ২ নফল + ৩ বিতর = ১৫ রাকাত" else "🌌 Isha: 4 Sunnah + 4 Fardh + 2 Sunnah + 2 Nafl + 3 Witr = 15 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
+            Text(if (isBangla) "🕌 জুমু'আ: ৪ কাবলাল জুমু'আ + ২ ফরয + ৪ বা'দাল জুমু'আ = ১০ রাকাত" else "🕌 Jumu'ah: 4 Qablal Jumu'ah + 2 Fardh + 4 Ba'dal Jumu'ah = 10 Rakahs", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp, color = Slate800)
         }
     }
 }
@@ -369,8 +375,9 @@ private fun AccordionCard(title: String, content: @Composable () -> Unit) {
             .fillMaxWidth()
             .clickable { expanded = !expanded },
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -378,10 +385,11 @@ private fun AccordionCard(title: String, content: @Composable () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, color = Slate900)
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = Slate600
                 )
             }
             AnimatedVisibility(visible = expanded) {
@@ -400,17 +408,18 @@ private fun DuaDisplayCard(item: DuaItem, isBangla: Boolean) {
             .fillMaxWidth()
             .padding(vertical = 5.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+        border = BorderStroke(1.dp, GlassBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = item.title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall)
+            Text(text = item.title, fontWeight = FontWeight.Bold, color = Emerald700, style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = item.arabic, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth(), lineHeight = 28.sp)
+            Text(text = item.arabic, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth(), lineHeight = 28.sp, color = Slate900)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}${item.pron}", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp)
+            Text(text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}${item.pron}", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp, color = Cyan700)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "${if (isBangla) "অর্থ: " else "Meaning: "}${item.meaning}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 17.sp)
+            Text(text = "${if (isBangla) "অর্থ: " else "Meaning: "}${item.meaning}", fontSize = 12.sp, color = Slate700, lineHeight = 17.sp)
         }
     }
 }

@@ -55,7 +55,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, // Enforce light glassmorphic Framer branding consistently
     dynamicColor: Boolean = false, // Keep user's pristine Framer glassmorphic branding
     content: @Composable () -> Unit
 ) {
