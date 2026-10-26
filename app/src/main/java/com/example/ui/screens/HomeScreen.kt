@@ -311,9 +311,7 @@ private fun ActiveWaqtBanner(
     modifier: Modifier = Modifier
 ) {
     val prayer = info.currentPrayer
-    val status = currentLog?.status
-    val isDone = status in listOf("jamaah", "on_time", "late")
-    val isMissed = status == "missed"
+    val isDone = currentLog?.status == "jamaah" || currentLog?.status == "on_time"
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -347,11 +345,9 @@ private fun ActiveWaqtBanner(
                 Column {
                     Text(
                         text = if (prayer != null) {
-                            if (isBangla) "চলতি ওয়াক্ত: ${prayer.banglaName} (${info.startTime} - ${info.endTime})"
-                            else "Active: ${prayer.englishName} (${info.startTime} - ${info.endTime})"
+                            if (isBangla) "চলতি ওয়াক্ত: ${prayer.banglaName}" else "Active Waqt: ${prayer.englishName}"
                         } else {
-                            if (isBangla) "পরবর্তী ওয়াক্ত: ${info.nextPrayer.banglaName} (${info.endTime})"
-                            else "Next: ${info.nextPrayer.englishName} (${info.endTime})"
+                            if (isBangla) "পরবর্তী ওয়াক্ত: ${info.nextPrayer.banglaName}" else "Next Waqt: ${info.nextPrayer.englishName}"
                         },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
@@ -373,24 +369,20 @@ private fun ActiveWaqtBanner(
             }
 
             if (prayer != null) {
-                val statusText = when (status) {
-                    "jamaah" -> if (isBangla) "✓ জামাতে সম্পন্ন" else "✓ In Jama'at"
-                    "on_time" -> if (isBangla) "✓ একাকী সম্পন্ন" else "✓ Alone"
-                    "late" -> if (isBangla) "✓ দেরিতে সম্পন্ন" else "✓ Late"
-                    "missed" -> if (isBangla) "মিস হয়েছে" else "Missed"
-                    else -> if (isBangla) "আদায় বাকি" else "Pending"
-                }
-
                 Surface(
-                    color = if (isDone) Emerald100 else if (isMissed) Amber50 else Color.White,
+                    color = if (isDone) Emerald100 else Color.White,
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(0.8.dp, if (isDone) Emerald300 else if (isMissed) Amber300 else Slate200)
+                    border = BorderStroke(0.8.dp, if (isDone) Emerald300 else Slate200)
                 ) {
                     Text(
-                        text = statusText,
+                        text = if (isDone) {
+                            if (isBangla) "✓ আদায় সম্পন্ন" else "✓ Completed"
+                        } else {
+                            if (isBangla) "বাকি আছে" else "Pending"
+                        },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isDone) Emerald800 else if (isMissed) Amber800 else Slate700,
+                        color = if (isDone) Emerald800 else Slate700,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }

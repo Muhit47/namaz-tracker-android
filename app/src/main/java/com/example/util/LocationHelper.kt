@@ -43,10 +43,11 @@ object LocationHelper {
             gpsLoc != null -> gpsLoc
             netLoc != null -> netLoc
             else -> null
-        } ?: return@withContext null
+        }
+        val loc = bestLocation ?: return@withContext null
 
-        val lat = bestLocation.latitude
-        val lng = bestLocation.longitude
+        val lat = loc.latitude
+        val lng = loc.longitude
 
         var detectedNameEn: String? = null
         var detectedNameBn: String? = null

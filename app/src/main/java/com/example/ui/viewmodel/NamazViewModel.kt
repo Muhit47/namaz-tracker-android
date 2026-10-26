@@ -7,11 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.database.AppDatabase
 import com.example.data.model.*
 import com.example.data.repository.PrayerRepository
+import com.example.notification.PrayerAlarmScheduler
+import com.example.notification.PrayerNotificationHelper
+import com.example.util.BackupRestoreHelper
 import com.example.util.CityLocation
 import com.example.util.DateUtil
 import com.example.util.HapticUtil
 import com.example.util.PrayerTimeCalculator
 import com.example.util.QiblaHelper
+import com.example.widget.PrayerWidgetProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -66,7 +70,10 @@ data class NamazUiState(
     // Compass
     val compassHeading: Float = 0f,
     val qiblaBearing: Float = QiblaHelper.calculateQiblaDirection(23.8103, 90.4125),
-    val isAlignedWithQibla: Boolean = false
+    val isAlignedWithQibla: Boolean = false,
+
+    // Notifications
+    val prayerNotificationsEnabled: Boolean = true
 )
 
 class NamazViewModel(application: Application) : AndroidViewModel(application) {
@@ -89,6 +96,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         NamazUiState(
             isBangla = prefs.getBoolean("is_bangla", true),
             isHanafiAsr = prefs.getBoolean("is_hanafi_asr", true),
+            prayerNotificationsEnabled = prefs.getBoolean("prayer_notifications_enabled", true),
             selectedCity = run {
                 val savedName = prefs.getString("selected_city_en", "Dhaka")
                 val found = PrayerTimeCalculator.predefinedCities.find {
@@ -110,6 +118,11 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<NamazUiState> = _uiState.asStateFlow()
 
     init {
+        // Create Notification Channel & Schedule Waqt Alarms
+        PrayerNotificationHelper.createNotificationChannel(application)
+        PrayerAlarmScheduler.scheduleAllPrayers(application)
+        PrayerWidgetProvider.updateAllWidgets(application)
+
         // Calculate initial prayer times with restored city & Hanafi settings
         val initialCal = Calendar.getInstance()
         val initialTimes = PrayerTimeCalculator.calculateTimes(
@@ -213,7 +226,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
     fun startCompass() {
         if (compassJob?.isActive == true) return
         compassJob = viewModelScope.launch {
-            QiblaHelper.getCompassHeading(application).collect { heading ->
+            QiblaHelper.getCompassHeading(getApplication<Application>()).collect { heading ->
                 _uiState.update { current ->
                     val bearing = current.qiblaBearing
                     var diff = Math.abs(heading - bearing)
@@ -494,6 +507,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         val newBangla = !_uiState.value.isBangla
         prefs.edit().putBoolean("is_bangla", newBangla).apply()
         _uiState.update { it.copy(isBangla = newBangla) }
+        PrayerWidgetProvider.updateAllWidgets(getApplication())
     }
 
     fun selectCity(city: CityLocation) {
@@ -513,6 +527,8 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
                 qiblaBearing = bearing
             )
         }
+        PrayerAlarmScheduler.scheduleAllPrayers(getApplication())
+        PrayerWidgetProvider.updateAllWidgets(getApplication())
     }
 
     fun toggleHanafiAsr() {
@@ -525,6 +541,61 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
                 isHanafiAsr = newHanafi,
                 prayerTimes = times
             )
+        }
+        PrayerAlarmScheduler.scheduleAllPrayers(getApplication())
+        PrayerWidgetProvider.updateAllWidgets(getApplication())
+    }
+
+    // Notifications
+    fun togglePrayerNotifications(context: Context) {
+        val newVal = !_uiState.value.prayerNotificationsEnabled
+        prefs.edit().putBoolean("prayer_notifications_enabled", newVal).apply()
+        _uiState.update { it.copy(prayerNotificationsEnabled = newVal) }
+        if (newVal) {
+            PrayerAlarmScheduler.scheduleAllPrayers(context)
+        } else {
+            PrayerAlarmScheduler.cancelAllAlarms(context)
+        }
+    }
+
+    fun sendTestNotification(context: Context) {
+        PrayerNotificationHelper.showTestNotification(context, _uiState.value.isBangla)
+    }
+
+    // Data Backup & Export
+    fun exportBackup(onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            val logs = repository.getAllPrayerLogsList()
+            val qazas = repository.getAllQazaList()
+            val json = BackupRestoreHelper.createBackupJson(logs, qazas)
+            onResult(json)
+        }
+    }
+
+    fun restoreBackup(jsonString: String, onComplete: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            val parsed = BackupRestoreHelper.parseBackupJson(jsonString)
+            if (parsed == null) {
+                onComplete(false, if (_uiState.value.isBangla) "ভুল বা অকার্যকর JSON ফরম্যাট" else "Invalid JSON backup format")
+                return@launch
+            }
+            try {
+                if (parsed.prayerLogs.isNotEmpty()) {
+                    repository.restorePrayerLogs(parsed.prayerLogs)
+                }
+                if (parsed.qazaRecords.isNotEmpty()) {
+                    repository.restoreQazaRecords(parsed.qazaRecords)
+                }
+                PrayerWidgetProvider.updateAllWidgets(getApplication())
+                val successMsg = if (_uiState.value.isBangla) {
+                    "সফলভাবে ${parsed.prayerLogs.size}টি নামায রেকর্ড ও ${parsed.qazaRecords.size}টি কাযা রেকর্ড রিস্টোর হয়েছে!"
+                } else {
+                    "Successfully restored ${parsed.prayerLogs.size} prayer logs & ${parsed.qazaRecords.size} Qaza records!"
+                }
+                onComplete(true, successMsg)
+            } catch (e: Exception) {
+                onComplete(false, e.localizedMessage ?: "Restore failed")
+            }
         }
     }
 }

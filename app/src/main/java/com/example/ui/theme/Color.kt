@@ -10,14 +10,18 @@ val Slate700 = Color(0xFF334155)
 val Slate600 = Color(0xFF475569) // var(--text-secondary)
 val Slate500 = Color(0xFF64748B)
 val Slate400 = Color(0xFF94A3B8) // var(--text-muted)
+val Slate300 = Color(0xFFCBD5E1)
 val Slate200 = Color(0xFFE2E8F0) // var(--glass-border)
 val Slate100 = Color(0xFFF1F5F9)
 val Slate50 = Color(0xFFF8FAFC)  // Page background #F8FAFC
 
 // Brand Emerald Tokens
+val Emerald900 = Color(0xFF064E3B)
+val Emerald800 = Color(0xFF065F46)
 val Emerald700 = Color(0xFF047857) // Deep active text
 val Emerald600 = Color(0xFF059669) // var(--accent-emerald-dark)
 val Emerald500 = Color(0xFF10B981) // var(--accent-emerald)
+val Emerald300 = Color(0xFF6EE7B7)
 val Emerald200 = Color(0xFFA7F3D0)
 val Emerald100 = Color(0xFFD1FAE5)
 val Emerald50 = Color(0xFFECFDF5)  // var(--accent-emerald-soft)

@@ -43,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun settingsDao(): SettingsDao
 
     companion object {
-        private const val CURRENT_DB_VERSION = 2 // Version 2: Complete 34,932 Hadiths + Quran + Tasbih
+        private const val CURRENT_DB_VERSION = 3 // Version 3: Pristine Room-validated schema with 34,932 Hadiths
         private const val PREFS_NAME = "namaz_tracker_db_meta"
         private const val KEY_INSTALLED_VERSION = "installed_db_version"
 
@@ -63,21 +63,11 @@ abstract class AppDatabase : RoomDatabase() {
                     }
                 }
 
-                val builder = Room.databaseBuilder(
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "namaz_tracker.db"
                 )
-
-                if (!dbFile.exists()) {
-                    try {
-                        builder.createFromAsset("namaz_tracker.db")
-                    } catch (e: Exception) {
-                        Log.w("AppDatabase", "createFromAsset fallback skipped: ${e.message}")
-                    }
-                }
-
-                val instance = builder
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                     .build()
@@ -88,10 +78,20 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun extractCompressedDb(context: Context, destFile: File): Boolean {
             return try {
-                val assetList = context.assets.list("") ?: emptyArray()
-                if (assetList.contains("namaz_tracker.db.gz")) {
-                    destFile.parentFile?.mkdirs()
-                    context.assets.open("namaz_tracker.db.gz").use { gzIn ->
+                val gzInputStream = try {
+                    context.assets.open("namaz_tracker.db.gz")
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (gzInputStream != null) {
+                    gzInputStream.use { gzIn ->
+                        destFile.parentFile?.mkdirs()
+                        if (destFile.exists()) destFile.delete()
+                        File(destFile.path + "-journal").delete()
+                        File(destFile.path + "-wal").delete()
+                        File(destFile.path + "-shm").delete()
+
                         GZIPInputStream(gzIn).use { decompressedIn ->
                             FileOutputStream(destFile).use { fileOut ->
                                 decompressedIn.copyTo(fileOut, bufferSize = 65536)
@@ -101,7 +101,28 @@ abstract class AppDatabase : RoomDatabase() {
                     Log.i("AppDatabase", "Successfully extracted 34,932 hadiths complete database from assets gz.")
                     true
                 } else {
-                    false
+                    val rawInputStream = try {
+                        context.assets.open("namaz_tracker.db")
+                    } catch (e: Exception) {
+                        null
+                    }
+                    if (rawInputStream != null) {
+                        rawInputStream.use { rawIn ->
+                            destFile.parentFile?.mkdirs()
+                            if (destFile.exists()) destFile.delete()
+                            File(destFile.path + "-journal").delete()
+                            File(destFile.path + "-wal").delete()
+                            File(destFile.path + "-shm").delete()
+
+                            FileOutputStream(destFile).use { fileOut ->
+                                rawIn.copyTo(fileOut, bufferSize = 65536)
+                            }
+                        }
+                        Log.i("AppDatabase", "Successfully copied uncompressed asset database.")
+                        true
+                    } else {
+                        false
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("AppDatabase", "Error extracting compressed database asset: ${e.message}", e)

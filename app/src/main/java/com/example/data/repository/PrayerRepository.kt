@@ -213,4 +213,10 @@ class PrayerRepository(
     suspend fun getSetting(key: String): String? = settingsDao.getSetting(key)
     suspend fun setSetting(key: String, value: String) =
         settingsDao.setSetting(SettingEntity(key = key, value = value))
+
+    // 7. Backup & Restore
+    suspend fun getAllPrayerLogsList(): List<PrayerLogEntity> = prayerLogDao.getAllLogsList()
+    suspend fun restorePrayerLogs(logs: List<PrayerLogEntity>) = prayerLogDao.upsertLogs(logs)
+    suspend fun getAllQazaList(): List<QazaRecordEntity> = qazaDao.getAllQazaList()
+    suspend fun restoreQazaRecords(records: List<QazaRecordEntity>) = qazaDao.upsertQazas(records)
 }

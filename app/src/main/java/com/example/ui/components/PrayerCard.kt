@@ -23,7 +23,6 @@ import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerStatus
 import com.example.data.model.PrayerType
 import com.example.ui.theme.*
-import com.example.util.DateUtil
 
 @Composable
 fun PrayerCard(
@@ -136,8 +135,14 @@ fun PrayerCard(
                                                 .background(Color.White)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
+                                        val activeText = if (remainingMinutes != null) {
+                                            val formattedRem = com.example.util.PrayerTimeCalculator.formatRemainingTime(remainingMinutes, isBangla)
+                                            if (isBangla) "চলতি ওয়াক্ত • $formattedRem বাকি" else "Active • $formattedRem left"
+                                        } else {
+                                            if (isBangla) "চলতি ওয়াক্ত" else "Active"
+                                        }
                                         Text(
-                                            text = if (isBangla) "চলতি ওয়াক্ত" else "Active",
+                                            text = activeText,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
@@ -148,16 +153,9 @@ fun PrayerCard(
                         }
 
                         Text(
-                            text = if (isActiveWaqt && remainingMinutes != null) {
-                                val remText = if (isBangla) "বাকি: ${DateUtil.toBanglaDigits(remainingMinutes.toString())} মিনিট"
-                                else "$remainingMinutes min left"
-                                "${if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn} • $remText"
-                            } else {
-                                if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn
-                            },
+                            text = if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (isActiveWaqt) Emerald700 else Slate600,
-                            fontWeight = if (isActiveWaqt) FontWeight.SemiBold else FontWeight.Normal,
+                            color = Slate600,
                             fontSize = 11.5.sp
                         )
                     }

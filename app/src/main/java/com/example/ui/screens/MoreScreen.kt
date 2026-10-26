@@ -1,6 +1,11 @@
 package com.example.ui.screens
 
+import android.Manifest
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.theme.*
+import com.example.util.BackupRestoreHelper
+import com.example.util.DateUtil
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
+import com.example.widget.PrayerWidgetProvider
 
 enum class MoreSubScreen {
     INDEX,
@@ -48,6 +57,28 @@ fun MoreScreen(
     modifier: Modifier = Modifier
 ) {
     val isBangla = uiState.isBangla
+    val context = LocalContext.current
+    var showRestoreDialog by remember { mutableStateOf(false) }
+    var restoreInputText by remember { mutableStateOf("") }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.togglePrayerNotifications(context)
+            Toast.makeText(
+                context,
+                if (isBangla) "ওয়াক্ত নোটিফিকেশন চালু করা হয়েছে" else "Prayer notifications enabled",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(
+                context,
+                if (isBangla) "নোটিফিকেশন পারমিশন প্রয়োজন" else "Notification permission is required",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     BackHandler(enabled = activeSubScreen != MoreSubScreen.INDEX) {
         onNavigateSub(MoreSubScreen.INDEX)
@@ -190,6 +221,240 @@ fun MoreScreen(
                         }
                     }
 
+                    // 2. Prayer Notifications Section
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (isBangla) "ওয়াক্ত পুশ নোটিফিকেশন" else "Prayer Push Notifications",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Emerald700
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = if (isBangla) "৫ ওয়াক্ত নামাজের নোটিফিকেশন" else "5 Daily Prayer Alerts",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.5.sp,
+                                            color = Slate900
+                                        )
+                                        Text(
+                                            text = if (isBangla) "প্রতিটি ওয়াক্ত শুরু হওয়ার সাথে সাথে অ্যালার্ট ও হাদিস বাণী পান" else "Get notified on exact time when each Waqt begins",
+                                            fontSize = 11.5.sp,
+                                            color = Slate600
+                                        )
+                                    }
+
+                                    Switch(
+                                        checked = uiState.prayerNotificationsEnabled,
+                                        onCheckedChange = {
+                                            if (!uiState.prayerNotificationsEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                            } else {
+                                                viewModel.togglePrayerNotifications(context)
+                                            }
+                                        },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.White,
+                                            checkedTrackColor = Emerald500
+                                        )
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                OutlinedButton(
+                                    onClick = {
+                                        viewModel.sendTestNotification(context)
+                                        Toast.makeText(
+                                            context,
+                                            if (isBangla) "টেস্ট নোটিফিকেশন পাঠানো হয়েছে" else "Test notification sent",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                ) {
+                                    Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (isBangla) "টেস্ট নোটিফিকেশন পরীক্ষা করুন" else "Send Test Notification",
+                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // 3. Home Screen Widget Section
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (isBangla) "হোম স্ক্রিন উইজেট (App Widget)" else "Home Screen Widget",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Emerald700
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Emerald50,
+                                        border = androidx.compose.foundation.BorderStroke(0.8.dp, Emerald100),
+                                        modifier = Modifier.size(40.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = Emerald700)
+                                        }
+                                    }
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = if (isBangla) "হোম স্ক্রিন থেকে নামাজের সময় দেখুন" else "Prayer times on your home screen",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.5.sp,
+                                            color = Slate900
+                                        )
+                                        Text(
+                                            text = if (isBangla) "হোম স্ক্রিনের খালি জায়গায় চাপ দিয়ে ধরে 'Widgets' থেকে 'Namaz Tracker' যোগ করুন।" else "Touch & hold empty space on home screen, select 'Widgets' and add 'Namaz Tracker'.",
+                                            fontSize = 11.5.sp,
+                                            color = Slate600
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                OutlinedButton(
+                                    onClick = {
+                                        PrayerWidgetProvider.updateAllWidgets(context)
+                                        Toast.makeText(
+                                            context,
+                                            if (isBangla) "উইজেট ডাটা আপডেট করা হয়েছে" else "Widget data refreshed",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                ) {
+                                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (isBangla) "উইজেট ডাটা রিফ্রেশ করুন" else "Refresh Widget Now",
+                                        fontSize = 12.5.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. Data Backup & Export Section
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (isBangla) "ডাটা ব্যাকআপ ও রিস্টোর" else "Data Backup & Restore",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Emerald700
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text(
+                                    text = if (isBangla) "আপনার নামাযের হিসাব ও কাযা রেকর্ড সুরক্ষিত রাখতে ব্যাকআপ ফাইল তৈরি বা পূর্বের ডাটা রিস্টোর করুন।" else "Backup your prayer logs and Qaza records or restore previous records safely.",
+                                    fontSize = 11.5.sp,
+                                    color = Slate600
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.exportBackup { json ->
+                                                BackupRestoreHelper.shareBackup(context, json)
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Emerald600)
+                                    ) {
+                                        Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = if (isBangla) "শেয়ার ব্যাকআপ" else "Share Backup", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            viewModel.exportBackup { json ->
+                                                BackupRestoreHelper.copyToClipboard(context, json, isBangla)
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                    ) {
+                                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = if (isBangla) "কপি JSON" else "Copy JSON", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+
+                                OutlinedButton(
+                                    onClick = {
+                                        restoreInputText = ""
+                                        showRestoreDialog = true
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald800)
+                                ) {
+                                    Icon(imageVector = Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (isBangla) "ডাটা রিস্টোর করুন (Restore Data)" else "Restore Data from JSON",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     // 2. Knowledge & Guides
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -287,6 +552,72 @@ fun MoreScreen(
                 }
             }
         }
+    }
+
+    if (showRestoreDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestoreDialog = false },
+            title = {
+                Text(
+                    text = if (isBangla) "ডাটা রিস্টোর করুন" else "Restore Data",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = if (isBangla) "পূর্বে ব্যাকআপ করা JSON টেক্সটটি নিচে পেস্ট করুন:" else "Paste your exported JSON backup text below:",
+                        fontSize = 12.sp,
+                        color = Slate600
+                    )
+                    OutlinedTextField(
+                        value = restoreInputText,
+                        onValueChange = { restoreInputText = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp),
+                        placeholder = {
+                            Text(
+                                text = "{\"appName\": \"NamazTracker\", ...}",
+                                fontSize = 11.sp,
+                                color = Slate400
+                            )
+                        },
+                        textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        maxLines = 10
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (restoreInputText.isBlank()) {
+                            Toast.makeText(
+                                context,
+                                if (isBangla) "দয়া করে ব্যাকআপ টেক্সট পেস্ট করুন" else "Please paste backup text",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@Button
+                        }
+                        viewModel.restoreBackup(restoreInputText) { success, msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                            if (success) {
+                                showRestoreDialog = false
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Emerald600)
+                ) {
+                    Text(text = if (isBangla) "রিস্টোর নিশ্চিত করুন" else "Confirm Restore")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreDialog = false }) {
+                    Text(text = if (isBangla) "বাতিল" else "Cancel", color = Slate600)
+                }
+            }
+        )
     }
 }
 

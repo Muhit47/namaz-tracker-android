@@ -731,7 +731,7 @@ private fun ChapterFullHadithsView(
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
-                                        text = if (isBangla) item.gradeBn!! else (if (!item.gradeEn.isNullOrBlank()) item.gradeEn!! else item.gradeBn!!),
+                                        text = item.gradeBn ?: "",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Amber700,

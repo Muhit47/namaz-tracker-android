@@ -20,6 +20,12 @@ interface PrayerLogDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertLog(log: PrayerLogEntity)
+
+    @Query("SELECT * FROM prayers_log ORDER BY date DESC")
+    suspend fun getAllLogsList(): List<PrayerLogEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertLogs(logs: List<PrayerLogEntity>)
 }
 
 @Dao
@@ -32,6 +38,12 @@ interface QazaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertQaza(record: QazaRecordEntity)
+
+    @Query("SELECT * FROM qaza_records ORDER BY id ASC")
+    suspend fun getAllQazaList(): List<QazaRecordEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertQazas(records: List<QazaRecordEntity>)
 }
 
 @Dao
