@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +40,7 @@ import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.DateUtil
 import com.example.util.PrayerTimeCalculator
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -831,6 +835,67 @@ private fun CitySelectionDialog(
     onCitySelected: (com.example.util.CityLocation) -> Unit,
     onToggleHanafi: () -> Unit
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isDetectingLocation by remember { mutableStateOf(false) }
+    var detectStatusMessage by remember { mutableStateOf<String?>(null) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            isDetectingLocation = true
+            coroutineScope.launch {
+                val city = com.example.util.LocationHelper.detectCurrentCity(context)
+                isDetectingLocation = false
+                if (city != null) {
+                    onCitySelected(city)
+                    android.widget.Toast.makeText(
+                        context,
+                        if (isBangla) "লোকেশন সনাক্ত হয়েছে: ${city.nameBn}" else "Location detected: ${city.nameEn}",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    detectStatusMessage = if (isBangla) "জিপিএস লোকেশন সনাক্ত করা যায়নি। তালিকা থেকে নির্বাচন করুন।" else "Could not detect GPS location. Select from list."
+                }
+            }
+        } else {
+            detectStatusMessage = if (isBangla) "লোকেশন পারমিশন দেওয়া হয়নি।" else "Location permission denied."
+        }
+    }
+
+    fun triggerAutoDetect() {
+        detectStatusMessage = null
+        if (!com.example.util.LocationHelper.hasLocationPermission(context)) {
+            permissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else if (!com.example.util.LocationHelper.isLocationEnabled(context)) {
+            detectStatusMessage = if (isBangla) "দয়া করে ফোনের জিপিএস/লোকেশন চালু করুন।" else "Please enable device GPS/Location services."
+        } else {
+            isDetectingLocation = true
+            coroutineScope.launch {
+                val city = com.example.util.LocationHelper.detectCurrentCity(context)
+                isDetectingLocation = false
+                if (city != null) {
+                    onCitySelected(city)
+                    android.widget.Toast.makeText(
+                        context,
+                        if (isBangla) "লোকেশন সনাক্ত হয়েছে: ${city.nameBn}" else "Location detected: ${city.nameEn}",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    detectStatusMessage = if (isBangla) "জিপিএস লোকেশন সনাক্ত করা যায়নি। তালিকা থেকে নির্বাচন করুন।" else "Could not detect GPS location. Select from list."
+                }
+            }
+        }
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
@@ -843,21 +908,79 @@ private fun CitySelectionDialog(
         },
         text = {
             Column {
+                // Auto detect button card
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(enabled = !isDetectingLocation) { triggerAutoDetect() },
+                    color = Emerald50,
+                    border = BorderStroke(1.dp, Emerald100),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = null,
+                                tint = Emerald600,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (isDetectingLocation) {
+                                    if (isBangla) "লোকেশন শনাক্ত করা হচ্ছে..." else "Detecting location..."
+                                } else {
+                                    if (isBangla) "স্বয়ংক্রিয় লোকেশন সনাক্তকরণ (Auto)" else "Auto Detect Location (GPS)"
+                                },
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Emerald700
+                            )
+                        }
+                        if (isDetectingLocation) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = Emerald600,
+                                strokeWidth = 2.dp
+                            )
+                        }
+                    }
+                }
+
+                if (detectStatusMessage != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = detectStatusMessage!!,
+                        fontSize = 11.sp,
+                        color = Color(0xFFDC2626),
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
-                    text = if (isBangla) "আপনার শহর নির্বাচন করুন:" else "Select your city for prayer times:",
+                    text = if (isBangla) "অথবা শহর নির্বাচন করুন:" else "Or select city from list:",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = Slate800
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
+                Spacer(modifier = Modifier.height(6.dp))
+                LazyColumn(modifier = Modifier.heightIn(max = 220.dp)) {
                     items(PrayerTimeCalculator.predefinedCities) { city ->
                         val isSelected = city.nameEn == currentCity.nameEn
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onCitySelected(city) }
-                                .padding(vertical = 10.dp, horizontal = 8.dp),
+                                .padding(vertical = 9.dp, horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(

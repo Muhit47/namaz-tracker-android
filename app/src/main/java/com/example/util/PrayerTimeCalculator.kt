@@ -38,6 +38,15 @@ object PrayerTimeCalculator {
         CityLocation("New York (নিউইয়র্ক)", "নিউইয়র্ক", 40.7128, -74.0060, -4.0)
     )
 
+    fun findNearestCity(latitude: Double, longitude: Double): CityLocation {
+        return predefinedCities.minByOrNull { city ->
+            val dLat = Math.toRadians(city.latitude - latitude)
+            val dLng = Math.toRadians(city.longitude - longitude)
+            val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(latitude)) * cos(Math.toRadians(city.latitude)) * sin(dLng / 2).pow(2)
+            2 * atan2(sqrt(a), sqrt(1 - a))
+        } ?: predefinedCities[0]
+    }
+
     fun calculateTimes(
         calendar: Calendar,
         city: CityLocation = predefinedCities[0],

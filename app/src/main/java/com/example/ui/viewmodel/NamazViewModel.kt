@@ -88,9 +88,22 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         NamazUiState(
             isBangla = prefs.getBoolean("is_bangla", true),
             isHanafiAsr = prefs.getBoolean("is_hanafi_asr", true),
-            selectedCity = PrayerTimeCalculator.predefinedCities.find {
-                it.nameEn == prefs.getString("selected_city_en", "Dhaka")
-            } ?: PrayerTimeCalculator.predefinedCities[0]
+            selectedCity = run {
+                val savedName = prefs.getString("selected_city_en", "Dhaka")
+                val found = PrayerTimeCalculator.predefinedCities.find {
+                    it.nameEn == savedName || it.nameEn.startsWith(savedName ?: "Dhaka")
+                }
+                if (found != null) {
+                    found
+                } else if (prefs.contains("custom_city_lat")) {
+                    val lat = prefs.getFloat("custom_city_lat", 23.8103f).toDouble()
+                    val lng = prefs.getFloat("custom_city_lng", 90.4125f).toDouble()
+                    val bn = prefs.getString("selected_city_bn", "ঢাকা") ?: "ঢাকা"
+                    CityLocation(savedName ?: "Custom", bn, lat, lng, 6.0)
+                } else {
+                    PrayerTimeCalculator.predefinedCities[0]
+                }
+            }
         )
     )
     val uiState: StateFlow<NamazUiState> = _uiState.asStateFlow()
@@ -472,7 +485,12 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectCity(city: CityLocation) {
-        prefs.edit().putString("selected_city_en", city.nameEn).apply()
+        prefs.edit()
+            .putString("selected_city_en", city.nameEn)
+            .putString("selected_city_bn", city.nameBn)
+            .putFloat("custom_city_lat", city.latitude.toFloat())
+            .putFloat("custom_city_lng", city.longitude.toFloat())
+            .apply()
         val cal = DateUtil.getCalendarFromIso(_uiState.value.selectedDate)
         val times = PrayerTimeCalculator.calculateTimes(cal, city, _uiState.value.isHanafiAsr)
         val bearing = QiblaHelper.calculateQiblaDirection(city.latitude, city.longitude)
