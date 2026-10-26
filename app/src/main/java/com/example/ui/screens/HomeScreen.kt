@@ -348,10 +348,30 @@ fun HomeScreen(
                                 modifier = Modifier.padding(top = 10.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                AdditionalPrayerRow("তাহাজ্জুদ (Tahajjud)", "মধ্যরাত থেকে ফজরের পূর্ব পর্যন্ত", "২-১২ রাকাত", isBangla)
-                                AdditionalPrayerRow("ইশরাক (Ishraq)", "সূর্যোদয়ের ১৫-২০ মিনিট পর", "২-৪ রাকাত", isBangla)
-                                AdditionalPrayerRow("চাশত / দুহা (Duha)", "সূর্য দ্বিপ্রহরে উঠার পূর্বে", "২-৮ রাকাত", isBangla)
-                                AdditionalPrayerRow("আউওয়াবিন (Awwabin)", "মাগরিবের পর থেকে ইশার পূর্বে", "৬ রাকাত", isBangla)
+                                AdditionalPrayerRow(
+                                    title = if (isBangla) "তাহাজ্জুদ (Tahajjud)" else "Tahajjud (Night Prayer)",
+                                    time = if (isBangla) "মধ্যরাত থেকে ফজরের পূর্ব পর্যন্ত" else "Midnight until before Fajr",
+                                    rakah = if (isBangla) "২-১২ রাকাত" else "2-12 Rakahs",
+                                    isBangla = isBangla
+                                )
+                                AdditionalPrayerRow(
+                                    title = if (isBangla) "ইশরাক (Ishraq)" else "Ishraq (Post-Sunrise)",
+                                    time = if (isBangla) "সূর্যোদয়ের ১৫-২০ মিনিট পর" else "15-20 mins after sunrise",
+                                    rakah = if (isBangla) "২-৪ রাকাত" else "2-4 Rakahs",
+                                    isBangla = isBangla
+                                )
+                                AdditionalPrayerRow(
+                                    title = if (isBangla) "চাশত / দুহা (Duha)" else "Duha / Chasht (Forenoon)",
+                                    time = if (isBangla) "সূর্য দ্বিপ্রহরে উঠার পূর্বে" else "Mid-morning before midday",
+                                    rakah = if (isBangla) "২-৮ রাকাত" else "2-8 Rakahs",
+                                    isBangla = isBangla
+                                )
+                                AdditionalPrayerRow(
+                                    title = if (isBangla) "আউওয়াবিন (Awwabin)" else "Awwabin (Post-Maghrib)",
+                                    time = if (isBangla) "মাগরিবের পর থেকে ইশার পূর্বে" else "Between Maghrib and Isha",
+                                    rakah = if (isBangla) "৬ রাকাত" else "6 Rakahs",
+                                    isBangla = isBangla
+                                )
                             }
                         }
                     }
