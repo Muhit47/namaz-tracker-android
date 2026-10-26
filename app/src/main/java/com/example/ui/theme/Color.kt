@@ -71,3 +71,36 @@ val StatusMissedText = Rose700
 val StatusDefaultBg = Slate50
 val StatusDefaultBorder = Slate200
 val StatusDefaultText = Slate600
+
+// Financy Fintech Theme Tokens
+// Light Mode
+val FinancyBgLight = Color(0xFFF8FAFC)
+val FinancyCardLight = Color(0xFFFFFFFF)
+val FinancyCardSubtleLight = Color(0xFFF1F5F9)
+val FinancyBorderLight = Color(0xFFE2E8F0)
+val FinancyTextPrimaryLight = Color(0xFF0F172A)
+val FinancyTextSecondaryLight = Color(0xFF64748B)
+val FinancyTextMutedLight = Color(0xFF94A3B8)
+
+// Dark Mode (Financy Dark Luxe)
+val FinancyBgDark = Color(0xFF0B0F19)
+val FinancyCardDark = Color(0xFF151C2C)
+val FinancyCardSubtleDark = Color(0xFF1E293B)
+val FinancyBorderDark = Color(0xFF223048)
+val FinancyTextPrimaryDark = Color(0xFFF8FAFC)
+val FinancyTextSecondaryDark = Color(0xFF94A3B8)
+val FinancyTextMutedDark = Color(0xFF64748B)
+
+// Brand Accents
+val FinancyEmerald = Color(0xFF10B981)
+val FinancyEmeraldDark = Color(0xFF059669)
+val FinancyEmeraldLight = Color(0xFFD1FAE5)
+val FinancyEmeraldSoft = Color(0xFFECFDF5)
+val FinancyEmeraldNeon = Color(0xFF34D399)
+
+val FinancyCyan = Color(0xFF0EA5E9)
+val FinancyCyanSoft = Color(0xFFF0F9FF)
+val FinancyAmber = Color(0xFFF59E0B)
+val FinancyAmberSoft = Color(0xFFFFFBEB)
+val FinancyRose = Color(0xFFF43F5E)
+val FinancyRoseSoft = Color(0xFFFFF1F2)

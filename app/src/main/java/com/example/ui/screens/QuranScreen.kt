@@ -41,6 +41,7 @@ fun QuranScreen(
     viewModel: NamazViewModel,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val context = LocalContext.current
     val isBangla = uiState.isBangla
     var searchQuery by remember { mutableStateOf("") }
@@ -81,7 +82,7 @@ fun QuranScreen(
         }
 
         Scaffold(
-            containerColor = Slate50,
+            containerColor = colors.background,
             topBar = {
                 TopAppBar(
                     title = {
@@ -90,18 +91,18 @@ fun QuranScreen(
                                 text = if (isBangla) "আল কুরআনুল কারীম" else "Holy Al-Qur'an",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                             Text(
                                 text = if (isBangla) "১১৪টি পূর্ণাঙ্গ সূরা অর্থ ও উচ্চারণসহ" else "114 Surahs with Translation & Transliteration",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 11.sp,
-                                color = Slate600
+                                color = colors.textMuted
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = GlassCardWhite
+                        containerColor = colors.card
                     )
                 )
             }
@@ -111,50 +112,50 @@ fun QuranScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(bottom = 90.dp)
             ) {
                 // Search bar
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("quran_search_field"),
                         placeholder = {
                             Text(
-                                text = if (isBangla) "সূরা খুঁজুন (যেমন: ফাতিহা, বাকারা, ১, ৩৬...)" else "Search Surah (e.g. Fatiha, Baqarah, 36...)",
-                                color = Slate400,
-                                fontSize = 13.5.sp
+                                text = if (isBangla) "সূরা খুঁজুন (যেমন: ফাতিহা, ১, ইয়াসীন...)" else "Search Surah (e.g. Fatiha, 1...)",
+                                fontSize = 12.5.sp,
+                                color = colors.textMuted
                             )
                         },
                         leadingIcon = {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = Slate500)
+                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = colors.textMuted)
                         },
                         trailingIcon = {
                             if (searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Slate500)
+                                    Icon(imageVector = Icons.Default.Close, contentDescription = "Clear", tint = colors.textMuted)
                                 }
                             }
                         },
+                        shape = RoundedCornerShape(16.dp),
                         singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("input_quran_search"),
-                        shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = GlassCardWhite,
-                            unfocusedContainerColor = GlassCardWhite,
-                            focusedBorderColor = Emerald500,
-                            unfocusedBorderColor = Slate200,
-                            focusedTextColor = Slate900,
-                            unfocusedTextColor = Slate900
+                            focusedContainerColor = colors.card,
+                            unfocusedContainerColor = colors.card,
+                            focusedBorderColor = colors.emerald,
+                            unfocusedBorderColor = colors.border,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                // Last read quick resume card
-                if (uiState.quranLastRead != null) {
+                // Last read resume card if available
+                if (uiState.quranLastRead != null && searchQuery.isBlank()) {
                     val lr = uiState.quranLastRead
                     val lrSurah = uiState.surahs.find { it.surahNo == lr.surahNo }
                     if (lrSurah != null) {
@@ -162,14 +163,10 @@ fun QuranScreen(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { viewModel.openSurah(lrSurah) }
-                                    .padding(bottom = 12.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Emerald50
-                                ),
-                                border = BorderStroke(1.dp, Emerald100),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                                    .clickable { viewModel.openSurah(lrSurah) },
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.emeraldSoft),
+                                border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f))
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -178,37 +175,55 @@ fun QuranScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text("📖", fontSize = 24.sp)
-                                        Spacer(modifier = Modifier.width(10.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = colors.emerald,
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = Icons.Default.MenuBook,
+                                                    contentDescription = null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
                                         Column {
                                             Text(
-                                                text = if (isBangla) "সর্বশেষ পঠিত সূরা" else "Last Read Surah",
+                                                text = if (isBangla) "সর্বশেষ পঠিত আয়াত" else "Last Read Bookmark",
                                                 fontSize = 11.sp,
-                                                color = Emerald700,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.emerald
                                             )
                                             Text(
                                                 text = "${if (isBangla) lrSurah.nameBn else lrSurah.nameEn} • ${if (isBangla) "আয়াত " + DateUtil.toBanglaDigits(lr.ayahNo.toString()) else "Ayah " + lr.ayahNo}",
+                                                fontSize = 13.5.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = Slate900
+                                                color = colors.textPrimary
                                             )
                                         }
                                     }
-                                    FilledTonalButton(
+
+                                    Button(
                                         onClick = { viewModel.openSurah(lrSurah) },
                                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                                         modifier = Modifier.height(34.dp),
-                                        colors = ButtonDefaults.filledTonalButtonColors(
-                                            containerColor = Emerald500,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.emerald,
                                             contentColor = Color.White
-                                        )
+                                        ),
+                                        shape = RoundedCornerShape(10.dp)
                                     ) {
-                                        Text(if (isBangla) "পড়ুন" else "Read", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text(if (isBangla) "পড়ুন" else "Read", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
@@ -232,16 +247,18 @@ private fun SurahListItem(
     isBangla: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = FinancyTheme.colors
     val isMeccan = surah.revelationType.equals("Meccan", ignoreCase = true)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick)
             .testTag("surah_item_${surah.surahNo}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-        border = BorderStroke(1.dp, GlassBorder),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.card),
+        border = BorderStroke(1.dp, colors.border),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -260,14 +277,14 @@ private fun SurahListItem(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(Emerald50)
-                        .border(BorderStroke(0.8.dp, Emerald100), CircleShape),
+                        .background(colors.emeraldSoft)
+                        .border(BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f)), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = if (isBangla) DateUtil.toBanglaDigits(surah.surahNo.toString()) else surah.surahNo.toString(),
                         fontWeight = FontWeight.Bold,
-                        color = Emerald700,
+                        color = colors.emerald,
                         fontSize = 13.sp
                     )
                 }
@@ -278,13 +295,13 @@ private fun SurahListItem(
                             text = if (isBangla) surah.nameBn else surah.nameEn,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleMedium,
-                            color = Slate900
+                            color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = if (isMeccan) Amber50 else Cyan50,
+                            color = if (isMeccan) colors.amberSoft else colors.cyanSoft,
                             shape = RoundedCornerShape(4.dp),
-                            border = BorderStroke(0.8.dp, if (isMeccan) Amber200 else Cyan200)
+                            border = BorderStroke(0.8.dp, if (isMeccan) colors.amber.copy(alpha = 0.4f) else colors.cyan.copy(alpha = 0.4f))
                         ) {
                             Text(
                                 text = if (isMeccan) (if (isBangla) "মাক্কী" else "Meccan")
@@ -292,7 +309,7 @@ private fun SurahListItem(
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
-                                color = if (isMeccan) Amber700 else Cyan700
+                                color = if (isMeccan) colors.amber else colors.cyan
                             )
                         }
                     }
@@ -300,7 +317,7 @@ private fun SurahListItem(
                     Text(
                         text = "${if (isBangla) surah.meaningBn else (surah.meaningEn ?: surah.meaningBn)} • ${if (isBangla) DateUtil.toBanglaDigits(surah.totalAyah.toString()) + " আয়াত" else "${surah.totalAyah} Ayahs"}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Slate600
+                        color = colors.textMuted
                     )
                 }
             }
@@ -310,7 +327,7 @@ private fun SurahListItem(
                 text = surah.nameAr,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Emerald700
+                color = colors.emerald
             )
         }
     }
@@ -329,9 +346,12 @@ private fun SurahReaderView(
     onSetLastRead: (Int, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val context = LocalContext.current
+    var playingAyahNo by remember { mutableStateOf<Int?>(null) }
+
     Scaffold(
-        containerColor = Slate50,
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -340,18 +360,18 @@ private fun SurahReaderView(
                             text = if (isBangla) surah.nameBn else surah.nameEn,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            color = colors.textPrimary
                         )
                         Text(
                             text = "${if (isBangla) surah.meaningBn else (surah.meaningEn ?: surah.meaningBn)} • ${if (isBangla) DateUtil.toBanglaDigits(surah.totalAyah.toString()) + " আয়াত" else "${surah.totalAyah} Ayahs"}",
                             fontSize = 11.sp,
-                            color = Slate600
+                            color = colors.textMuted
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Slate900)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colors.textPrimary)
                     }
                 },
                 actions = {
@@ -359,12 +379,66 @@ private fun SurahReaderView(
                         text = surah.nameAr,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Emerald700,
+                        color = colors.emerald,
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = GlassCardWhite)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.card)
             )
+        },
+        bottomBar = {
+            // Floating Audio Player Dock if playing
+            if (playingAyahNo != null) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .clip(RoundedCornerShape(20.dp)),
+                    color = colors.card,
+                    border = BorderStroke(1.dp, colors.emerald),
+                    shadowElevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = colors.emerald,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Default.GraphicEq, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = if (isBangla) "তিলাওয়াত চলছে: আয়াত $playingAyahNo" else "Playing: Ayah $playingAyahNo",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Text(
+                                    text = if (isBangla) surah.nameBn else surah.nameEn,
+                                    fontSize = 10.5.sp,
+                                    color = colors.emerald
+                                )
+                            }
+                        }
+
+                        IconButton(onClick = { playingAyahNo = null }) {
+                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = colors.rose)
+                        }
+                    }
+                }
+            }
         }
     ) { innerPadding ->
         LazyColumn(
@@ -372,7 +446,7 @@ private fun SurahReaderView(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 14.dp),
-            contentPadding = PaddingValues(bottom = 32.dp)
+            contentPadding = PaddingValues(bottom = 90.dp)
         ) {
             // Bismillah card (except Surah Tawbah #9)
             if (surah.surahNo != 9) {
@@ -381,11 +455,9 @@ private fun SurahReaderView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 10.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = GlassCardWhite
-                        ),
-                        border = BorderStroke(1.dp, GlassBorder),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.card),
+                        border = BorderStroke(1.dp, colors.border),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                     ) {
                         Column(
@@ -398,7 +470,7 @@ private fun SurahReaderView(
                                 text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Emerald700,
+                                color = colors.emerald,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
@@ -406,7 +478,7 @@ private fun SurahReaderView(
                                 text = if (isBangla) "পরম করুণাময় ও অসীম দয়ালু আল্লাহর নামে (শুরু করছি)"
                                 else "In the name of Allah, the Entirely Merciful, the Especially Merciful",
                                 fontSize = 12.5.sp,
-                                color = Slate600,
+                                color = colors.textSecondary,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -418,19 +490,20 @@ private fun SurahReaderView(
             items(ayahs) { ayah ->
                 val isBookmarked = bookmarks.any { it.surahNo == surah.surahNo && it.ayahNo == ayah.ayahNo }
                 val isLastRead = lastRead?.surahNo == surah.surahNo && lastRead?.ayahNo == ayah.ayahNo
+                val isPlaying = playingAyahNo == ayah.ayahNo
 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
                         .testTag("ayah_${ayah.surahNo}_${ayah.ayahNo}"),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isLastRead) Emerald50.copy(alpha = 0.6f) else GlassCardWhite
+                        containerColor = if (isLastRead || isPlaying) colors.emeraldSoft.copy(alpha = 0.5f) else colors.card
                     ),
                     border = BorderStroke(
                         1.dp,
-                        if (isLastRead) Emerald500.copy(alpha = 0.5f) else GlassBorder
+                        if (isLastRead || isPlaying) colors.emerald.copy(alpha = 0.5f) else colors.border
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
                 ) {
@@ -439,28 +512,43 @@ private fun SurahReaderView(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Header: Ayah number + action buttons
+                        // Header: Ayah number pill + audio + copy + bookmark buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                shape = CircleShape,
-                                color = if (isLastRead) Emerald100 else Emerald50,
-                                border = BorderStroke(0.8.dp, Emerald100)
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isLastRead) colors.emerald else colors.emeraldSoft,
+                                border = BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.4f))
                             ) {
                                 Text(
                                     text = if (isBangla) "আয়াত ${DateUtil.toBanglaDigits(ayah.ayahNo.toString())}"
                                     else "Ayah ${ayah.ayahNo}",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.5.sp,
-                                    color = Emerald700,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                    color = if (isLastRead) Color.White else colors.emerald,
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
                                 )
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Audio play button chip
+                                IconButton(
+                                    onClick = {
+                                        playingAyahNo = if (isPlaying) null else ayah.ayahNo
+                                    },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isPlaying) Icons.Default.PauseCircleFilled else Icons.Default.PlayCircleFilled,
+                                        contentDescription = "Audio Play",
+                                        tint = colors.emerald,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+
                                 // Copy Ayah button
                                 IconButton(
                                     onClick = {
@@ -489,51 +577,53 @@ private fun SurahReaderView(
                                             android.widget.Toast.LENGTH_SHORT
                                         ).show()
                                     },
-                                    modifier = Modifier.size(34.dp)
+                                    modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.ContentCopy,
                                         contentDescription = "Copy Ayah",
-                                        tint = Slate400,
-                                        modifier = Modifier.size(18.dp)
+                                        tint = colors.textMuted,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
 
                                 // Last read button
                                 IconButton(
                                     onClick = { onSetLastRead(surah.surahNo, ayah.ayahNo) },
-                                    modifier = Modifier.size(34.dp)
+                                    modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
                                         imageVector = if (isLastRead) Icons.Default.BookmarkAdded else Icons.Default.BookmarkBorder,
                                         contentDescription = "Set Last Read",
-                                        tint = if (isLastRead) Emerald600 else Slate400
+                                        tint = if (isLastRead) colors.emerald else colors.textMuted,
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
 
                                 // Bookmark button
                                 IconButton(
                                     onClick = { onToggleBookmark(surah.surahNo, ayah.ayahNo) },
-                                    modifier = Modifier.size(34.dp)
+                                    modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
                                         imageVector = if (isBookmarked) Icons.Default.Star else Icons.Default.StarBorder,
                                         contentDescription = "Bookmark Ayah",
-                                        tint = if (isBookmarked) Amber600 else Slate400
+                                        tint = if (isBookmarked) colors.amber else colors.textMuted,
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         // Arabic Ayah text
                         Text(
                             text = ayah.textAr,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900,
-                            lineHeight = 38.sp,
+                            color = colors.textPrimary,
+                            lineHeight = 40.sp,
                             textAlign = TextAlign.End,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -548,9 +638,9 @@ private fun SurahReaderView(
                         if (translitText.isNotBlank()) {
                             Text(
                                 text = translitText,
-                                fontSize = 13.5.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Cyan700,
+                                color = colors.cyan,
                                 lineHeight = 20.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
@@ -564,7 +654,7 @@ private fun SurahReaderView(
                         Text(
                             text = translationText,
                             fontSize = 13.5.sp,
-                            color = Slate700,
+                            color = colors.textSecondary,
                             lineHeight = 20.sp
                         )
                     }

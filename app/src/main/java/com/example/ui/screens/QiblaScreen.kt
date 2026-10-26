@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CompassCalibration
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -50,6 +48,7 @@ fun QiblaScreen(
             viewModel?.stopCompass()
         }
     }
+    val colors = FinancyTheme.colors
     val isBangla = uiState.isBangla
     val heading = uiState.compassHeading
     val qiblaBearing = uiState.qiblaBearing
@@ -58,12 +57,12 @@ fun QiblaScreen(
     val animatedRotation by animateFloatAsState(targetValue = -heading, label = "compassRotate")
 
     val bannerBg by animateColorAsState(
-        targetValue = if (isAligned) Emerald50 else GlassCardWhite,
+        targetValue = if (isAligned) colors.neonGreen.copy(alpha = 0.15f) else colors.surfaceCard,
         label = "bannerColor"
     )
 
     Scaffold(
-        containerColor = Slate50,
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -71,7 +70,7 @@ fun QiblaScreen(
                         text = if (isBangla) "কিবলা কম্পাস" else "Qibla Direction",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = colors.textPrimary
                     )
                 },
                 navigationIcon = {
@@ -80,13 +79,13 @@ fun QiblaScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Slate900
+                                tint = colors.textPrimary
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GlassCardWhite
+                    containerColor = colors.surfaceCard
                 )
             )
         }
@@ -98,17 +97,17 @@ fun QiblaScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // 1. Status Banner
+            // 1. Status Banner with Glow
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = bannerBg),
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (isAligned) Emerald500 else GlassBorder
+                    if (isAligned) colors.neonGreen else colors.borderSubtle
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("qibla_alignment_status")
@@ -124,72 +123,79 @@ fun QiblaScreen(
                         text = if (isAligned) "🕋 " else "🧭 ",
                         fontSize = 20.sp
                     )
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (isAligned) {
                             if (isBangla) "মাশাআল্লাহ! আপনি সঠিক কিবলামুখী আছেন" else "Aligned with Qibla!"
                         } else {
-                            if (isBangla) "ফোনটি সমান রেখে নির্দেশকটি কিবলামুখী করুন" else "Rotate phone until aligned with Kaaba"
+                            if (isBangla) "ফোনটি অনুভূমিক রেখে নির্দেশকটি কিবলামুখী করুন" else "Rotate phone until aligned with Kaaba"
                         },
                         fontWeight = FontWeight.Bold,
-                        color = if (isAligned) Emerald700 else Slate900,
+                        color = if (isAligned) colors.neonGreen else colors.textPrimary,
                         fontSize = 13.5.sp,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. Degrees info
+            // 2. Financy Bento Degree Cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Surface(
-                    color = GlassCardWhite,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
-                    shape = RoundedCornerShape(12.dp)
+                Card(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = if (isBangla) "আপনার দিক" else "Device Heading",
-                            fontSize = 11.sp,
-                            color = Slate600
+                            fontSize = 11.5.sp,
+                            color = colors.textSecondary,
+                            fontWeight = FontWeight.Medium
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (isBangla) "${DateUtil.toBanglaDigits(heading.toInt().toString())}°"
                             else "${heading.toInt()}°",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.textPrimary
                         )
                     }
                 }
 
-                Surface(
-                    color = Cyan50,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Cyan200),
-                    shape = RoundedCornerShape(12.dp)
+                Card(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.4f))
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = if (isBangla) "কিবলার কোণ (${uiState.selectedCity.nameBn})"
                             else "Qibla (${uiState.selectedCity.nameEn.split(" ")[0]})",
-                            fontSize = 11.sp,
-                            color = Cyan700
+                            fontSize = 11.5.sp,
+                            color = colors.neonGreen,
+                            fontWeight = FontWeight.Medium
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (isBangla) "${DateUtil.toBanglaDigits(qiblaBearing.toInt().toString())}°"
                             else "${qiblaBearing.toInt()}°",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Cyan700
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.neonGreen
                         )
                     }
                 }
@@ -197,13 +203,14 @@ fun QiblaScreen(
 
             Spacer(modifier = Modifier.weight(0.1f))
 
-            // 3. Canvas Compass Dial (Crisp Clean White Dial with Emerald Qibla pointer)
+            // 3. Financy Tactile Compass Dial
+            val dialBorderColor = if (isAligned) colors.neonGreen else colors.borderSubtle
             Box(
                 modifier = Modifier
                     .size(280.dp)
                     .clip(CircleShape)
-                    .background(GlassCardWhite)
-                    .border(2.dp, Slate200, CircleShape),
+                    .background(colors.surfaceCard)
+                    .border(2.dp, dialBorderColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
@@ -212,10 +219,10 @@ fun QiblaScreen(
 
                     // Draw outer dial ring
                     drawCircle(
-                        color = Slate200,
+                        color = colors.borderSubtle,
                         radius = radius,
                         center = center,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f)
                     )
 
                     // Draw cardinal tick marks rotated with heading
@@ -230,7 +237,7 @@ fun QiblaScreen(
                             val endY = center.y - radius * cos(angleRad).toFloat()
 
                             val tickColor = if (i == 0) Rose600 // North in Rose/Red
-                            else Slate400
+                            else colors.textSecondary.copy(alpha = 0.5f)
 
                             drawLine(
                                 color = tickColor,
@@ -242,18 +249,18 @@ fun QiblaScreen(
 
                         // Qibla needle pointer towards qiblaBearing
                         rotate(qiblaBearing, pivot = center) {
-                            // Emerald triangle pointing to Qibla
+                            // Emerald neon triangle pointing to Qibla
                             val pointerPath = Path().apply {
                                 moveTo(center.x, center.y - radius + 10f)
                                 lineTo(center.x - 14f, center.y - radius + 55f)
                                 lineTo(center.x + 14f, center.y - radius + 55f)
                                 close()
                             }
-                            drawPath(pointerPath, color = Emerald500)
+                            drawPath(pointerPath, color = colors.neonGreen)
 
-                            // Small Emerald circle
+                            // Small indicator dot
                             drawCircle(
-                                color = Emerald600,
+                                color = colors.emeraldPrimary,
                                 radius = 9f,
                                 center = Offset(center.x, center.y - radius + 70f)
                             )
@@ -261,8 +268,8 @@ fun QiblaScreen(
                     }
 
                     // Center pivot
-                    drawCircle(color = Emerald500, radius = 12f, center = center)
-                    drawCircle(color = Color.White, radius = 6f, center = center)
+                    drawCircle(color = colors.neonGreen, radius = 12f, center = center)
+                    drawCircle(color = colors.surfaceCard, radius = 6f, center = center)
                 }
 
                 // Center Kaaba symbol
@@ -273,34 +280,44 @@ fun QiblaScreen(
 
             Spacer(modifier = Modifier.weight(0.1f))
 
-            // 4. Calibration Instructions
-            Surface(
-                color = GlassCardWhite,
-                border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
-                shape = RoundedCornerShape(12.dp),
+            // 4. Financy Calibration Guide Card
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CompassCalibration,
-                        contentDescription = null,
-                        tint = Emerald600,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = colors.neonGreen.copy(alpha = 0.12f),
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.CompassCalibration,
+                                contentDescription = null,
+                                tint = colors.neonGreen,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = if (isBangla) "কম্পাস সঠিক রাখতে ফোনটিকে অনুভূমিকভাবে সমতল রাখুন এবং প্রয়োজনমতো শূন্যে ৮ (আট) আকারে ঘুরিয়ে নিন।"
-                        else "Keep phone flat on a horizontal surface and wave in figure-8 for accurate compass calibration.",
+                        text = if (isBangla) "কম্পাস সঠিক রাখতে ফোনটিকে সমতল রাখুন এবং প্রয়োজনমতো শূন্যে ৮ (আট) আকারে ঘুরিয়ে ক্যালিব্রেট করুন।"
+                        else "Keep phone flat horizontally and wave in figure-8 for accurate compass calibration.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Slate600
+                        color = colors.textSecondary,
+                        fontSize = 11.5.sp,
+                        lineHeight = 16.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

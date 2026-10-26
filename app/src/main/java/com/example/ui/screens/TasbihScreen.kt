@@ -7,10 +7,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -21,11 +20,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +44,7 @@ fun TasbihScreen(
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val context = LocalContext.current
     val isBangla = uiState.isBangla
     val activeTasbih = uiState.tasbihs.find { it.id == uiState.selectedTasbihId } ?: uiState.tasbihs.firstOrNull()
@@ -55,16 +57,24 @@ fun TasbihScreen(
     var newTarget by remember { mutableStateOf("33") }
 
     Scaffold(
-        containerColor = Slate50,
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = if (isBangla) "ডিজিটাল তাসবীহ" else "Digital Tasbih",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate900
-                    )
+                    Column {
+                        Text(
+                            text = if (isBangla) "ডিজিটাল তাসবীহ" else "Digital Tasbih",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Text(
+                            text = if (isBangla) "মাসনূন যিকির ও হ্যাপটিক কাউন্টার" else "Tactile Dhikr Counter & Presets",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp,
+                            color = colors.textMuted
+                        )
+                    }
                 },
                 navigationIcon = {
                     if (onBack != null) {
@@ -72,7 +82,7 @@ fun TasbihScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Slate900
+                                tint = colors.textPrimary
                             )
                         }
                     }
@@ -82,12 +92,10 @@ fun TasbihScreen(
                         onClick = { showAddDialog = true },
                         modifier = Modifier.testTag("btn_add_tasbih")
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Dhikr", tint = Emerald700)
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Dhikr", tint = colors.emerald)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GlassCardWhite
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.card)
             )
         }
     ) { innerPadding ->
@@ -98,11 +106,11 @@ fun TasbihScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Responsive Wrapped Dhikr selector (FlowRow)
+            // 1. Preset Dhikr Chips (FlowRow)
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -118,15 +126,15 @@ fun TasbihScreen(
                                 fontSize = 12.sp
                             )
                         },
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Emerald50,
-                            selectedLabelColor = Emerald700,
-                            containerColor = Slate100,
-                            labelColor = Slate600
+                            selectedContainerColor = colors.emeraldSoft,
+                            selectedLabelColor = colors.emerald,
+                            containerColor = colors.card,
+                            labelColor = colors.textSecondary
                         ),
                         border = FilterChipDefaults.filterChipBorder(
-                            borderColor = if (isSelected) Emerald500 else Slate200,
+                            borderColor = if (isSelected) colors.emerald else colors.border,
                             enabled = true,
                             selected = isSelected
                         )
@@ -136,13 +144,13 @@ fun TasbihScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 2. Active Dhikr Info Card
+            // 2. Active Dhikr Card
             if (activeTasbih != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                    border = BorderStroke(1.dp, GlassBorder),
+                    colors = CardDefaults.cardColors(containerColor = colors.card),
+                    border = BorderStroke(1.dp, colors.border),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(
@@ -154,9 +162,9 @@ fun TasbihScreen(
                         // Arabic text
                         Text(
                             text = activeTasbih.arabicText,
-                            fontSize = 26.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700,
+                            color = colors.emerald,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(6.dp))
@@ -165,22 +173,22 @@ fun TasbihScreen(
                             text = activeTasbih.transliteration,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         // Meaning
                         Text(
                             text = if (isBangla) activeTasbih.translationBn else activeTasbih.translationEn,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Slate600,
+                            color = colors.textMuted,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(0.1f))
+                Spacer(modifier = Modifier.weight(0.15f))
 
-                // 3. Circular Touch Dial
+                // 3. Tactile Dial & Gauge
                 val target = activeTasbih.targetCount.coerceAtLeast(1)
                 val currentInCycle = activeTasbih.currentCount % target
                 val progress = (currentInCycle.toFloat() / target.toFloat()).coerceIn(0f, 1f)
@@ -189,12 +197,17 @@ fun TasbihScreen(
                 Box(
                     modifier = Modifier
                         .size(240.dp)
+                        .shadow(
+                            elevation = if (colors.isDark) 16.dp else 10.dp,
+                            shape = CircleShape,
+                            ambientColor = if (colors.isDark) Color(0x60000000) else Color(0x20000000)
+                        )
                         .clip(CircleShape)
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    Emerald500,
-                                    Emerald600
+                                    colors.emeraldDark,
+                                    colors.emerald
                                 )
                             )
                         )
@@ -214,7 +227,7 @@ fun TasbihScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp),
-                        color = Amber500,
+                        color = colors.amber,
                         trackColor = Color.White.copy(alpha = 0.25f),
                         strokeWidth = 8.dp
                     )
@@ -245,76 +258,71 @@ fun TasbihScreen(
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = if (isBangla) "গণনা করতে স্পর্শ করুন" else "Tap anywhere to count",
-                            color = Emerald50,
+                            text = if (isBangla) "স্পর্শ করে গণনা করুন" else "Tap anywhere to count",
+                            color = Color.White.copy(alpha = 0.85f),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(0.1f))
+                Spacer(modifier = Modifier.weight(0.15f))
 
-                // 4. Lifetime Total & Reset Controls
+                // 4. Reset & Lap Controls
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                        .padding(bottom = 30.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = if (isBangla) "সর্বমোট পঠিত" else "Total Recited",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Slate600
-                        )
-                        Text(
-                            text = if (isBangla) "${DateUtil.toBanglaDigits(activeTasbih.totalRecited.toString())} বার"
-                            else "${activeTasbih.totalRecited} times",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Emerald700
-                        )
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.resetTasbih(activeTasbih.id)
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, colors.border),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textSecondary),
+                        modifier = Modifier
+                            .height(44.dp)
+                            .testTag("btn_reset_tasbih")
+                    ) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Reset", modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(if (isBangla) "রিসেট করুন" else "Reset Count", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
                     }
 
-                    // Reset button
-                    OutlinedButton(
-                        onClick = { viewModel.resetTasbih(activeTasbih.id, context) },
-                        shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, Slate200),
-                        modifier = Modifier.testTag("btn_reset_tasbih")
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = colors.card,
+                        border = BorderStroke(1.dp, colors.border),
+                        modifier = Modifier.height(44.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Reset",
-                            modifier = Modifier.size(16.dp),
-                            tint = Slate600
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = if (isBangla) "রিসেট" else "Reset",
-                            fontWeight = FontWeight.SemiBold,
-                            color = Slate900
-                        )
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
+                            val laps = activeTasbih.currentCount / target
+                            Text(
+                                text = if (isBangla) "পূর্ণ চক্কর: ${DateUtil.toBanglaDigits(laps.toString())}"
+                                else "Laps completed: $laps",
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.emerald
+                            )
+                        }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
-    // Add Custom Dhikr Dialog
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            containerColor = Color.White,
+            containerColor = colors.card,
             title = {
                 Text(
-                    text = if (isBangla) "নতুন যিকির যোগ করুন" else "Add Custom Dhikr",
+                    text = if (isBangla) "নতুন তাসবীহ / যিকির যোগ করুন" else "Add Custom Dhikr",
                     fontWeight = FontWeight.Bold,
-                    color = Slate900
+                    color = colors.textPrimary
                 )
             },
             text = {
@@ -322,37 +330,43 @@ fun TasbihScreen(
                     OutlinedTextField(
                         value = newTitle,
                         onValueChange = { newTitle = it },
-                        label = { Text(if (isBangla) "নাম / শিরোনাম" else "Title") },
+                        label = { Text(if (isBangla) "নাম (যেমন: ইস্তিগফার)" else "Title (e.g. Istighfar)") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     OutlinedTextField(
                         value = newArabic,
                         onValueChange = { newArabic = it },
-                        label = { Text(if (isBangla) "আরবী পাঠ (ঐচ্ছিক)" else "Arabic Text (Optional)") },
+                        label = { Text(if (isBangla) "আরবি পাঠ" else "Arabic Text") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     OutlinedTextField(
                         value = newTranslit,
                         onValueChange = { newTranslit = it },
-                        label = { Text(if (isBangla) "উচ্চারণ" else "Pronunciation") },
+                        label = { Text(if (isBangla) "উচ্চারণ" else "Transliteration") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     OutlinedTextField(
                         value = newTranslationBn,
                         onValueChange = { newTranslationBn = it },
-                        label = { Text(if (isBangla) "অর্থ / ফজিলত" else "Meaning / Translation") },
+                        label = { Text(if (isBangla) "অর্থ" else "Meaning") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     OutlinedTextField(
                         value = newTarget,
                         onValueChange = { newTarget = it.filter { ch -> ch.isDigit() } },
-                        label = { Text(if (isBangla) "লক্ষ্য সংখ্যা (যেমন: ৩৩ বা ১০০)" else "Target count (e.g. 33 or 100)") },
+                        label = { Text(if (isBangla) "লক্ষ্য সংখ্যা (যেমন: ৩৩ বা ১০০)" else "Target Count (e.g. 33 or 100)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
                     )
                 }
             },
@@ -360,16 +374,13 @@ fun TasbihScreen(
                 Button(
                     onClick = {
                         if (newTitle.isNotBlank()) {
+                            val targetInt = newTarget.toIntOrNull() ?: 33
                             viewModel.addCustomTasbih(
-                                TasbihCounterEntity(
-                                    title = newTitle,
-                                    arabicText = newArabic.ifBlank { newTitle },
-                                    transliteration = newTranslit.ifBlank { newTitle },
-                                    translationBn = newTranslationBn,
-                                    translationEn = newTranslationBn,
-                                    targetCount = newTarget.toIntOrNull() ?: 33,
-                                    isPreset = false
-                                )
+                                title = newTitle,
+                                arabic = newArabic.ifBlank { newTitle },
+                                translit = newTranslit.ifBlank { newTitle },
+                                meaning = newTranslationBn,
+                                target = targetInt
                             )
                             newTitle = ""
                             newArabic = ""
@@ -379,14 +390,14 @@ fun TasbihScreen(
                             showAddDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Emerald500, contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
                 ) {
                     Text(if (isBangla) "যোগ করুন" else "Add", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text(if (isBangla) "বাতিল" else "Cancel", color = Slate600)
+                    Text(if (isBangla) "বাতিল" else "Cancel", color = colors.textSecondary)
                 }
             }
         )

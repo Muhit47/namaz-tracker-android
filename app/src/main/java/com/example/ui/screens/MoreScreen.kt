@@ -56,6 +56,7 @@ fun MoreScreen(
     onNavigateSub: (MoreSubScreen) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val isBangla = uiState.isBangla
     val context = LocalContext.current
     var showRestoreDialog by remember { mutableStateOf(false) }
@@ -109,7 +110,7 @@ fun MoreScreen(
         )
         MoreSubScreen.INDEX -> {
             Scaffold(
-                containerColor = Slate50,
+                containerColor = colors.background,
                 topBar = {
                     TopAppBar(
                         title = {
@@ -117,10 +118,10 @@ fun MoreScreen(
                                 text = if (isBangla) "আমল, সেটিংস ও প্রয়ােজনীয় টুলস" else "Settings & Islamic Tools",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                         },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = GlassCardWhite)
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceCard)
                     )
                 }
             ) { innerPadding ->
@@ -129,49 +130,86 @@ fun MoreScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                         .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    contentPadding = PaddingValues(bottom = 90.dp)
                 ) {
-                    // 1. Language Toggle & App Settings Section
+                    // 1. Language, Dark Mode & App Settings Section
                     item {
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = if (isBangla) "অ্যাপ সেটিংস ও ভাষা" else "App Settings & Language",
+                            text = if (isBangla) "অ্যাপ সেটিংস ও থিম" else "App Preferences & Theme",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                            colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
+                                // Dark Mode Toggle
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = if (isBangla) "ডার্ক মোড (Financy Dark)" else "Financy Dark Theme",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.5.sp,
+                                            color = colors.textPrimary
+                                        )
+                                        Text(
+                                            text = if (uiState.isDarkMode)
+                                                (if (isBangla) "গাঢ় অন্ধকার ইন্টারফেস সক্রিয়" else "Dark mode active")
+                                            else
+                                                (if (isBangla) "উজ্জ্বল হালকা ইন্টারফেস সক্রিয়" else "Light mode active"),
+                                            fontSize = 11.5.sp,
+                                            color = colors.textSecondary
+                                        )
+                                    }
+
+                                    Switch(
+                                        checked = uiState.isDarkMode,
+                                        onCheckedChange = { viewModel.toggleDarkMode() },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.White,
+                                            checkedTrackColor = colors.neonGreen,
+                                            uncheckedThumbColor = colors.textSecondary,
+                                            uncheckedTrackColor = colors.surfaceSubtle
+                                        )
+                                    )
+                                }
+
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = colors.borderSubtle)
+
                                 // Language Toggle
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = if (isBangla) "অ্যাপের ভাষা" else "App Language",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
-                                            color = Slate900
+                                            color = colors.textPrimary
                                         )
                                         Text(
                                             text = if (isBangla) "বাংলা এবং ইংরেজির মধ্যে পরিবর্তন করুন" else "Switch between Bengali and English",
                                             fontSize = 11.5.sp,
-                                            color = Slate600
+                                            color = colors.textSecondary
                                         )
                                     }
 
                                     Button(
                                         onClick = { viewModel.toggleLanguage() },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Emerald500),
+                                        colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary),
                                         shape = RoundedCornerShape(10.dp)
                                     ) {
                                         Text(
@@ -183,7 +221,7 @@ fun MoreScreen(
                                     }
                                 }
 
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Slate200)
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = colors.borderSubtle)
 
                                 // Asr Method Toggle
                                 Row(
@@ -191,12 +229,12 @@ fun MoreScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = if (isBangla) "আসর নামাজের মাযহাব সময়" else "Asr Prayer Calculation",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
-                                            color = Slate900
+                                            color = colors.textPrimary
                                         )
                                         Text(
                                             text = if (uiState.isHanafiAsr)
@@ -204,7 +242,7 @@ fun MoreScreen(
                                             else
                                                 (if (isBangla) "শাফেয়ী/মালিকী/হাম্বলী মাযহাব" else "Shafi'i/Maliki/Hanbali Method"),
                                             fontSize = 11.5.sp,
-                                            color = Slate600
+                                            color = colors.textSecondary
                                         )
                                     }
 
@@ -213,7 +251,9 @@ fun MoreScreen(
                                         onCheckedChange = { viewModel.toggleHanafiAsr() },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
-                                            checkedTrackColor = Emerald500
+                                            checkedTrackColor = colors.neonGreen,
+                                            uncheckedThumbColor = colors.textSecondary,
+                                            uncheckedTrackColor = colors.surfaceSubtle
                                         )
                                     )
                                 }
@@ -228,15 +268,15 @@ fun MoreScreen(
                             text = if (isBangla) "ওয়াক্ত পুশ নোটিফিকেশন" else "Prayer Push Notifications",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                            colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Row(
@@ -249,12 +289,12 @@ fun MoreScreen(
                                             text = if (isBangla) "৫ ওয়াক্ত নামাজের নোটিফিকেশন" else "5 Daily Prayer Alerts",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
-                                            color = Slate900
+                                            color = colors.textPrimary
                                         )
                                         Text(
                                             text = if (isBangla) "প্রতিটি ওয়াক্ত শুরু হওয়ার সাথে সাথে অ্যালার্ট ও হাদিস বাণী পান" else "Get notified on exact time when each Waqt begins",
                                             fontSize = 11.5.sp,
-                                            color = Slate600
+                                            color = colors.textSecondary
                                         )
                                     }
 
@@ -269,12 +309,14 @@ fun MoreScreen(
                                         },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
-                                            checkedTrackColor = Emerald500
+                                            checkedTrackColor = colors.neonGreen,
+                                            uncheckedThumbColor = colors.textSecondary,
+                                            uncheckedTrackColor = colors.surfaceSubtle
                                         )
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
                                 OutlinedButton(
                                     onClick = {
@@ -287,7 +329,8 @@ fun MoreScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
                                 ) {
                                     Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -308,15 +351,15 @@ fun MoreScreen(
                             text = if (isBangla) "হোম স্ক্রিন উইজেট (App Widget)" else "Home Screen Widget",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                            colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Row(
@@ -325,12 +368,11 @@ fun MoreScreen(
                                 ) {
                                     Surface(
                                         shape = CircleShape,
-                                        color = Emerald50,
-                                        border = androidx.compose.foundation.BorderStroke(0.8.dp, Emerald100),
+                                        color = colors.neonGreen.copy(alpha = 0.12f),
                                         modifier = Modifier.size(40.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = Emerald700)
+                                            Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = colors.neonGreen)
                                         }
                                     }
                                     Column(modifier = Modifier.weight(1f)) {
@@ -338,17 +380,17 @@ fun MoreScreen(
                                             text = if (isBangla) "হোম স্ক্রিন থেকে নামাজের সময় দেখুন" else "Prayer times on your home screen",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
-                                            color = Slate900
+                                            color = colors.textPrimary
                                         )
                                         Text(
                                             text = if (isBangla) "হোম স্ক্রিনের খালি জায়গায় চাপ দিয়ে ধরে 'Widgets' থেকে 'Namaz Tracker' যোগ করুন।" else "Touch & hold empty space on home screen, select 'Widgets' and add 'Namaz Tracker'.",
                                             fontSize = 11.5.sp,
-                                            color = Slate600
+                                            color = colors.textSecondary
                                         )
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
                                 OutlinedButton(
                                     onClick = {
@@ -361,7 +403,8 @@ fun MoreScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
                                 ) {
                                     Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -382,21 +425,21 @@ fun MoreScreen(
                             text = if (isBangla) "ডাটা ব্যাকআপ ও রিস্টোর" else "Data Backup & Restore",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                            colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text(
                                     text = if (isBangla) "আপনার নামাযের হিসাব ও কাযা রেকর্ড সুরক্ষিত রাখতে ব্যাকআপ ফাইল তৈরি বা পূর্বের ডাটা রিস্টোর করুন।" else "Backup your prayer logs and Qaza records or restore previous records safely.",
                                     fontSize = 11.5.sp,
-                                    color = Slate600
+                                    color = colors.textSecondary
                                 )
 
                                 Row(
@@ -411,11 +454,11 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(10.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Emerald600)
+                                        colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary)
                                     ) {
-                                        Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = if (isBangla) "শেয়ার ব্যাকআপ" else "Share Backup", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                                        Text(text = if (isBangla) "শেয়ার ব্যাকআপ" else "Share Backup", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                     }
 
                                     OutlinedButton(
@@ -426,7 +469,8 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(10.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald700)
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
                                     ) {
                                         Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -441,9 +485,10 @@ fun MoreScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Emerald800)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                                 ) {
-                                    Icon(imageVector = Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Icon(imageVector = Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.neonGreen)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = if (isBangla) "ডাটা রিস্টোর করুন (Restore Data)" else "Restore Data from JSON",
@@ -455,14 +500,14 @@ fun MoreScreen(
                         }
                     }
 
-                    // 2. Knowledge & Guides
+                    // 5. Knowledge & Guides
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (isBangla) "দ্বীনি শিক্ষা ও নিয়মাবলী" else "Knowledge & Guides",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -476,14 +521,14 @@ fun MoreScreen(
                         )
                     }
 
-                    // 3. Tools & Analytics
+                    // 6. Tools & Analytics
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (isBangla) "আমল ও ট্র্যাকিং টুলস" else "Tools & Analytics",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700
+                            color = colors.neonGreen
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -496,7 +541,7 @@ fun MoreScreen(
                             testTag = "nav_more_analytics"
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         ToolNavCard(
                             title = if (isBangla) "ডিজিটাল তাসবীহ" else "Digital Tasbih",
@@ -507,7 +552,7 @@ fun MoreScreen(
                             testTag = "nav_more_tasbih"
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         ToolNavCard(
                             title = if (isBangla) "কিবলা কম্পাস" else "Qibla Direction",
@@ -521,13 +566,12 @@ fun MoreScreen(
 
                     // App Branding Footer
                     item {
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
@@ -543,7 +587,7 @@ fun MoreScreen(
                                 Text(
                                     text = if (isBangla) "সকল মুসলিম ভাই-বোনদের জন্য পূর্ণাঙ্গ ইসলামিক সহচর। আল কুরআন, সহিহ হাদীস, নামাজ ও আমল ট্র্যাকিং।" else "Complete Islamic companion for tracking daily prayers, Quran, Hadith, and Qaza.",
                                     fontSize = 11.5.sp,
-                                    color = Slate600,
+                                    color = colors.textSecondary,
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -557,11 +601,13 @@ fun MoreScreen(
     if (showRestoreDialog) {
         AlertDialog(
             onDismissRequest = { showRestoreDialog = false },
+            containerColor = colors.surfaceCard,
             title = {
                 Text(
                     text = if (isBangla) "ডাটা রিস্টোর করুন" else "Restore Data",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.textPrimary
                 )
             },
             text = {
@@ -569,7 +615,7 @@ fun MoreScreen(
                     Text(
                         text = if (isBangla) "পূর্বে ব্যাকআপ করা JSON টেক্সটটি নিচে পেস্ট করুন:" else "Paste your exported JSON backup text below:",
                         fontSize = 12.sp,
-                        color = Slate600
+                        color = colors.textSecondary
                     )
                     OutlinedTextField(
                         value = restoreInputText,
@@ -581,10 +627,10 @@ fun MoreScreen(
                             Text(
                                 text = "{\"appName\": \"NamazTracker\", ...}",
                                 fontSize = 11.sp,
-                                color = Slate400
+                                color = colors.textSecondary.copy(alpha = 0.5f)
                             )
                         },
-                        textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, color = colors.textPrimary),
                         maxLines = 10
                     )
                 }
@@ -607,14 +653,14 @@ fun MoreScreen(
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Emerald600)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary)
                 ) {
-                    Text(text = if (isBangla) "রিস্টোর নিশ্চিত করুন" else "Confirm Restore")
+                    Text(text = if (isBangla) "রিস্টোর নিশ্চিত করুন" else "Confirm Restore", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRestoreDialog = false }) {
-                    Text(text = if (isBangla) "বাতিল" else "Cancel", color = Slate600)
+                    Text(text = if (isBangla) "বাতিল" else "Cancel", color = colors.textSecondary)
                 }
             }
         )
@@ -630,20 +676,20 @@ private fun ToolNavCard(
     onClick: () -> Unit,
     testTag: String
 ) {
+    val colors = FinancyTheme.colors
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .testTag(testTag),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-        border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+        colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -654,35 +700,33 @@ private fun ToolNavCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = Emerald50,
-                    border = androidx.compose.foundation.BorderStroke(0.8.dp, Emerald100),
-                    modifier = Modifier.size(44.dp)
+                    color = colors.neonGreen.copy(alpha = 0.12f),
+                    modifier = Modifier.size(42.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(imageVector = icon, contentDescription = null, tint = Emerald700)
+                        Icon(imageVector = icon, contentDescription = null, tint = colors.neonGreen, modifier = Modifier.size(22.dp))
                     }
                 }
 
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = Slate900)
+                        Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = Emerald50,
-                            border = androidx.compose.foundation.BorderStroke(0.8.dp, Emerald100)
+                            shape = RoundedCornerShape(6.dp),
+                            color = colors.neonGreen.copy(alpha = 0.15f)
                         ) {
                             Text(
                                 text = badge,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Emerald700,
+                                color = colors.neonGreen,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(text = desc, style = MaterialTheme.typography.bodySmall, color = Slate600, maxLines = 2)
+                    Text(text = desc, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary, maxLines = 2)
                 }
             }
 
@@ -690,7 +734,7 @@ private fun ToolNavCard(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = Slate400
+                tint = colors.textSecondary
             )
         }
     }

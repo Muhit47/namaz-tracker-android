@@ -29,6 +29,7 @@ fun AnalyticsScreen(
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val isBangla = uiState.isBangla
 
     // Calculate metrics
@@ -41,7 +42,7 @@ fun AnalyticsScreen(
     val qazaCount = uiState.currentDayLogs.count { it.status == "late" || it.status == "qaza" }
 
     Scaffold(
-        containerColor = Slate50,
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -49,7 +50,7 @@ fun AnalyticsScreen(
                         text = if (isBangla) "নামাযের পরিসংখ্যান" else "Salah Analytics",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = colors.textPrimary
                     )
                 },
                 navigationIcon = {
@@ -58,13 +59,13 @@ fun AnalyticsScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Slate900
+                                tint = colors.textPrimary
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GlassCardWhite
+                    containerColor = colors.surfaceCard
                 )
             )
         }
@@ -74,14 +75,14 @@ fun AnalyticsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            // 1. Streak & Weekly Rate Cards
+            // 1. Financy Metric Bento Cards (Streak & Weekly Rate)
             item {
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Card(
                         modifier = Modifier
@@ -89,16 +90,16 @@ fun AnalyticsScreen(
                             .testTag("stat_card_streak"),
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = Emerald50
+                            containerColor = colors.surfaceCard
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Emerald100)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
                                 text = "🔥 " + (if (isBangla) "ধারাবাহিকতা" else "Current Streak"),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Emerald700
+                                color = colors.neonGreen
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
@@ -106,12 +107,13 @@ fun AnalyticsScreen(
                                 else "$streakDays Days",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Emerald700
+                                color = colors.textPrimary
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = if (isBangla) "প্রতিদিন ৫ ওয়াক্ত" else "All 5 daily fardh",
                                 fontSize = 11.sp,
-                                color = Slate600
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -122,16 +124,16 @@ fun AnalyticsScreen(
                             .testTag("stat_card_weekly_rate"),
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = Cyan50
+                            containerColor = colors.surfaceCard
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Cyan200)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
                                 text = "📈 " + (if (isBangla) "সাপ্তাহিক হার" else "Weekly Rate"),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Cyan700
+                                color = colors.neonGreen
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
@@ -139,12 +141,13 @@ fun AnalyticsScreen(
                                 else "$weeklyRate%",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Cyan700
+                                color = colors.neonGreen
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = if (isBangla) "বিগত ৭ দিনের গড়" else "Past 7-day average",
                                 fontSize = 11.sp,
-                                color = Slate600
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -152,23 +155,22 @@ fun AnalyticsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 2. Status Distribution Card
+            // 2. Status Distribution Bento Card
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = GlassCardWhite
+                        containerColor = colors.surfaceCard
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = if (isBangla) "আজকের নামাযের ধরণ" else "Today's Prayer Breakdown",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(14.dp))
 
@@ -176,18 +178,18 @@ fun AnalyticsScreen(
                             title = if (isBangla) "জামাতে আদায়" else "With Jama'at",
                             count = jamatCount,
                             total = 5,
-                            color = Emerald500,
+                            color = colors.neonGreen,
                             isBangla = isBangla
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         DistributionRow(
                             title = if (isBangla) "একাকী আদায়" else "Alone / On-time",
                             count = aloneCount,
                             total = 5,
-                            color = Cyan600,
+                            color = colors.emeraldPrimary,
                             isBangla = isBangla
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         DistributionRow(
                             title = if (isBangla) "কাযা আদায়" else "Qaza (Late)",
                             count = qazaCount,
@@ -206,9 +208,9 @@ fun AnalyticsScreen(
                     text = if (isBangla) "নামাযের ফজিলত ও গুরুত্ব" else "Virtues & Rewards of Prayer",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Slate900
+                    color = colors.neonGreen
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 VirtueCard(
                     arabicText = "صَلَاةُ الْجَمَاعَةِ تَفْضُلُ صَلَاةَ الْفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً",
@@ -235,6 +237,7 @@ private fun DistributionRow(
     color: Color,
     isBangla: Boolean
 ) {
+    val colors = FinancyTheme.colors
     val fraction = (count.toFloat() / total.toFloat()).coerceIn(0f, 1f)
     Column {
         Row(
@@ -245,7 +248,7 @@ private fun DistributionRow(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = Slate900
+                color = colors.textPrimary
             )
             Text(
                 text = if (isBangla) "${DateUtil.toBanglaDigits(count.toString())}/${DateUtil.toBanglaDigits(total.toString())}"
@@ -254,7 +257,7 @@ private fun DistributionRow(
                 color = color
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         LinearProgressIndicator(
             progress = { fraction },
             modifier = Modifier
@@ -262,7 +265,7 @@ private fun DistributionRow(
                 .height(8.dp)
                 .clip(RoundedCornerShape(4.dp)),
             color = color,
-            trackColor = color.copy(alpha = 0.2f)
+            trackColor = colors.surfaceSubtle
         )
     }
 }
@@ -272,26 +275,29 @@ private fun VirtueCard(
     arabicText: String,
     translation: String
 ) {
+    val colors = FinancyTheme.colors
     Card(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = GlassCardWhite
+            containerColor = colors.surfaceCard
         ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder),
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = arabicText,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Emerald700
+                color = colors.neonGreen,
+                lineHeight = 24.sp
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = translation,
-                fontSize = 12.sp,
-                color = Slate600
+                fontSize = 12.5.sp,
+                color = colors.textSecondary,
+                lineHeight = 18.sp
             )
         }
     }

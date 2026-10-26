@@ -78,8 +78,10 @@ fun HadithScreen(
         }
     }
 
+    val colors = FinancyTheme.colors
+
     Scaffold(
-        containerColor = Slate50,
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -88,17 +90,17 @@ fun HadithScreen(
                             text = if (isBangla) "হাদীস শরীফ" else "Hadith Sharif",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            color = colors.textPrimary
                         )
                         Text(
                             text = if (isBangla) "সহিহ হাদীস সম্ভার ও প্রধান গ্রন্থসমূহ" else "Authentic Hadith Collections",
                             style = MaterialTheme.typography.bodySmall,
                             fontSize = 11.sp,
-                            color = Slate600
+                            color = colors.textMuted
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = GlassCardWhite)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.card)
             )
         }
     ) { innerPadding ->
@@ -109,9 +111,9 @@ fun HadithScreen(
         ) {
             // Tab row
             Surface(
-                color = Slate100,
+                color = colors.cardSubtle,
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Slate200),
+                border = BorderStroke(1.dp, colors.border),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -275,9 +277,10 @@ private fun TabCapsuleButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val colors = FinancyTheme.colors
     Surface(
         shape = RoundedCornerShape(10.dp),
-        color = if (isSelected) Emerald500 else Color.Transparent,
+        color = if (isSelected) colors.emerald else Color.Transparent,
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .clickable { onClick() }
@@ -290,7 +293,7 @@ private fun TabCapsuleButton(
                 text = label,
                 fontSize = 11.5.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else Slate700,
+                color = if (isSelected) Color.White else colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -308,6 +311,7 @@ private fun CategoriesListView(
     isBangla: Boolean,
     onSelectCategory: (HadithCategoryEntity) -> Unit
 ) {
+    val colors = FinancyTheme.colors
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -319,7 +323,7 @@ private fun CategoriesListView(
                 text = if (isBangla) "বিষয়ভিত্তিক হাদীস ক্যাটাগরি" else "Hadith Categories",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Slate700,
+                color = colors.textPrimary,
                 modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
             )
         }
@@ -332,8 +336,8 @@ private fun CategoriesListView(
                     .padding(vertical = 5.dp)
                     .clickable { onSelectCategory(cat) },
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                border = BorderStroke(1.dp, GlassBorder),
+                colors = CardDefaults.cardColors(containerColor = colors.card),
+                border = BorderStroke(1.dp, colors.border),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
@@ -348,9 +352,9 @@ private fun CategoriesListView(
                         modifier = Modifier.weight(1f)
                     ) {
                         Surface(
-                            color = Emerald50,
+                            color = colors.emeraldSoft,
                             shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Emerald100),
+                            border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f)),
                             modifier = Modifier.size(46.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -365,20 +369,20 @@ private fun CategoriesListView(
                                 text = if (isBangla) cat.nameBn else (cat.nameEn ?: cat.nameBn),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(3.dp))
                             Text(
                                 text = if (isBangla) "${DateUtil.toBanglaDigits(count.toString())}টি নির্বাচিত সহীহ হাদীস"
                                 else "$count Selected Authentic Hadiths",
                                 fontSize = 12.sp,
-                                color = Slate600
+                                color = colors.textMuted
                             )
                         }
                     }
 
                     Surface(
-                        color = Slate100,
+                        color = colors.cardSubtle,
                         shape = CircleShape,
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -386,7 +390,7 @@ private fun CategoriesListView(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                                 contentDescription = "Open Category",
-                                tint = Slate600,
+                                tint = colors.textSecondary,
                                 modifier = Modifier.size(13.dp)
                             )
                         }
@@ -407,6 +411,8 @@ private fun BooksListView(
     isBangla: Boolean,
     onSelectBook: (HadithBookEntity) -> Unit
 ) {
+    val colors = FinancyTheme.colors
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -421,8 +427,8 @@ private fun BooksListView(
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Cyan50),
-                    border = BorderStroke(1.dp, Cyan100)
+                    colors = CardDefaults.cardColors(containerColor = colors.cyanSoft),
+                    border = BorderStroke(1.dp, colors.cyan.copy(alpha = 0.3f))
                 ) {
                     Row(
                         modifier = Modifier.padding(14.dp),
@@ -431,7 +437,7 @@ private fun BooksListView(
                         Icon(
                             imageVector = Icons.Default.Bookmark,
                             contentDescription = "Last Read",
-                            tint = Cyan700,
+                            tint = colors.cyan,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -440,13 +446,13 @@ private fun BooksListView(
                                 text = if (isBangla) "সর্বশেষ পঠিত হাদীস" else "Last Read Position",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.5.sp,
-                                color = Cyan700
+                                color = colors.cyan
                             )
                             Text(
                                 text = if (isBangla) "কিতাব: ${lastRead.bookId.uppercase()} • অধ্যায় ${DateUtil.toBanglaDigits(lastRead.chapterNo.toString())} • হাদীস নং ${DateUtil.toBanglaDigits(lastRead.hadithNo.toString())}"
                                 else "Book: ${lastRead.bookId.uppercase()} • Chapter ${lastRead.chapterNo} • Hadith #${lastRead.hadithNo}",
                                 fontSize = 12.sp,
-                                color = Slate700
+                                color = colors.textPrimary
                             )
                         }
                     }
@@ -459,7 +465,7 @@ private fun BooksListView(
                 text = if (isBangla) "প্রধান হাদীস গ্রন্থসমূহ (৮টি কিতাব)" else "Major Hadith Collections",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Slate700,
+                color = colors.textPrimary,
                 modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
             )
         }
@@ -471,8 +477,8 @@ private fun BooksListView(
                     .padding(vertical = 5.dp)
                     .clickable { onSelectBook(book) },
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                border = BorderStroke(1.dp, GlassBorder),
+                colors = CardDefaults.cardColors(containerColor = colors.card),
+                border = BorderStroke(1.dp, colors.border),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
@@ -488,18 +494,18 @@ private fun BooksListView(
                                 text = if (isBangla) book.nameBn else (book.nameEn ?: book.nameBn),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
-                                color = Emerald50,
+                                color = colors.emeraldSoft,
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
                                     text = book.nameAr,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Emerald700,
+                                    color = colors.emerald,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
@@ -508,14 +514,14 @@ private fun BooksListView(
                         Text(
                             text = if (isBangla) "সকল অধ্যায় ও সহীহ সনদসহ পড়া যাবে" else "Browse chapters & full Hadith text",
                             fontSize = 12.sp,
-                            color = Slate600
+                            color = colors.textMuted
                         )
                     }
 
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                         contentDescription = "Open Book",
-                        tint = Slate600,
+                        tint = colors.textSecondary,
                         modifier = Modifier.size(14.dp)
                     )
                 }
@@ -535,6 +541,8 @@ private fun BookChaptersListView(
     onBack: () -> Unit,
     onSelectChapter: (HadithChapterEntity) -> Unit
 ) {
+    val colors = FinancyTheme.colors
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -552,7 +560,7 @@ private fun BookChaptersListView(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Emerald700
+                        tint = colors.emerald
                     )
                 }
                 Spacer(modifier = Modifier.width(6.dp))
@@ -561,13 +569,13 @@ private fun BookChaptersListView(
                         text = if (isBangla) book.nameBn else (book.nameEn ?: book.nameBn),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = colors.textPrimary
                     )
                     Text(
                         text = if (isBangla) "মোট ${DateUtil.toBanglaDigits(chapters.size.toString())}টি অধ্যায়"
                         else "${chapters.size} Chapters available",
                         fontSize = 11.5.sp,
-                        color = Slate600
+                        color = colors.textMuted
                     )
                 }
             }
@@ -580,8 +588,8 @@ private fun BookChaptersListView(
                     .padding(vertical = 4.dp)
                     .clickable { onSelectChapter(ch) },
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                border = BorderStroke(1.dp, GlassBorder)
+                colors = CardDefaults.cardColors(containerColor = colors.card),
+                border = BorderStroke(1.dp, colors.border)
             ) {
                 Row(
                     modifier = Modifier
@@ -595,14 +603,14 @@ private fun BookChaptersListView(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Emerald50),
+                                .background(colors.emeraldSoft),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = if (isBangla) DateUtil.toBanglaDigits(ch.chapterNo.toString()) else ch.chapterNo.toString(),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Emerald700
+                                color = colors.emerald
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
@@ -611,13 +619,13 @@ private fun BookChaptersListView(
                                 text = if (isBangla) ch.nameBn else (if (!ch.nameEn.isNullOrBlank()) ch.nameEn!! else ch.nameBn),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.5.sp,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                             if (!ch.nameAr.isNull_or_blank()) {
                                 Text(
                                     text = ch.nameAr!!,
                                     fontSize = 12.sp,
-                                    color = Slate600
+                                    color = colors.textMuted
                                 )
                             }
                         }
@@ -625,14 +633,14 @@ private fun BookChaptersListView(
 
                     if (ch.totalHadith > 0) {
                         Surface(
-                            color = Slate100,
+                            color = colors.cardSubtle,
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = if (isBangla) "${DateUtil.toBanglaDigits(ch.totalHadith.toString())}টি" else "${ch.totalHadith}",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate700,
+                                color = colors.textSecondary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -656,6 +664,8 @@ private fun ChapterFullHadithsView(
     onSetLastRead: (String, Int, Int) -> Unit,
     onCopyText: (String) -> Unit
 ) {
+    val colors = FinancyTheme.colors
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -673,7 +683,7 @@ private fun ChapterFullHadithsView(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Emerald700
+                        tint = colors.emerald
                     )
                 }
                 Spacer(modifier = Modifier.width(6.dp))
@@ -682,13 +692,13 @@ private fun ChapterFullHadithsView(
                         text = if (isBangla) chapter.nameBn else (if (!chapter.nameEn.isNullOrBlank()) chapter.nameEn!! else chapter.nameBn),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = colors.textPrimary
                     )
                     Text(
                         text = if (isBangla) "অধ্যায় নং ${DateUtil.toBanglaDigits(chapter.chapterNo.toString())} • মোট ${DateUtil.toBanglaDigits(fullHadiths.size.toString())}টি হাদীস"
                         else "Chapter ${chapter.chapterNo} • Total ${fullHadiths.size} Hadiths",
                         fontSize = 11.5.sp,
-                        color = Slate600
+                        color = colors.textMuted
                     )
                 }
             }
@@ -702,8 +712,8 @@ private fun ChapterFullHadithsView(
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-                border = BorderStroke(1.dp, if (isLastRead) Emerald500 else GlassBorder)
+                colors = CardDefaults.cardColors(containerColor = colors.card),
+                border = BorderStroke(1.dp, if (isLastRead) colors.emerald else colors.border)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -712,14 +722,14 @@ private fun ChapterFullHadithsView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
-                            color = Emerald50,
+                            color = colors.emeraldSoft,
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = if (isBangla) "হাদীস নং ${DateUtil.toBanglaDigits(item.hadithNo.toString())}" else "Hadith #${item.hadithNo}",
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Emerald700,
+                                color = colors.emerald,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
@@ -727,14 +737,14 @@ private fun ChapterFullHadithsView(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (!item.gradeBn.isNull_or_blank()) {
                                 Surface(
-                                    color = Amber50,
+                                    color = colors.amberSoft,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
                                         text = item.gradeBn ?: "",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Amber700,
+                                        color = colors.amber,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
@@ -1067,14 +1077,16 @@ private fun HadithCardItem(
     onToggleBookmark: () -> Unit,
     onCopy: () -> Unit
 ) {
+    val colors = FinancyTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
             .testTag("hadith_card_${hadith.id}"),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
-        border = BorderStroke(1.dp, GlassBorder),
+        colors = CardDefaults.cardColors(containerColor = colors.card),
+        border = BorderStroke(1.dp, colors.border),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
@@ -1092,15 +1104,15 @@ private fun HadithCardItem(
                     modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Surface(
-                        color = Cyan50,
+                        color = colors.cyanSoft,
                         shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(0.8.dp, Cyan100)
+                        border = BorderStroke(0.8.dp, colors.cyan.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = if (isBangla) hadith.bookNameBn else (hadith.bookNameEn ?: hadith.bookNameBn),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Cyan700,
+                            color = colors.cyan,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -1109,7 +1121,7 @@ private fun HadithCardItem(
                         text = "• ${if (isBangla) hadith.chapterBn else (if (hadith.chapterEn.isNullOrBlank()) hadith.chapterBn else hadith.chapterEn!!)}",
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Slate600,
+                        color = colors.textMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1117,15 +1129,15 @@ private fun HadithCardItem(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
-                        color = Emerald50,
+                        color = colors.emeraldSoft,
                         shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(0.8.dp, Emerald100)
+                        border = BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = if (isBangla) hadith.gradeBn else (if (hadith.gradeEn.isNullOrBlank()) hadith.gradeBn else hadith.gradeEn!!),
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald700,
+                            color = colors.emerald,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -1139,7 +1151,7 @@ private fun HadithCardItem(
                         Icon(
                             imageVector = if (isBookmarked) Icons.Default.Star else Icons.Default.StarBorder,
                             contentDescription = "Bookmark",
-                            tint = if (isBookmarked) Amber600 else Slate400,
+                            tint = if (isBookmarked) colors.amber else colors.textMuted,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -1153,7 +1165,7 @@ private fun HadithCardItem(
                     text = hadith.textAr,
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Slate900,
+                    color = colors.textPrimary,
                     lineHeight = 31.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth()
@@ -1170,7 +1182,7 @@ private fun HadithCardItem(
                     text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}$translit",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Cyan700,
+                    color = colors.cyan,
                     lineHeight = 18.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -1182,7 +1194,7 @@ private fun HadithCardItem(
                     text = if (isBangla) "$narrator বর্ণনা করেন:" else "Narrated by $narrator:",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Emerald700
+                    color = colors.emerald
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
@@ -1190,7 +1202,7 @@ private fun HadithCardItem(
             Text(
                 text = if (isBangla) hadith.textBn else (if (hadith.textEn.isNullOrBlank()) hadith.textBn else hadith.textEn!!),
                 fontSize = 13.5.sp,
-                color = Slate700,
+                color = colors.textSecondary,
                 lineHeight = 21.sp
             )
 
@@ -1205,13 +1217,13 @@ private fun HadithCardItem(
                 Text(
                     text = "${if (isBangla) "হাদিস নং: " else "Hadith No: "}$ref",
                     fontSize = 11.5.sp,
-                    color = Slate500
+                    color = colors.textMuted
                 )
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Slate100,
-                    border = BorderStroke(0.8.dp, Slate200),
+                    color = colors.cardSubtle,
+                    border = BorderStroke(0.8.dp, colors.border),
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .clickable { onCopy() }

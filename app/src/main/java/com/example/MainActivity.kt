@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ui.components.FinancyFloatingNavBar
 import com.example.ui.screens.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazViewModel
@@ -43,8 +44,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
-                NamazAppRoot()
+            val viewModel: NamazViewModel = viewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            MyApplicationTheme(darkTheme = uiState.isDarkMode) {
+                NamazAppRoot(viewModel = viewModel)
             }
         }
     }
@@ -68,45 +72,18 @@ fun NamazAppRoot(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = FinancyTheme.colors.background,
         bottomBar = {
-            NavigationBar(
-                containerColor = GlassCardWhite,
-                tonalElevation = 0.dp
-            ) {
-                NamazNavTab.entries.forEach { tab ->
-                    val selected = currentTab == tab
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            currentTab = tab
-                            if (tab == NamazNavTab.MORE) {
-                                moreSubScreen = MoreSubScreen.INDEX
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = tab.icon,
-                                contentDescription = if (uiState.isBangla) tab.titleBn else tab.titleEn
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = if (uiState.isBangla) tab.titleBn else tab.titleEn,
-                                fontSize = 11.sp,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Emerald700,
-                            selectedTextColor = Emerald700,
-                            indicatorColor = Emerald100,
-                            unselectedIconColor = Slate400,
-                            unselectedTextColor = Slate600
-                        ),
-                        modifier = Modifier.testTag(tab.testTag)
-                    )
+            FinancyFloatingNavBar(
+                currentTab = currentTab,
+                isBangla = uiState.isBangla,
+                onTabSelected = { tab ->
+                    currentTab = tab
+                    if (tab == NamazNavTab.MORE) {
+                        moreSubScreen = MoreSubScreen.INDEX
+                    }
                 }
-            }
+            )
         }
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)

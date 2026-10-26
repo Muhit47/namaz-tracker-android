@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,13 +38,17 @@ fun PrayerCard(
     remainingMinutes: Int? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = FinancyTheme.colors
     val currentStatusCode = log?.status ?: "pending"
-    val currentStatus = PrayerStatus.fromCode(currentStatusCode)
     val isCompleted = currentStatusCode == "jamaah" || currentStatusCode == "on_time"
     val isSunnahDone = (log?.isSunnah ?: 0) == 1
 
     var showNotesDialog by remember { mutableStateOf(false) }
     var notesText by remember(log?.notes) { mutableStateOf(log?.notes ?: "") }
+
+    val cardBorderColor = if (isActiveWaqt) colors.emerald
+    else if (isCompleted) colors.emerald.copy(alpha = 0.5f)
+    else colors.border
 
     Card(
         modifier = modifier
@@ -52,22 +57,20 @@ fun PrayerCard(
             .testTag("prayer_card_${prayerType.keyName}"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isActiveWaqt && currentStatusCode == "pending") Emerald50.copy(alpha = 0.5f) else GlassCardWhite
+            containerColor = if (isActiveWaqt && currentStatusCode == "pending") colors.emeraldSoft.copy(alpha = 0.4f) else colors.card
         ),
         border = androidx.compose.foundation.BorderStroke(
             if (isActiveWaqt) 1.5.dp else 1.dp,
-            if (isActiveWaqt) Emerald500
-            else if (currentStatusCode != "pending") currentStatus.activeBorder.copy(alpha = 0.5f)
-            else GlassBorder
+            cardBorderColor
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isActiveWaqt) 3.dp else if (isCompleted) 1.dp else 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isActiveWaqt) 3.dp else 1.5.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Row 1: Prayer name, Arabic, Waqt Time, Notes icon
+            // Row 1: Prayer icon, name, Waqt Time, Notes icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -79,17 +82,17 @@ fun PrayerCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
                             .background(
-                                if (isCompleted || isActiveWaqt) Emerald50 else Slate100
+                                if (isCompleted || isActiveWaqt) colors.emeraldSoft else colors.cardSubtle
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = prayerType.arabicName.take(1),
                             fontWeight = FontWeight.Bold,
-                            color = if (isCompleted || isActiveWaqt) Emerald600 else Slate600,
+                            color = if (isCompleted || isActiveWaqt) colors.emerald else colors.textSecondary,
                             fontSize = 17.sp
                         )
                     }
@@ -100,28 +103,28 @@ fun PrayerCard(
                                 text = if (isBangla) prayerType.banglaName else prayerType.englishName,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = colors.textPrimary
                             )
                             if (prayerType.isFardh) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = Emerald50,
+                                    color = colors.emeraldSoft,
                                     shape = RoundedCornerShape(6.dp),
-                                    border = androidx.compose.foundation.BorderStroke(0.8.dp, Emerald100)
+                                    border = androidx.compose.foundation.BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f))
                                 ) {
                                     Text(
                                         text = if (isBangla) "ফরয" else "Fardh",
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Emerald700
+                                        color = colors.emerald
                                     )
                                 }
                             }
                             if (isActiveWaqt) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = Emerald500,
+                                    color = colors.emerald,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Row(
@@ -155,7 +158,7 @@ fun PrayerCard(
                         Text(
                             text = if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Slate600,
+                            color = colors.textSecondary,
                             fontSize = 11.5.sp
                         )
                     }
@@ -167,12 +170,12 @@ fun PrayerCard(
                             text = timeString,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Emerald600
+                            color = colors.emerald
                         )
                         Text(
                             text = prayerType.arabicName,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Slate400,
+                            color = colors.textMuted,
                             fontSize = 11.sp
                         )
                     }
@@ -184,7 +187,7 @@ fun PrayerCard(
                         Icon(
                             imageVector = Icons.Default.EditNote,
                             contentDescription = "Notes",
-                            tint = if (!log?.notes.isNullOrBlank()) Emerald600 else Slate400
+                            tint = if (!log?.notes.isNullOrBlank()) colors.emerald else colors.textMuted
                         )
                     }
                 }
@@ -192,7 +195,7 @@ fun PrayerCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Row 2: Status Selection Pills matching user's Framer pills exactly
+            // Row 2: Status Selection Pills
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -250,7 +253,10 @@ fun PrayerCard(
                     Checkbox(
                         checked = isSunnahDone,
                         onCheckedChange = { onToggleSunnah() },
-                        colors = CheckboxDefaults.colors(checkedColor = Emerald500),
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = colors.emerald,
+                            checkmarkColor = Color.White
+                        ),
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -258,15 +264,15 @@ fun PrayerCard(
                         text = if (isBangla) "সুন্নাত আদায় সম্পন্ন" else "Sunnah Completed",
                         fontSize = 11.5.sp,
                         fontWeight = if (isSunnahDone) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSunnahDone) Emerald700 else Slate600
+                        color = if (isSunnahDone) colors.emerald else colors.textSecondary
                     )
                 }
 
                 if (!log?.notes.isNullOrBlank()) {
                     Text(
                         text = "📝 ${log?.notes}",
-                        fontSize = 11.sp,
-                        color = Emerald600,
+                        fontSize = 10.5.sp,
+                        color = colors.textMuted,
                         maxLines = 1,
                         modifier = Modifier
                             .clickable { showNotesDialog = true }
@@ -280,12 +286,12 @@ fun PrayerCard(
     if (showNotesDialog) {
         AlertDialog(
             onDismissRequest = { showNotesDialog = false },
-            containerColor = Color.White,
+            containerColor = colors.card,
             title = {
                 Text(
                     text = if (isBangla) "${prayerType.banglaName} এর নোট" else "Notes for ${prayerType.englishName}",
                     fontWeight = FontWeight.Bold,
-                    color = Slate900
+                    color = colors.textPrimary
                 )
             },
             text = {
@@ -303,14 +309,14 @@ fun PrayerCard(
                         onSaveNotes(notesText)
                         showNotesDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Emerald500, contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
                 ) {
                     Text(if (isBangla) "সংরক্ষণ" else "Save", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNotesDialog = false }) {
-                    Text(if (isBangla) "বাতিল" else "Cancel", color = Slate600)
+                    Text(if (isBangla) "বাতিল" else "Cancel", color = colors.textSecondary)
                 }
             }
         )
@@ -325,9 +331,44 @@ private fun StatusPill(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val bg = if (isSelected) status.activeBg else StatusDefaultBg
-    val borderCol = if (isSelected) status.activeBorder else StatusDefaultBorder
-    val textColor = if (isSelected) status.activeText else StatusDefaultText
+    val colors = FinancyTheme.colors
+    val isDark = colors.isDark
+
+    val bg = when {
+        isSelected && isDark -> when (status) {
+            PrayerStatus.JAMAAH -> Color(0x3310B981)
+            PrayerStatus.ON_TIME -> Color(0x330EA5E9)
+            PrayerStatus.LATE, PrayerStatus.QAZA -> Color(0x33F59E0B)
+            PrayerStatus.MISSED -> Color(0x33F43F5E)
+            PrayerStatus.PENDING -> colors.cardSubtle
+        }
+        isSelected && !isDark -> status.activeBg
+        else -> colors.cardSubtle
+    }
+
+    val borderCol = when {
+        isSelected && isDark -> when (status) {
+            PrayerStatus.JAMAAH -> colors.emerald
+            PrayerStatus.ON_TIME -> colors.cyan
+            PrayerStatus.LATE, PrayerStatus.QAZA -> colors.amber
+            PrayerStatus.MISSED -> colors.rose
+            PrayerStatus.PENDING -> colors.border
+        }
+        isSelected && !isDark -> status.activeBorder
+        else -> colors.border
+    }
+
+    val textColor = when {
+        isSelected && isDark -> when (status) {
+            PrayerStatus.JAMAAH -> colors.emerald
+            PrayerStatus.ON_TIME -> colors.cyan
+            PrayerStatus.LATE, PrayerStatus.QAZA -> colors.amber
+            PrayerStatus.MISSED -> colors.rose
+            PrayerStatus.PENDING -> colors.textMuted
+        }
+        isSelected && !isDark -> status.activeText
+        else -> colors.textSecondary
+    }
 
     Box(
         modifier = modifier

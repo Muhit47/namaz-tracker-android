@@ -73,7 +73,10 @@ data class NamazUiState(
     val isAlignedWithQibla: Boolean = false,
 
     // Notifications
-    val prayerNotificationsEnabled: Boolean = true
+    val prayerNotificationsEnabled: Boolean = true,
+
+    // Dark Mode (Financy Fintech Adaptive Theme)
+    val isDarkMode: Boolean = false
 )
 
 class NamazViewModel(application: Application) : AndroidViewModel(application) {
@@ -97,6 +100,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             isBangla = prefs.getBoolean("is_bangla", true),
             isHanafiAsr = prefs.getBoolean("is_hanafi_asr", true),
             prayerNotificationsEnabled = prefs.getBoolean("prayer_notifications_enabled", true),
+            isDarkMode = prefs.getBoolean("is_dark_mode", false),
             selectedCity = run {
                 val savedName = prefs.getString("selected_city_en", "Dhaka")
                 val found = PrayerTimeCalculator.predefinedCities.find {
@@ -544,6 +548,13 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         }
         PrayerAlarmScheduler.scheduleAllPrayers(getApplication())
         PrayerWidgetProvider.updateAllWidgets(getApplication())
+    }
+
+    // Financy Theme: Dark / Light Mode Toggle
+    fun toggleDarkMode() {
+        val newDark = !_uiState.value.isDarkMode
+        prefs.edit().putBoolean("is_dark_mode", newDark).apply()
+        _uiState.update { it.copy(isDarkMode = newDark) }
     }
 
     // Notifications
