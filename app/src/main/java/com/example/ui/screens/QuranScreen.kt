@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -32,6 +33,7 @@ import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.DateUtil
+import com.example.util.QuranAudioPlayer
 import com.example.util.TransliterationUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -349,6 +351,57 @@ private fun SurahReaderView(
     val colors = FinancyTheme.colors
     val context = LocalContext.current
     var playingAyahNo by remember { mutableStateOf<Int?>(null) }
+    var isAudioPlaying by remember { mutableStateOf(false) }
+    var isAudioBuffering by remember { mutableStateOf(false) }
+
+    DisposableEffect(surah.surahNo) {
+        onDispose {
+            QuranAudioPlayer.stop()
+        }
+    }
+
+    fun playAyahAudio(ayahNo: Int) {
+        if (playingAyahNo == ayahNo && isAudioPlaying) {
+            QuranAudioPlayer.pause()
+            isAudioPlaying = false
+        } else if (playingAyahNo == ayahNo && !isAudioPlaying && !isAudioBuffering) {
+            QuranAudioPlayer.resume()
+            isAudioPlaying = true
+        } else {
+            playingAyahNo = ayahNo
+            isAudioBuffering = true
+            isAudioPlaying = false
+            QuranAudioPlayer.playAyah(
+                surahNo = surah.surahNo,
+                ayahNo = ayahNo,
+                onStart = {
+                    isAudioBuffering = false
+                    isAudioPlaying = true
+                },
+                onCompletion = {
+                    // Auto-advance to the next ayah in this surah
+                    val nextAyah = ayahNo + 1
+                    if (nextAyah <= surah.totalAyah) {
+                        playAyahAudio(nextAyah)
+                    } else {
+                        playingAyahNo = null
+                        isAudioPlaying = false
+                        isAudioBuffering = false
+                    }
+                },
+                onError = { errorMsg ->
+                    isAudioBuffering = false
+                    isAudioPlaying = false
+                    playingAyahNo = null
+                    Toast.makeText(
+                        context,
+                        if (isBangla) "তেলাওয়াত লোড করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।" else errorMsg,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
+    }
 
     Scaffold(
         containerColor = colors.background,
@@ -407,7 +460,8 @@ private fun SurahReaderView(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.weight(1f)
                         ) {
                             Surface(
                                 shape = CircleShape,
@@ -415,26 +469,52 @@ private fun SurahReaderView(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Default.GraphicEq, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    if (isAudioBuffering) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            color = Color.White,
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Icon(Icons.Default.GraphicEq, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    }
                                 }
                             }
                             Column {
                                 Text(
-                                    text = if (isBangla) "তিলাওয়াত চলছে: আয়াত $playingAyahNo" else "Playing: Ayah $playingAyahNo",
+                                    text = if (isBangla) "তেলাওয়াত চলছে: আয়াত $playingAyahNo" else "Reciting: Ayah $playingAyahNo",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colors.textPrimary
                                 )
                                 Text(
-                                    text = if (isBangla) surah.nameBn else surah.nameEn,
+                                    text = if (isBangla) "${surah.nameBn} • মিশারি রাশিদ আল-আফাসী" else "${surah.nameEn} • Mishary Alafasy",
                                     fontSize = 10.5.sp,
                                     color = colors.emerald
                                 )
                             }
                         }
 
-                        IconButton(onClick = { playingAyahNo = null }) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop", tint = colors.rose)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = {
+                                playingAyahNo?.let { playAyahAudio(it) }
+                            }) {
+                                Icon(
+                                    imageVector = if (isAudioPlaying) Icons.Default.PauseCircleFilled else Icons.Default.PlayCircleFilled,
+                                    contentDescription = if (isAudioPlaying) "Pause" else "Play",
+                                    tint = colors.emerald,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+
+                            IconButton(onClick = {
+                                QuranAudioPlayer.stop()
+                                playingAyahNo = null
+                                isAudioPlaying = false
+                                isAudioBuffering = false
+                            }) {
+                                Icon(Icons.Default.StopCircle, contentDescription = "Stop", tint = colors.rose, modifier = Modifier.size(28.dp))
+                            }
                         }
                     }
                 }
@@ -537,16 +617,24 @@ private fun SurahReaderView(
                                 // Audio play button chip
                                 IconButton(
                                     onClick = {
-                                        playingAyahNo = if (isPlaying) null else ayah.ayahNo
+                                        playAyahAudio(ayah.ayahNo)
                                     },
                                     modifier = Modifier.size(32.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = if (isPlaying) Icons.Default.PauseCircleFilled else Icons.Default.PlayCircleFilled,
-                                        contentDescription = "Audio Play",
-                                        tint = colors.emerald,
-                                        modifier = Modifier.size(20.dp)
-                                    )
+                                    if (isPlaying && isAudioBuffering) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            color = colors.emerald,
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = if (isPlaying && isAudioPlaying) Icons.Default.PauseCircleFilled else Icons.Default.PlayCircleFilled,
+                                            contentDescription = "Audio Play",
+                                            tint = colors.emerald,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
 
                                 // Copy Ayah button
