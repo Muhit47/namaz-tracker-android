@@ -24,10 +24,12 @@ data class DailyPrayerTimes(
     val tahajjudEnd: String
 )
 
-data class RamadanCountdown(
-    val isFastingHours: Boolean,
-    val minutesLeft: Int,
-    val targetTime: String
+data class ActiveWaqtInfo(
+    val currentPrayer: PrayerType?,
+    val nextPrayer: PrayerType,
+    val minutesRemaining: Int,
+    val startTime: String,
+    val endTime: String
 )
 
 object PrayerTimeCalculator {
@@ -140,27 +142,42 @@ object PrayerTimeCalculator {
             else -> hour24 - 12
         }
 
-        return String.format(Locale.getDefault(), "%02d:%02d %s", hour12, minute, ampm)
+        return String.format(Locale.US, "%02d:%02d %s", hour12, minute, ampm)
+    }
+
+    private fun normalizeDigits(input: String): String {
+        val bnZero = '০'
+        val arZero = '٠'
+        val sb = StringBuilder()
+        for (ch in input) {
+            when (ch) {
+                in '০'..'৯' -> sb.append((ch - bnZero).digitToChar())
+                in '٠'..'٩' -> sb.append((ch - arZero).digitToChar())
+                else -> sb.append(ch)
+            }
+        }
+        return sb.toString()
     }
 
     fun parseTimeToMinutes(timeStr: String): Int? {
         return try {
-            val parts = timeStr.trim().split(" ")
-            if (parts.size != 2) return null
+            val normalized = normalizeDigits(timeStr).trim()
+            val parts = normalized.split("\\s+".toRegex())
+            if (parts.size < 2) return null
             val timeParts = parts[0].split(":")
-            if (timeParts.size != 2) return null
+            if (timeParts.size < 2) return null
             var hour = timeParts[0].toInt()
             val minute = timeParts[1].toInt()
             val ampm = parts[1].uppercase(Locale.US)
-            if (ampm == "PM" && hour < 12) hour += 12
-            if (ampm == "AM" && hour == 12) hour = 0
+            if (ampm.contains("PM") && hour < 12) hour += 12
+            if (ampm.contains("AM") && hour == 12) hour = 0
             hour * 60 + minute
         } catch (e: Exception) {
             null
         }
     }
 
-    fun getActiveWaqt(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): PrayerType? {
+    fun getActiveWaqtInfo(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): ActiveWaqtInfo? {
         val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
         val fajrMin = parseTimeToMinutes(times.fajr) ?: return null
         val sunriseMin = parseTimeToMinutes(times.sunrise) ?: return null
@@ -170,49 +187,75 @@ object PrayerTimeCalculator {
         val ishaMin = parseTimeToMinutes(times.isha) ?: return null
 
         return when {
-            currentMinutes in fajrMin until sunriseMin -> PrayerType.FAJR
-            currentMinutes in dhuhrMin until asrMin -> PrayerType.DHUHR
-            currentMinutes in asrMin until maghribMin -> PrayerType.ASR
-            currentMinutes in maghribMin until ishaMin -> PrayerType.MAGHRIB
-            currentMinutes >= ishaMin || currentMinutes < fajrMin -> PrayerType.ISHA
-            else -> null
-        }
-    }
-
-    fun getRamadanCountdown(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): RamadanCountdown? {
-        val currentMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-        val fajrMin = parseTimeToMinutes(times.fajr) ?: return null
-        val maghribMin = parseTimeToMinutes(times.maghrib) ?: return null
-
-        return when {
-            currentMinutes in fajrMin until maghribMin -> {
-                RamadanCountdown(
-                    isFastingHours = true,
-                    minutesLeft = maghribMin - currentMinutes,
-                    targetTime = times.maghrib
+            currentMinutes in fajrMin until sunriseMin -> {
+                ActiveWaqtInfo(
+                    currentPrayer = PrayerType.FAJR,
+                    nextPrayer = PrayerType.DHUHR,
+                    minutesRemaining = sunriseMin - currentMinutes,
+                    startTime = times.fajr,
+                    endTime = times.sunrise
                 )
             }
-            currentMinutes < fajrMin -> {
-                RamadanCountdown(
-                    isFastingHours = false,
-                    minutesLeft = fajrMin - currentMinutes,
-                    targetTime = times.fajr
+            currentMinutes in sunriseMin until dhuhrMin -> {
+                ActiveWaqtInfo(
+                    currentPrayer = null,
+                    nextPrayer = PrayerType.DHUHR,
+                    minutesRemaining = dhuhrMin - currentMinutes,
+                    startTime = times.sunrise,
+                    endTime = times.dhuhr
+                )
+            }
+            currentMinutes in dhuhrMin until asrMin -> {
+                ActiveWaqtInfo(
+                    currentPrayer = PrayerType.DHUHR,
+                    nextPrayer = PrayerType.ASR,
+                    minutesRemaining = asrMin - currentMinutes,
+                    startTime = times.dhuhr,
+                    endTime = times.asr
+                )
+            }
+            currentMinutes in asrMin until maghribMin -> {
+                ActiveWaqtInfo(
+                    currentPrayer = PrayerType.ASR,
+                    nextPrayer = PrayerType.MAGHRIB,
+                    minutesRemaining = maghribMin - currentMinutes,
+                    startTime = times.asr,
+                    endTime = times.maghrib
+                )
+            }
+            currentMinutes in maghribMin until ishaMin -> {
+                ActiveWaqtInfo(
+                    currentPrayer = PrayerType.MAGHRIB,
+                    nextPrayer = PrayerType.ISHA,
+                    minutesRemaining = ishaMin - currentMinutes,
+                    startTime = times.maghrib,
+                    endTime = times.isha
                 )
             }
             else -> {
-                val minutesUntilMidnight = (24 * 60) - currentMinutes
-                RamadanCountdown(
-                    isFastingHours = false,
-                    minutesLeft = minutesUntilMidnight + fajrMin,
-                    targetTime = times.fajr
+                val remaining = if (currentMinutes >= ishaMin) {
+                    (24 * 60 - currentMinutes) + fajrMin
+                } else {
+                    fajrMin - currentMinutes
+                }
+                ActiveWaqtInfo(
+                    currentPrayer = PrayerType.ISHA,
+                    nextPrayer = PrayerType.FAJR,
+                    minutesRemaining = remaining,
+                    startTime = times.isha,
+                    endTime = times.fajr
                 )
             }
         }
     }
 
-    fun formatCountdown(minutesLeft: Int, isBangla: Boolean): String {
-        val hours = minutesLeft / 60
-        val mins = minutesLeft % 60
+    fun getActiveWaqt(calendar: Calendar = Calendar.getInstance(), times: DailyPrayerTimes): PrayerType? {
+        return getActiveWaqtInfo(calendar, times)?.currentPrayer
+    }
+
+    fun formatRemainingTime(minutes: Int, isBangla: Boolean): String {
+        val hours = minutes / 60
+        val mins = minutes % 60
         return if (isBangla) {
             if (hours > 0) {
                 "${DateUtil.toBanglaDigits(hours.toString())} ঘণ্টা ${DateUtil.toBanglaDigits(mins.toString())} মিনিট"

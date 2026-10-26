@@ -33,13 +33,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerType
 import com.example.ui.components.PrayerCard
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
+import com.example.util.ActiveWaqtInfo
 import com.example.util.DateUtil
 import com.example.util.PrayerTimeCalculator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -60,11 +63,20 @@ fun HomeScreen(
     val calendar = remember(uiState.selectedDate) { DateUtil.getCalendarFromIso(uiState.selectedDate) }
     val isFriday = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY
 
-    val activeWaqt = if (isToday) {
-        remember(uiState.prayerTimes, calendar) {
-            PrayerTimeCalculator.getActiveWaqt(Calendar.getInstance(), uiState.prayerTimes)
+    var currentClockMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(30000)
+            currentClockMillis = System.currentTimeMillis()
+        }
+    }
+
+    val activeWaqtInfo = if (isToday) {
+        remember(uiState.prayerTimes, currentClockMillis) {
+            PrayerTimeCalculator.getActiveWaqtInfo(Calendar.getInstance(), uiState.prayerTimes)
         }
     } else null
+    val activeWaqt = activeWaqtInfo?.currentPrayer
 
     val fardhPrayers = listOf(
         PrayerType.FAJR,
@@ -175,7 +187,6 @@ fun HomeScreen(
                 RamadanBentoCard(
                     uiState = uiState,
                     isBangla = isBangla,
-                    isToday = isToday,
                     onToggleRoza = { viewModel.toggleRoza() },
                     onOpenDua = { showRamadanDuaDialog = true }
                 )
@@ -188,7 +199,22 @@ fun HomeScreen(
                     uiState = uiState,
                     isBangla = isBangla
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // 3.5 Active Waqt Live Banner
+            if (isToday && activeWaqtInfo != null) {
+                val activeLog = activeWaqt?.let { p ->
+                    uiState.currentDayLogs.find { it.prayerName.equals(p.keyName, ignoreCase = true) }
+                }
+                item {
+                    ActiveWaqtBanner(
+                        info = activeWaqtInfo,
+                        currentLog = activeLog,
+                        isBangla = isBangla
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
             }
 
             // 4. Section Title
@@ -239,6 +265,7 @@ fun HomeScreen(
                     log = log,
                     isBangla = isBangla,
                     isActiveWaqt = isToday && prayer == activeWaqt,
+                    remainingMinutes = if (isToday && prayer == activeWaqt) activeWaqtInfo?.minutesRemaining else null,
                     onStatusSelected = { status ->
                         viewModel.updatePrayerStatus(prayer.keyName, status, context)
                     },
@@ -277,19 +304,100 @@ fun HomeScreen(
 }
 
 @Composable
+private fun ActiveWaqtBanner(
+    info: ActiveWaqtInfo,
+    currentLog: PrayerLogEntity?,
+    isBangla: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val prayer = info.currentPrayer
+    val isDone = currentLog?.status == "jamaah" || currentLog?.status == "on_time"
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (prayer != null) Emerald50 else Slate100
+        ),
+        border = BorderStroke(
+            1.2.dp,
+            if (prayer != null) Emerald300 else Slate300
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(if (prayer != null) Emerald500 else Amber500)
+                )
+                Column {
+                    Text(
+                        text = if (prayer != null) {
+                            if (isBangla) "চলতি ওয়াক্ত: ${prayer.banglaName}" else "Active Waqt: ${prayer.englishName}"
+                        } else {
+                            if (isBangla) "পরবর্তী ওয়াক্ত: ${info.nextPrayer.banglaName}" else "Next Waqt: ${info.nextPrayer.englishName}"
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (prayer != null) Emerald900 else Slate900
+                    )
+                    Text(
+                        text = if (prayer != null) {
+                            if (isBangla) "ওয়াক্ত শেষ হতে বাকি: ${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, true)}"
+                            else "Ends in: ${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, false)}"
+                        } else {
+                            if (isBangla) "শুরু হতে বাকি: ${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, true)}"
+                            else "Starts in: ${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, false)}"
+                        },
+                        fontSize = 11.5.sp,
+                        color = if (prayer != null) Emerald700 else Slate600,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            if (prayer != null) {
+                Surface(
+                    color = if (isDone) Emerald100 else Color.White,
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(0.8.dp, if (isDone) Emerald300 else Slate200)
+                ) {
+                    Text(
+                        text = if (isDone) {
+                            if (isBangla) "✓ আদায় সম্পন্ন" else "✓ Completed"
+                        } else {
+                            if (isBangla) "বাকি আছে" else "Pending"
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isDone) Emerald800 else Slate700,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun RamadanBentoCard(
     uiState: NamazUiState,
     isBangla: Boolean,
-    isToday: Boolean,
     onToggleRoza: () -> Unit,
     onOpenDua: () -> Unit
 ) {
-    val countdown = if (isToday) {
-        remember(uiState.prayerTimes) {
-            PrayerTimeCalculator.getRamadanCountdown(Calendar.getInstance(), uiState.prayerTimes)
-        }
-    } else null
-
     Card(
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = GlassCardWhite),
@@ -338,51 +446,6 @@ private fun RamadanBentoCard(
                         color = Emerald700,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
-                }
-            }
-
-            if (countdown != null) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (countdown.isFastingHours) Amber50 else Emerald50,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (countdown.isFastingHours) Amber200 else Emerald100
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = if (countdown.isFastingHours) "🌅" else "🌌",
-                                fontSize = 14.sp
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (countdown.isFastingHours) {
-                                    if (isBangla) "ইফতারের বাকি:" else "Time to Iftar:"
-                                } else {
-                                    if (isBangla) "সেহরি শেষ হতে বাকি:" else "Sehri ends in:"
-                                },
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = if (countdown.isFastingHours) Amber700 else Emerald700
-                            )
-                        }
-                        Text(
-                            text = PrayerTimeCalculator.formatCountdown(countdown.minutesLeft, isBangla),
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (countdown.isFastingHours) Amber700 else Emerald700
-                        )
-                    }
                 }
             }
 

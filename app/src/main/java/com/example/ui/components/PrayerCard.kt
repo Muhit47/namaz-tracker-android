@@ -23,6 +23,7 @@ import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerStatus
 import com.example.data.model.PrayerType
 import com.example.ui.theme.*
+import com.example.util.DateUtil
 
 @Composable
 fun PrayerCard(
@@ -34,6 +35,7 @@ fun PrayerCard(
     onToggleSunnah: () -> Unit,
     onSaveNotes: (String) -> Unit,
     isActiveWaqt: Boolean = false,
+    remainingMinutes: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val currentStatusCode = log?.status ?: "pending"
@@ -146,9 +148,16 @@ fun PrayerCard(
                         }
 
                         Text(
-                            text = if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn,
+                            text = if (isActiveWaqt && remainingMinutes != null) {
+                                val remText = if (isBangla) "বাকি: ${DateUtil.toBanglaDigits(remainingMinutes.toString())} মিনিট"
+                                else "$remainingMinutes min left"
+                                "${if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn} • $remText"
+                            } else {
+                                if (isBangla) prayerType.rakahInfoBn else prayerType.rakahInfoEn
+                            },
                             style = MaterialTheme.typography.bodySmall,
-                            color = Slate600,
+                            color = if (isActiveWaqt) Emerald700 else Slate600,
+                            fontWeight = if (isActiveWaqt) FontWeight.SemiBold else FontWeight.Normal,
                             fontSize = 11.5.sp
                         )
                     }
