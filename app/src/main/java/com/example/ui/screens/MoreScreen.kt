@@ -103,7 +103,7 @@ fun MoreScreen(
                     item {
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = if (isBangla) "অ্যাপ সেটিংস ও ভাষা (i18n)" else "App Settings & Language",
+                            text = if (isBangla) "অ্যাপ সেটিংস ও ভাষা" else "App Settings & Language",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = Emerald700
@@ -125,7 +125,7 @@ fun MoreScreen(
                                 ) {
                                     Column {
                                         Text(
-                                            text = if (isBangla) "অ্যাপের ভাষা (Language)" else "App Language",
+                                            text = if (isBangla) "অ্যাপের ভাষা" else "App Language",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
                                             color = Slate900
