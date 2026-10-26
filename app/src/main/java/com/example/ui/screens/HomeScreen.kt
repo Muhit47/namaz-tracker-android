@@ -127,7 +127,7 @@ fun HomeScreen(
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             modifier = Modifier.height(34.dp).padding(end = 4.dp)
                         ) {
-                            Text("🕌 জুমু'আ", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                            Text(if (isBangla) "🕌 জুমু'আ" else "🕌 Jumu'ah", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -273,11 +273,11 @@ fun HomeScreen(
     }
 
     if (showJumuahDialog) {
-        JumuahDeedsDialog(onDismiss = { showJumuahDialog = false })
+        JumuahDeedsDialog(isBangla = isBangla, onDismiss = { showJumuahDialog = false })
     }
 
     if (showRamadanDuaDialog) {
-        RamadanDuaDialog(onDismiss = { showRamadanDuaDialog = false })
+        RamadanDuaDialog(isBangla = isBangla, onDismiss = { showRamadanDuaDialog = false })
     }
 }
 
@@ -330,7 +330,7 @@ private fun RamadanBentoCard(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Emerald100)
                 ) {
                     Text(
-                        text = "ইফতার: ${uiState.prayerTimes.maghrib}",
+                        text = if (isBangla) "ইফতার: ${uiState.prayerTimes.maghrib}" else "Iftar: ${uiState.prayerTimes.maghrib}",
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = Emerald700,
@@ -680,7 +680,7 @@ private fun HeroSummaryCard(
 }
 
 @Composable
-private fun JumuahDeedsDialog(onDismiss: () -> Unit) {
+private fun JumuahDeedsDialog(isBangla: Boolean, onDismiss: () -> Unit) {
     var check1 by remember { mutableStateOf(false) }
     var check2 by remember { mutableStateOf(false) }
     var check3 by remember { mutableStateOf(false) }
@@ -690,21 +690,45 @@ private fun JumuahDeedsDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         containerColor = Color.White,
         title = {
-            Text("🕌 জুমু'আর বিশেষ আমলসমূহ", fontWeight = FontWeight.Bold, color = Slate900)
+            Text(
+                text = if (isBangla) "🕌 জুমু'আর বিশেষ আমলসমূহ" else "🕌 Special Virtues & Deeds of Jumu'ah",
+                fontWeight = FontWeight.Bold,
+                color = Slate900
+            )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                DeedCheckboxItem("১. সূরা আল-কাহাফ তিলাওয়াত", "জুমু'আর দিনে সূরা কাহাফ পাঠ করলে পরবর্তী জুমু'আ পর্যন্ত তার জন্য বিশেষ নূর চমকাতে থাকবে। (সহিহ আত-তারগিব: ৭৩৬)", check1) { check1 = it }
-                DeedCheckboxItem("২. নবীজি (সা.) এর ওপর দরূদ পাঠ", "তোমরা জুমু'আর দিনে আমার ওপর বেশি বেশি দরুদ পাঠ করো, কেননা তা আমার কাছে পেশ করা হয়। (আবু দাউদ: ১০৪৭)", check2) { check2 = it }
-                DeedCheckboxItem("৩. গোসল, মেসওয়াক ও আতর", "সুন্নাহ অনুযায়ী উত্তমরূপে গোসল করা, মেসওয়াক করা, পরিচ্ছন্ন পোশাক ও সুগন্ধি ব্যবহার করা। (বুখারি: ৮৮০)", check3) { check3 = it }
-                DeedCheckboxItem("৪. আসর পরবর্তী দোয়া কবুলের মুহূর্ত", "জুমু'আর দিনে একটি বিশেষ মুহূর্ত রয়েছে যাতে বান্দা যে দোয়াই করে আল্লাহ তা কবুল করেন। (আবু দাউদ: ১০৪৮)", check4) { check4 = it }
+                DeedCheckboxItem(
+                    title = if (isBangla) "১. সূরা আল-কাহাফ তিলাওয়াত" else "1. Reciting Surah Al-Kahf",
+                    desc = if (isBangla) "জুমু'আর দিনে সূরা কাহাফ পাঠ করলে পরবর্তী জুমু'আ পর্যন্ত তার জন্য বিশেষ নূর চমকাতে থাকবে। (সহিহ আত-তারগিব: ৭৩৬)"
+                    else "Whoever reads Surah Al-Kahf on Friday, light will shine for him from one Friday to the next. (Sahih Al-Targhib: 736)",
+                    isChecked = check1
+                ) { check1 = it }
+                DeedCheckboxItem(
+                    title = if (isBangla) "২. নবীজি (সা.) এর ওপর দরূদ পাঠ" else "2. Sending Durood upon the Prophet (pbuh)",
+                    desc = if (isBangla) "তোমরা জুমু'আর দিনে আমার ওপর বেশি বেশি দরুদ পাঠ করো, কেননা তা আমার কাছে পেশ করা হয়। (আবু দাউদ: ১০৪৭)"
+                    else "Send abundant blessings upon me on Friday, for your blessings are presented to me. (Abu Dawud: 1047)",
+                    isChecked = check2
+                ) { check2 = it }
+                DeedCheckboxItem(
+                    title = if (isBangla) "৩. গোসল, মেসওয়াক ও আতর" else "3. Ghusl, Miswak and Attar",
+                    desc = if (isBangla) "সুন্নাহ অনুযায়ী উত্তমরূপে গোসল করা, মেসওয়াক করা, পরিচ্ছন্ন পোশাক ও সুগন্ধি ব্যবহার করা। (বুখারি: ৮৮০)"
+                    else "Bathing, cleaning teeth with Miswak, wearing clean clothes, and applying perfume. (Bukhari: 880)",
+                    isChecked = check3
+                ) { check3 = it }
+                DeedCheckboxItem(
+                    title = if (isBangla) "৪. আসর পরবর্তী দোয়া কবুলের মুহূর্ত" else "4. Special Hour of Acceptance after Asr",
+                    desc = if (isBangla) "জুমু'আর দিনে একটি বিশেষ মুহূর্ত রয়েছে যাতে বান্দা যে দোয়াই করে আল্লাহ তা কবুল করেন। (আবু দাউদ: ১০৪৮)"
+                    else "On Friday there is an hour in which no Muslim asks Allah for anything good but He grants it to him. (Abu Dawud: 1048)",
+                    isChecked = check4
+                ) { check4 = it }
             }
         },
         confirmButton = {
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Emerald500, contentColor = Color.White)
-            ) { Text("ঠিক আছে", fontWeight = FontWeight.Bold) }
+            ) { Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold) }
         }
     )
 }
@@ -733,11 +757,17 @@ private fun DeedCheckboxItem(title: String, desc: String, isChecked: Boolean, on
 }
 
 @Composable
-private fun RamadanDuaDialog(onDismiss: () -> Unit) {
+private fun RamadanDuaDialog(isBangla: Boolean, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
-        title = { Text("🤲 রমজানের দোয়া ও নিয়ত", fontWeight = FontWeight.Bold, color = Slate900) },
+        title = {
+            Text(
+                text = if (isBangla) "🤲 রমজানের দোয়া ও নিয়ত" else "🤲 Ramadan Duas & Intentions",
+                fontWeight = FontWeight.Bold,
+                color = Slate900
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Card(
@@ -746,12 +776,34 @@ private fun RamadanDuaDialog(onDismiss: () -> Unit) {
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("🌅 ইফতারের বিশুদ্ধ সুন্নাহ দোয়া (ইফতারের পর)", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Emerald700)
+                        Text(
+                            text = if (isBangla) "🌅 ইফতারের বিশুদ্ধ সুন্নাহ দোয়া (ইফতারের পর)" else "🌅 Authentic Sunnah Dua for Iftar (After Breaking Fast)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = Emerald700
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ", fontWeight = FontWeight.Bold, fontSize = 16.sp, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth(), color = Slate900)
+                        Text(
+                            text = "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Slate900
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("উচ্চারণ: যাহাবায যমা'উ, ওয়াবতাল্লাতিল ‘উরূক্ব, ওয়া ছাবাতাল আজরু ইনশাআল্লাহ।", fontSize = 11.5.sp, color = Slate900)
-                        Text("অর্থ: পিপাসা দূর হলো, শিরা-উপশিরা সিক্ত হলো এবং ইনশাআল্লাহ প্রতিদান নির্ধারিত হলো। [আবু দাউদ: ২৩৫৭ • সহিহ]", fontSize = 11.sp, color = Slate600)
+                        Text(
+                            text = if (isBangla) "উচ্চারণ: যাহাবায যমা'উ, ওয়াবতাল্লাতিল ‘উরূক্ব, ওয়া ছাবাতাল আজরু ইনশাআল্লাহ।"
+                            else "Transliteration: Dhahaba adh-dhama'u wabtallatil-'urooqu wa thabatal-ajru in sha Allah.",
+                            fontSize = 11.5.sp,
+                            color = Slate900
+                        )
+                        Text(
+                            text = if (isBangla) "অর্থ: পিপাসা দূর হলো, শিরা-উপশিরা সিক্ত হলো এবং ইনশাআল্লাহ প্রতিদান নির্ধারিত হলো। [আবু দাউদ: ২৩৫৭ • সহিহ]"
+                            else "Meaning: The thirst is gone, the veins are moistened, and the reward is confirmed, if Allah wills. [Abu Dawud: 2357 • Sahih]",
+                            fontSize = 11.sp,
+                            color = Slate600
+                        )
                     }
                 }
 
@@ -761,9 +813,19 @@ private fun RamadanDuaDialog(onDismiss: () -> Unit) {
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("🌌 রোজার নিয়ত", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Slate900)
+                        Text(
+                            text = if (isBangla) "🌌 রোজার নিয়ত" else "🌌 Intention for Fasting (Niyyah)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = Slate900
+                        )
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("সুন্নাহসম্মত নিয়ম: নিয়তের মূল স্থান হলো অন্তর। মনে মনে এই সংকল্প করাই যথেষ্ট যে— 'আমি মহান আল্লাহর সন্তুষ্টির উদ্দেশ্যে আজকের রোজা রাখছি।'", fontSize = 11.5.sp, color = Slate600)
+                        Text(
+                            text = if (isBangla) "সুন্নাহসম্মত নিয়ম: নিয়তের মূল স্থান হলো অন্তর। মনে মনে এই সংকল্প করাই যথেষ্ট যে— 'আমি মহান আল্লাহর সন্তুষ্টির উদ্দেশ্যে আজকের রোজা রাখছি।'"
+                            else "Sunnah principle: The true place of intention is the heart. Having a conscious intention to fast today for the pleasure of Allah is sufficient.",
+                            fontSize = 11.5.sp,
+                            color = Slate600
+                        )
                     }
                 }
             }
@@ -772,7 +834,7 @@ private fun RamadanDuaDialog(onDismiss: () -> Unit) {
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Emerald500, contentColor = Color.White)
-            ) { Text("ঠিক আছে", fontWeight = FontWeight.Bold) }
+            ) { Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold) }
         }
     )
 }

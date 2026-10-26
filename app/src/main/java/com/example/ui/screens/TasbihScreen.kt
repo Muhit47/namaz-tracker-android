@@ -113,7 +113,7 @@ fun TasbihScreen(
                         onClick = { viewModel.selectTasbih(item.id) },
                         label = {
                             Text(
-                                text = item.title,
+                                text = if (isBangla) item.title else (if (item.transliteration.isNotBlank()) item.transliteration else item.title),
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 12.sp
                             )

@@ -245,7 +245,7 @@ fun PrayerCard(
             containerColor = Color.White,
             title = {
                 Text(
-                    text = "${if (isBangla) prayerType.banglaName else prayerType.englishName} এর নোট",
+                    text = if (isBangla) "${prayerType.banglaName} এর নোট" else "Notes for ${prayerType.englishName}",
                     fontWeight = FontWeight.Bold,
                     color = Slate900
                 )

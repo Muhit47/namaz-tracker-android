@@ -204,7 +204,7 @@ fun MoreScreen(
                             title = if (isBangla) "নামাজ ও ওজু শিক্ষা গাইড" else "Salah & Wudu Guide",
                             desc = if (isBangla) "নামাজের সঠিক নিয়ম, ওজুর ফরজ ও সুন্নাত, দোয়া ও নারী-পুরুষ পার্থক্য" else "Step-by-step Salah, Wudu, and essential Duas",
                             icon = Icons.AutoMirrored.Filled.MenuBook,
-                            badge = "পূর্ণ গাইড",
+                            badge = if (isBangla) "পূর্ণ গাইড" else "Guide",
                             onClick = { onNavigateSub(MoreSubScreen.GUIDE) },
                             testTag = "nav_more_guide"
                         )
@@ -225,7 +225,7 @@ fun MoreScreen(
                             title = if (isBangla) "ক্যালেন্ডার ও স্ট্রিক রিপোর্ট" else "Calendar & Streak Analytics",
                             desc = if (isBangla) "মাসিক নামাযের ধারাবাহিকতা, স্ট্রিক ও জামাত আদায় পরিসংখ্যান" else "Consistency stats, daily streak, and completion rate",
                             icon = Icons.Default.BarChart,
-                            badge = "${uiState.currentStreakDays} দিন স্ট্রিক",
+                            badge = if (isBangla) "${DateUtil.toBanglaDigits(uiState.currentStreakDays.toString())} দিন স্ট্রিক" else "${uiState.currentStreakDays} Days Streak",
                             onClick = { onNavigateSub(MoreSubScreen.ANALYTICS) },
                             testTag = "nav_more_analytics"
                         )
@@ -236,7 +236,7 @@ fun MoreScreen(
                             title = if (isBangla) "ডিজিটাল তাসবীহ" else "Digital Tasbih",
                             desc = if (isBangla) "স্পর্শকাতর ভাইব্রেশন কাউন্টার, মাসনূন যিকির ও কাস্টম তাসবীহ" else "Tactile Dhikr counter with presets and custom dhikrs",
                             icon = Icons.Default.TouchApp,
-                            badge = "হ্যাপটিক",
+                            badge = if (isBangla) "হ্যাপটিক" else "Haptic",
                             onClick = { onNavigateSub(MoreSubScreen.TASBIH) },
                             testTag = "nav_more_tasbih"
                         )

@@ -194,7 +194,7 @@ fun HadithScreen(
                             isBangla = isBangla,
                             onBack = { selectedCategoryForDetail = null },
                             onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
-                            onCopy = { hadith -> copyHadithToClipboard(context, hadith) }
+                            onCopy = { hadith -> copyHadithToClipboard(context, hadith, isBangla) }
                         )
                     }
                 }
@@ -211,7 +211,7 @@ fun HadithScreen(
                             onSetLastRead = { bookId, chNo, hNo ->
                                 viewModel.setHadithLastRead(bookId, chNo, hNo, context)
                             },
-                            onCopyText = { text -> copyToClipboard(context, text) }
+                            onCopyText = { text -> copyToClipboard(context, text, isBangla) }
                         )
                     } else if (selectedBookForChapters != null) {
                         // Book Chapters List View
@@ -247,7 +247,7 @@ fun HadithScreen(
                         isBangla = isBangla,
                         onSearchChange = { searchQuery = it },
                         onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
-                        onCopy = { hadith -> copyHadithToClipboard(context, hadith) }
+                        onCopy = { hadith -> copyHadithToClipboard(context, hadith, isBangla) }
                     )
                 }
 
@@ -259,7 +259,7 @@ fun HadithScreen(
                         hadiths = bookmarkedHadiths,
                         isBangla = isBangla,
                         onToggleBookmark = { id -> viewModel.toggleHadithBookmark(id, context) },
-                        onCopy = { hadith -> copyHadithToClipboard(context, hadith) },
+                        onCopy = { hadith -> copyHadithToClipboard(context, hadith, isBangla) },
                         onExploreAll = { activeTab = HadithTabMode.CATEGORIES }
                     )
                 }
@@ -362,7 +362,7 @@ private fun CategoriesListView(
 
                         Column {
                             Text(
-                                text = cat.nameBn,
+                                text = if (isBangla) cat.nameBn else (cat.nameEn ?: cat.nameBn),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Slate900
@@ -443,7 +443,8 @@ private fun BooksListView(
                                 color = Cyan700
                             )
                             Text(
-                                text = "কিতাব: ${lastRead.bookId.uppercase()} • অধ্যায় ${lastRead.chapterNo} • হাদীস নং ${lastRead.hadithNo}",
+                                text = if (isBangla) "কিতাব: ${lastRead.bookId.uppercase()} • অধ্যায় ${DateUtil.toBanglaDigits(lastRead.chapterNo.toString())} • হাদীস নং ${DateUtil.toBanglaDigits(lastRead.hadithNo.toString())}"
+                                else "Book: ${lastRead.bookId.uppercase()} • Chapter ${lastRead.chapterNo} • Hadith #${lastRead.hadithNo}",
                                 fontSize = 12.sp,
                                 color = Slate700
                             )
@@ -484,7 +485,7 @@ private fun BooksListView(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = book.nameBn,
+                                text = if (isBangla) book.nameBn else (book.nameEn ?: book.nameBn),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Slate900
@@ -557,7 +558,7 @@ private fun BookChaptersListView(
                 Spacer(modifier = Modifier.width(6.dp))
                 Column {
                     Text(
-                        text = book.nameBn,
+                        text = if (isBangla) book.nameBn else (book.nameEn ?: book.nameBn),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Slate900
@@ -607,7 +608,7 @@ private fun BookChaptersListView(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = ch.nameBn,
+                                text = if (isBangla) ch.nameBn else (if (!ch.nameEn.isNullOrBlank()) ch.nameEn!! else ch.nameBn),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.5.sp,
                                 color = Slate900
@@ -678,13 +679,14 @@ private fun ChapterFullHadithsView(
                 Spacer(modifier = Modifier.width(6.dp))
                 Column {
                     Text(
-                        text = chapter.nameBn,
+                        text = if (isBangla) chapter.nameBn else (if (!chapter.nameEn.isNullOrBlank()) chapter.nameEn!! else chapter.nameBn),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Slate900
                     )
                     Text(
-                        text = "অধ্যায় নং ${chapter.chapterNo} • মোট ${fullHadiths.size}টি হাদীস",
+                        text = if (isBangla) "অধ্যায় নং ${DateUtil.toBanglaDigits(chapter.chapterNo.toString())} • মোট ${DateUtil.toBanglaDigits(fullHadiths.size.toString())}টি হাদীস"
+                        else "Chapter ${chapter.chapterNo} • Total ${fullHadiths.size} Hadiths",
                         fontSize = 11.5.sp,
                         color = Slate600
                     )
@@ -714,7 +716,7 @@ private fun ChapterFullHadithsView(
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
-                                text = "হাদীস নং ${item.hadithNo}",
+                                text = if (isBangla) "হাদীস নং ${DateUtil.toBanglaDigits(item.hadithNo.toString())}" else "Hadith #${item.hadithNo}",
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Emerald700,
@@ -729,7 +731,7 @@ private fun ChapterFullHadithsView(
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
-                                        text = item.gradeBn!!,
+                                        text = if (isBangla) item.gradeBn!! else (if (!item.gradeEn.isNullOrBlank()) item.gradeEn!! else item.gradeBn!!),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Amber700,
@@ -769,10 +771,12 @@ private fun ChapterFullHadithsView(
                     }
 
                     // Auto Transliteration
-                    val translit = item.translitBn ?: TransliterationUtil.transliterateArabicToBangla(item.textAr)
+                    val translit = if (isBangla) (item.translitBn ?: TransliterationUtil.transliterateArabicToBangla(item.textAr))
+                    else (if (!item.translitEn.isNullOrBlank()) item.translitEn!! else TransliterationUtil.transliterateArabicToEnglish(item.textAr))
+
                     if (translit.isNotBlank()) {
                         Text(
-                            text = "উচ্চারণ: $translit",
+                            text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}$translit",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Cyan700,
@@ -781,8 +785,10 @@ private fun ChapterFullHadithsView(
                         Spacer(modifier = Modifier.height(6.dp))
                     }
 
+                    val fullHadithText = if (isBangla) item.textBn else (if (!item.textEn.isNullOrBlank()) item.textEn!! else item.textBn)
+
                     Text(
-                        text = item.textBn,
+                        text = fullHadithText,
                         fontSize = 13.5.sp,
                         color = Slate700,
                         lineHeight = 21.sp
@@ -800,7 +806,7 @@ private fun ChapterFullHadithsView(
                             border = BorderStroke(0.8.dp, Slate200),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .clickable { onCopyText(item.textBn) }
+                                .clickable { onCopyText(fullHadithText) }
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -814,7 +820,7 @@ private fun ChapterFullHadithsView(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "কপি",
+                                    text = if (isBangla) "কপি" else "Copy",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Slate700
@@ -1024,7 +1030,7 @@ private fun CategoryDetailHadithsView(
 
                     Column {
                         Text(
-                            text = "${category.icon} ${if (isBangla) category.nameBn else category.nameEn}",
+                            text = "${category.icon} ${if (isBangla) category.nameBn else (category.nameEn ?: category.nameBn)}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Slate900
@@ -1291,23 +1297,42 @@ private fun EmptyStateCard(
 
 private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()
 
-private fun copyToClipboard(context: Context, text: String) {
+private fun copyToClipboard(context: Context, text: String, isBangla: Boolean = true) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clip = ClipData.newPlainText("Hadith", text)
     clipboard.setPrimaryClip(clip)
-    Toast.makeText(context, "টেক্সট কপি করা হয়েছে", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, if (isBangla) "টেক্সট কপি করা হয়েছে" else "Text copied to clipboard", Toast.LENGTH_SHORT).show()
 }
 
-private fun copyHadithToClipboard(context: Context, hadith: HadithEntity) {
-    val shareText = buildString {
-        append("[হাদীস শরীফ • ${hadith.bookNameBn} | ${hadith.referenceBn}]\n")
-        append("বিষয়: ${hadith.chapterBn}\n")
-        append("বর্ণনাকারী: ${hadith.narratorBn}\n\n")
-        if (hadith.textAr.isNotBlank()) {
-            append("${hadith.textAr}\n\n")
+private fun copyHadithToClipboard(context: Context, hadith: HadithEntity, isBangla: Boolean = true) {
+    val shareText = if (isBangla) {
+        buildString {
+            append("[হাদীস শরীফ • ${hadith.bookNameBn} | ${hadith.referenceBn}]\n")
+            append("বিষয়: ${hadith.chapterBn}\n")
+            append("বর্ণনাকারী: ${hadith.narratorBn}\n\n")
+            if (hadith.textAr.isNotBlank()) {
+                append("${hadith.textAr}\n\n")
+            }
+            append("${hadith.textBn}\n\n")
+            append("মান: ${hadith.gradeBn}")
         }
-        append("${hadith.textBn}\n\n")
-        append("মান: ${hadith.gradeBn}")
+    } else {
+        val bName = if (!hadith.bookNameEn.isNullOrBlank()) hadith.bookNameEn!! else hadith.bookNameBn
+        val ch = if (!hadith.chapterEn.isNullOrBlank()) hadith.chapterEn!! else hadith.chapterBn
+        val narrator = if (!hadith.narratorEn.isNullOrBlank()) hadith.narratorEn!! else hadith.narratorBn
+        val text = if (!hadith.textEn.isNullOrBlank()) hadith.textEn!! else hadith.textBn
+        val grade = if (!hadith.gradeEn.isNullOrBlank()) hadith.gradeEn!! else hadith.gradeBn
+        val ref = if (!hadith.referenceEn.isNullOrBlank()) hadith.referenceEn!! else hadith.referenceBn
+        buildString {
+            append("[Hadith Sharif • $bName | Hadith No: $ref]\n")
+            append("Chapter: $ch\n")
+            append("Narrated by: $narrator\n\n")
+            if (hadith.textAr.isNotBlank()) {
+                append("${hadith.textAr}\n\n")
+            }
+            append("$text\n\n")
+            append("Grade: $grade")
+        }
     }
-    copyToClipboard(context, shareText)
+    copyToClipboard(context, shareText, isBangla)
 }
