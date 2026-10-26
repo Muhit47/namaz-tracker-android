@@ -36,7 +36,7 @@ enum class NamazNavTab(
     QURAN("Qur'an", "কুরআন", Icons.AutoMirrored.Filled.MenuBook, "nav_tab_quran"),
     HADITH("Hadith", "হাদীস", Icons.AutoMirrored.Filled.LibraryBooks, "nav_tab_hadith"),
     QAZA("Qaza", "কাযা", Icons.Default.History, "nav_tab_qaza"),
-    MORE("Guides", "গাইড", Icons.Default.Widgets, "nav_tab_more")
+    MORE("Settings", "সেটিংস", Icons.Default.Settings, "nav_tab_more")
 }
 
 class MainActivity : ComponentActivity() {

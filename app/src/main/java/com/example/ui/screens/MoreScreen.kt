@@ -115,7 +115,7 @@ fun MoreScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = if (isBangla) "আমল, সেটিংস ও প্রয়ােজনীয় টুলস" else "Settings & Islamic Tools",
+                                text = if (isBangla) "সেটিংস ও প্রয়ােজনীয় টুলস" else "Settings & Islamic Tools",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.textPrimary
