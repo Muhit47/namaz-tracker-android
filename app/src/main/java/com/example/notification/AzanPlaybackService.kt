@@ -106,28 +106,34 @@ class AzanPlaybackService : Service() {
         startForeground(NOTIFICATION_ID, notification)
 
         try {
-            mediaPlayer = MediaPlayer.create(this, rawRes).apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .build()
-                )
-                setOnCompletionListener {
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .build()
+
+            val player = MediaPlayer.create(this, rawRes, audioAttributes, 0)
+            if (player != null) {
+                player.setOnCompletionListener {
                     Log.d(TAG, "Azan audio playback finished.")
                     isAzanPlaying = false
                     stopForeground(STOP_FOREGROUND_DETACH)
                     stopSelf()
                 }
-                setOnErrorListener { _, what, extra ->
+                player.setOnErrorListener { _, what, extra ->
                     Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
                     isAzanPlaying = false
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                     true
                 }
-                start()
+                player.start()
                 isAzanPlaying = true
+                mediaPlayer = player
+            } else {
+                Log.e(TAG, "MediaPlayer.create returned null for rawRes=$rawRes")
+                isAzanPlaying = false
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start Azan audio", e)

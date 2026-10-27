@@ -11,14 +11,14 @@ object AppVersionHelper {
         get() = try {
             BuildConfig.VERSION_NAME
         } catch (e: Throwable) {
-            "2.11.0"
+            "2.12.0"
         }
 
     val versionCode: Int
         get() = try {
             BuildConfig.VERSION_CODE
         } catch (e: Throwable) {
-            13
+            14
         }
 
     fun getDisplayVersion(isBangla: Boolean): String {
