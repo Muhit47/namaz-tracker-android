@@ -1,7 +1,7 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.5.0` (Build 7)  
+**App Version:** `v2.6.0` (Build 8)  
 **Branch:** `android`  
-**Latest Remote Commit:** `d1e926e`
+**Latest Remote Commit:** `d91a9eb`
 
 ---
 
@@ -17,7 +17,7 @@
 
 | ID | Area | Acceptance Criterion | Verification Method |
 |:---|:---|:---|:---|
-| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 7` and `versionName = "2.5.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.5.0` / `ভার্সন ২.৫.০`). | Verify `build.gradle.kts` and UI text match. |
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 8` and `versionName = "2.6.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.6.0` / `ভার্সন ২.৬.০`). | Verify `build.gradle.kts` and UI text match. |
 | **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
 | **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
 | **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
@@ -75,7 +75,14 @@
 - [x] **Task 4.1**: Audio Recitation & Adhan Background Service Polish (Completed in `v2.2.0`)
 - [x] **Task 4.2**: Automated Compose UI Test Suite Expansion (Completed in `v2.3.0`)
 - [x] **Task 4.3**: Home Screen App Multi-Widget Suite Expansion (Completed in `v2.4.0`)
-### Milestone 6: Official Production Package Name & Release Prep (`v2.5.0`, Build 7)
-- [x] Set official clean production package name / applicationId: `com.namaztracker.app`.
-- [x] Bumped app version to `v2.5.0` (Build 7).
-- [x] Verified build config and synchronized all documentation.
+### Milestone 7: Visual Screenshot Gallery & GitHub README Overhaul (`v2.6.0`, Build 8)
+- [x] Generated 7 high-resolution device screenshots in `docs/screenshots/`:
+  - `00_hero_showcase.png`: Panoramic 1200x600 header banner.
+  - `01_namaz_tab.png`: 5 Waqt tracker, active Waqt countdown & status pills.
+  - `02_quran_hadith_tab.png`: Complete 114 Surahs, last read card & Hadith books.
+  - `03_ibadah_tab.png`: Digital Haptic Tasbih, 360° Qibla compass & Masnoon Duas.
+  - `04_tracker_tab.png`: 21-day streak, weekly completion bar chart & Qaza debt counter.
+  - `05_more_tab.png`: Smart offline Azan, Muezzin selection, lockscreen ongoing tracker & widget hub.
+  - `06_home_widgets.png`: 4 Nothing OS-inspired Frosted Glass widgets on Android launcher.
+- [x] Overhauled `README.md` with visual preview gallery tables, technical badges, and bilingual documentation.
+- [x] Bumped app version to `v2.6.0` (Build 8).
