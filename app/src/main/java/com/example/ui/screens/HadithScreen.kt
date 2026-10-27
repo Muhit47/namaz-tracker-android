@@ -80,35 +80,11 @@ fun HadithScreen(
 
     val colors = FinancyTheme.colors
 
-    Scaffold(
-        containerColor = colors.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = if (isBangla) "হাদীস শরীফ" else "Hadith Sharif",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Text(
-                            text = if (isBangla) "সহিহ হাদীস সম্ভার ও প্রধান গ্রন্থসমূহ" else "Authentic Hadith Collections",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 11.sp,
-                            color = colors.textMuted
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.card)
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
             // Tab row
             Surface(
                 color = colors.cardSubtle,
@@ -268,7 +244,6 @@ fun HadithScreen(
             }
         }
     }
-}
 
 @Composable
 private fun TabCapsuleButton(
@@ -316,7 +291,7 @@ private fun CategoriesListView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         item {
             Text(
@@ -417,7 +392,7 @@ private fun BooksListView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         // Last Read Hero
         if (lastRead != null) {
@@ -547,7 +522,7 @@ private fun BookChaptersListView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         item {
             Row(
@@ -670,7 +645,7 @@ private fun ChapterFullHadithsView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         item {
             Row(
@@ -871,7 +846,7 @@ private fun HadithSearchListView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         item {
             OutlinedTextField(
@@ -956,7 +931,7 @@ private fun BookmarksListView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp)
     ) {
         if (hadiths.isEmpty()) {
             item {
@@ -1008,7 +983,7 @@ private fun CategoryDetailHadithsView(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp)
     ) {
         item {
             Surface(

@@ -83,39 +83,12 @@ fun QuranScreen(
             }
         }
 
-        Scaffold(
-            containerColor = colors.background,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text(
-                                text = if (isBangla) "আল কুরআনুল কারীম" else "Holy Al-Qur'an",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.textPrimary
-                            )
-                            Text(
-                                text = if (isBangla) "১১৪টি পূর্ণাঙ্গ সূরা অর্থ ও উচ্চারণসহ" else "114 Surahs with Translation & Transliteration",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 11.sp,
-                                color = colors.textMuted
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = colors.card
-                    )
-                )
-            }
-        ) { innerPadding ->
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(bottom = 90.dp)
-            ) {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp)
+        ) {
                 // Search bar
                 item {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -241,7 +214,6 @@ fun QuranScreen(
             }
         }
     }
-}
 
 @Composable
 private fun SurahListItem(
@@ -526,7 +498,7 @@ private fun SurahReaderView(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 14.dp),
-            contentPadding = PaddingValues(bottom = 90.dp)
+            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
             // Bismillah card (except Surah Tawbah #9)
             if (surah.surahNo != 9) {
