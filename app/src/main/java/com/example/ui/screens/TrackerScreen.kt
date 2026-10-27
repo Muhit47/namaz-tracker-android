@@ -40,9 +40,9 @@ enum class TrackerSubTab(
     val titleEn: String,
     val titleBn: String
 ) {
-    ANALYTICS("Analytics & Streaks", "অ্যানালিটিক্স ও স্ট্রিক"),
-    CALENDAR("History Calendar", "হিস্ট্রি ক্যালেন্ডার"),
-    AUTO_QAZA("Auto Qaza Report", "স্বয়ংক্রিয় কাযা সামারি")
+    ANALYTICS("Analytics", "অ্যানালিটিক্স"),
+    CALENDAR("Calendar", "ক্যালেন্ডার"),
+    AUTO_QAZA("Auto Qaza", "স্বয়ংক্রিয় কাযা")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,19 +61,40 @@ fun TrackerScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            text = if (isBangla) "নামায ট্র্যাকার ও হিস্ট্রি" else "Salah Tracker & Insights",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Text(
-                            text = if (isBangla) "স্বয়ংক্রিয় হিস্ট্রি, স্ট্রিক ও পারফরম্যান্স" else "Automatic history, streaks & performance",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 11.sp,
-                            color = colors.textSecondary
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = if (isBangla) "নামায ট্র্যাকার ও হিস্ট্রি" else "Salah Tracker & Insights",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                            Text(
+                                text = if (isBangla) "স্বয়ংক্রিয় হিস্ট্রি, স্ট্রিক ও পারফরম্যান্স" else "Automatic history, streaks & performance",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 11.sp,
+                                color = colors.textSecondary
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = colors.emerald.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f)),
+                            modifier = Modifier.padding(end = 12.dp)
+                        ) {
+                            Text(
+                                text = if (isBangla) "১০০% অটো-সিঙ্ক" else "100% Auto-Sync",
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.emerald,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.card)
@@ -160,7 +181,7 @@ private fun TrackerAnalyticsTab(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp),
+        contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Streak & Weekly Rate Cards
@@ -324,7 +345,7 @@ private fun TrackerCalendarTab(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp),
+        contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Date Selector Pill Row
@@ -462,7 +483,7 @@ private fun TrackerAutoQazaTab(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp),
+        contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {

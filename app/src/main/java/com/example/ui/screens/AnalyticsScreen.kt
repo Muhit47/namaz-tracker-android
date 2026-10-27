@@ -75,7 +75,7 @@ fun AnalyticsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 32.dp)
+            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
             // 1. Financy Metric Bento Cards (Streak & Weekly Rate)
             item {
