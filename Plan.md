@@ -1,76 +1,70 @@
-# Project Plan & Roadmap (Plan) - Namaz Tracker
+# Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
+**App Version:** `v2.2.0` (Build 4)  
+**Branch:** `android`  
+**Latest Remote Commit:** `0b9310c`
+
+---
 
 ## 1. Project Current Status
-- **Current Branch**: `main`
-- **Working Tree**: Clean (all changes committed in `a163da1df654def18777f31ad9193d6c3343485d`).
-- **Core Functionality**:
-  - Daily prayer logging with active Waqt highlight & Sunnah tracker.
-  - Qaza tracker with increment/decrement counters and lifetime estimator.
-  - Ramadan fasting and deeds tracker.
-  - Monthly consistency calendar and streak tracking.
-  - Al-Quran reader with Bengali & English translations and bookmarking.
-  - Hadith catalog and canonical book chapter caching.
-  - Bilingual i18n support (Bengali & English).
-  - PWA service worker with static asset caching.
-  - JSON backup and restore with transaction validation.
+- **Architecture**: Native Android Application in Kotlin + Jetpack Compose (Material3 + Custom Frosted Glass Primitives).
+- **Embedded Database**: AndroidX Room Database 2.6.1 (`namaz_tracker.db`) containing 114 Surahs, authentic Hadith collections, and user state.
+- **UI Design System**: Unified **iOS Frosted Glassmorphism & Rounded Pill System** (`IosGlassPill.kt`, `FinancyNavBar.kt`) with `RoundedCornerShape(999.dp)`, crystalline rim gradients, and micro-spring touch feedback.
+- **Working Tree**: Clean on branch `android`, synced with `origin/android`.
 
 ---
 
 ## 2. Testable Acceptance Criteria
-| ID | Area | Acceptance Criterion | Verification Command / Step |
-|---|---|---|---|
-| AC-1 | Core Server | Flask server boots up without error and responds to `GET /` and `GET /api/prayers/<today>`. | `python -c "import server; print('Server ready')"` and test GET endpoint |
-| AC-2 | Database | SQLite WAL mode enabled, 14 tables verified, zero schema corruption. | Check PRAGMA journal_mode and table counts |
-| AC-3 | Prayer Logging | `POST /api/prayers` persists `prayed`, `late`, `missed`, and `is_sunnah`. | Send test JSON POST and verify database row |
-| AC-4 | Qaza Management | Decrementing a Qaza counter reduces remaining count and increases completed count. | Send POST to `/api/qaza` and verify delta |
-| AC-5 | Localization | Toggling language swaps text strings between Bengali and English across all tabs. | Inspect `i18n.js` translation map coverage |
-| AC-6 | Backup & Restore | Exported JSON payload re-imports cleanly, preserving all prayer logs without loss. | Test round-trip export -> import cycle |
-| AC-7 | PWA & Offline | Service Worker installs, activates, and handles asset requests. | Validate `sw.js` syntax and static asset list |
+
+| ID | Area | Acceptance Criterion | Verification Method |
+|:---|:---|:---|:---|
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `versionCode = 4` and `versionName = "2.2.0"`. `MoreScreen` displays `v2.2.0` / `ভার্সন ২.২.০`. | Verify `build.gradle.kts` and UI text match. |
+| **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
+| **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
+| **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
+| **AC-5** | Prayer Logging | Tapping quick status pills updates prayer status (`jamaah`, `on_time`, `late`, `missed`) with haptic feedback. | Test UI event dispatches to `NamazViewModel.updatePrayerStatus()`. |
+| **AC-6** | Qaza Counter | Tap `+1 Missed` increments missed count; tap `Prayed ✓` decrements remaining count and increments completed count. | Verify `NamazViewModel.addOneMissed()` and `recordQazaCompleted()`. |
+| **AC-7** | Localization | Toggling language in `MoreScreen` switches all strings between Bengali and English dynamically. | Verify `uiState.isBangla` propagates across all screens. |
+| **AC-8** | Room Database | Room DB boots from `namaz_tracker.db` asset with 15 tables without schema mismatch. | Validate `NamazDatabase.kt` entity list and asset integrity. |
 
 ---
 
-## 3. Tasks
+## 3. Completed Milestones
 
-### Task 1: Comprehensive Unit & API Test Suite Setup (Completed)
-- **Goal**: Add an automated pytest / unittest test suite covering all API endpoints in `server.py` and database operations in `db.py`.
-- **Status**: [x] Completed (2026-10-26). 22 tests passing with 100% pass rate.
-- **Scope**:
-  - Created `tests/test_server.py` (10 tests) and `tests/test_db.py` (12 tests).
-  - Test `/api/prayers` (GET, POST with validation).
-  - Test `/api/qaza` (increment, decrement, invalid action handling).
-  - Test `/api/backup/export` and `/api/backup/import` round-trip.
-  - Test `/api/stats/monthly` and `/api/stats/monthly-detail`.
-  - Added `pytest>=8.0.0` to `requirements.txt`.
-- **Verification**: `python -m pytest tests -v` (22/22 passed) and `python -m unittest discover tests` (22/22 passed).
+### Milestone 1: Core Android Migration & Room DB Integration (`v2.0.0`, Build 2)
+- [x] Migrated from initial web prototype to native Kotlin + Jetpack Compose Android app.
+- [x] Prepackaged SQLite database with full Al-Quran (114 Surahs with Bengali transliteration & translation) and Hadith books into Room DB.
+- [x] Implemented MVVM architecture with `NamazViewModel` and `NamazRepository`.
 
-### Task 2: City & Prayer Time Auto-Geolocation (Completed)
-- **Goal**: Allow users to optionally detect their city/location via browser GPS / IP geolocation in addition to the dropdown selection.
-- **Status**: [x] Completed (2026-10-26).
-- **Scope**:
-  - Added "Auto Detect Location" button in the city modal with responsive glassmorphism styling and dark mode support.
-  - Implemented `handleAutoDetectLocation()` using `navigator.geolocation` and BigDataCloud reverse geocode client API with fallback to nearest division coordinates.
-  - Dynamic Aladhan API query using exact coordinates (`latitude` & `longitude`) and offline solar calculation fallback.
-  - Added bilingual translations in `i18n.js` for auto-detection button, status messages, and feedback.
-- **Verification**: Syntax check via `node --check` on JS files, all 22 tests passing via pytest and unittest.
+### Milestone 2: Pure Vector Navigation & Asset Integration (`v2.1.0`, Build 3)
+- [x] Replaced generic raster icons with pure XML Android Vector Drawables:
+  - Al-Quran (Sacred Book with ribbon)
+  - Namaz (Minaret & Dome Mosque)
+  - Ibadah (Cupped Praying Hands with crescent & star)
+  - Tracker (3-Bar upward trending analytics chart)
+  - More (4-Tile grid)
+- [x] Added dual filled (active) and outlined (inactive) vector states for seamless dark/light theme support.
 
-### Task 3: Audio Adhan / Waqt Reminder Notifications
-- **Goal**: Provide optional Web Audio or local browser notifications when a prayer Waqt starts.
-- **Scope**:
-  - Implement Web Notifications API permission check and toggle in settings.
-  - Add audio chime or gentle Takbeer notification sound.
-- **Verification**: Trigger notification with synthetic clock time and verify sound playback.
-
-### Task 4: Ramadan Fasting History & Multi-Year Archive
-- **Goal**: Persist Ramadan daily fasting logs across multiple years with yearly archive viewing.
-- **Scope**:
-  - Add `ramadan_log` table to `db.py`.
-  - Update backup export/import to include `ramadan_log`.
-- **Verification**: Log 30 days of fasting, export backup, import into clean database, verify retention.
+### Milestone 3: Full iOS Frosted Glass & Rounded Pill Overhaul (`v2.2.0`, Build 4)
+- [x] Created `IosGlassPill.kt` primitive library:
+  - `IosGlassPillButton`: Translucent glass body, crystalline rim gradient border, bouncy spring scale (`0.95f`), and tactile haptic feedback.
+  - `IosGlassChip`: Capsule status chip with subtle glow.
+  - `IosGlassSegmentedControl`: Apple-inspired floating capsule dock switcher.
+- [x] Upgraded Floating Bottom Dock (`FinancyNavBar.kt`) to `RoundedCornerShape(999.dp)` frosted glass capsule.
+- [x] Eliminated all boxy rectangular buttons (`10.dp` / `12.dp`) across all 5 main tabs and secondary screens.
+- [x] Bumped version to `v2.2.0` (Build 4) across `app/build.gradle.kts` and `MoreScreen.kt`.
 
 ---
 
-## 4. Execution Workflow Rules
-- **Permission**: Strictly follow current authorization (AUDIT ONLY / PLAN ONLY).
-- **Implementation**: Proceed to execute Tasks only upon user approval.
-- **Focus**: Execute one small, focused task at a time.
-- **Testing**: Run test checks after any change before declaring completion.
+## 4. Remaining Tasks & Roadmap
+
+### Task 4.1: Audio Recitation & Adhan Background Service Polish
+- **Goal**: Polish background playback of Ayah recitations and optional gentle Adhan notification audio.
+- **Verification**: Trigger audio in Surah detail; verify audio stops cleanly on back navigation or background pause.
+
+### Task 4.2: Automated Compose UI Test Suite
+- **Goal**: Expand Android instrumentation / Compose UI tests (`createComposeRule`) verifying touch interactions on `IosGlassPillButton` and `IosGlassSegmentedControl`.
+- **Verification**: Run `./gradlew connectedAndroidTest`.
+
+### Task 4.3: Home Screen App Widget Expansion
+- **Goal**: Enhance `PrayerWidgetProvider` with next prayer countdown pill directly on Android home screen.
+- **Verification**: Place widget on device home screen and observe automated Waqt updates.

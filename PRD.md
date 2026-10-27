@@ -1,107 +1,87 @@
-# Product Requirements Document (PRD) - Namaz Tracker
+# Product Requirements Document (PRD) - Namaz Tracker (নামায ট্র্যাকার)
+**App Version:** `v2.2.0` (Build 4)  
+**Platform:** Native Android (Kotlin + Jetpack Compose)  
+**Target SDK:** 36 (Android 14+ compatible, minSdk 24)
+
+---
 
 ## 1. Overview & Vision
-**Namaz Tracker** (নামায ট্র্যাকার) is a comprehensive, privacy-first, bilingual (Bengali & English) Islamic web application and Progressive Web App (PWA). It empowers Muslims to track daily prayers (Fard and Sunnah), manage lifetime missed (Qaza) prayers, observe Ramadan fasting and rituals, access Quran with translations, explore authentic Hadith collections, and review prayer guides and monthly consistency analytics.
+**Namaz Tracker** (নামায ট্র্যাকার) is a privacy-first, bilingual (Bengali & English) native Android application crafted for Muslim daily life and spiritual habit tracking. Designed with an **iOS-style Frosted Glassmorphic & Rounded Pill UI design system**, the app operates completely offline with an embedded SQLite Room database containing the complete Al-Quran (114 Surahs with Bengali/English translations and audio), 6 authentic Hadith collections, lifetime Qaza prayer management, digital Tasbih counters, comprehensive daily Duas, and detailed prayer guidelines.
 
-The application works completely offline as a PWA, storing personal tracking data locally in an SQLite database with full JSON import/export capability for zero data lock-in.
-
----
-
-## 2. Target Audience
-- Daily practicing Muslims seeking an intuitive tracker for their 5 daily prayers (Fajr, Dhuhr, Asr, Maghrib, Isha).
-- Users aiming to systematically calculate, track, and complete lifetime Qaza (missed) prayers.
-- Bengali- and English-speaking users desiring Quran recitations, translations, authentic Hadith study, and prayer/wudu learning materials in a unified dashboard.
-- Users who need offline-capable, responsive mobile and desktop access without mandatory account registration.
+All user logs and spiritual progress remain 100% on-device with zero required cloud logins, offering zero data lock-in via one-tap JSON backup and restore.
 
 ---
 
-## 3. Core Features & Functional Requirements
+## 2. Target Audience & Personas
+- **Daily Practicing Muslims**: Track 5 daily prayers (Fajr, Dhuhr, Asr, Maghrib, Isha) with Jama'at status, on-time completion, and accompanying Sunnah prayers.
+- **Qaza Rectifiers**: Systematically calculate, track, and decrement lifetime missed (Qaza Umri) prayers with waqt-by-waqt quick action steppers.
+- **Quran & Hadith Students**: Read, search, recite, and bookmark 114 Surahs and authentic Hadith books offline.
+- **Daily Dhikr & Dua Performers**: Digital tactile Tasbih counter with target milestones, haptic feedback, and categorized morning/evening Adhkar.
+- **Bilingual Users**: Seamless instant toggle between native Bengali (বাংলা) and English across all tabs and components.
 
-### 3.1 Daily Prayer Tracking (`Today` Tab)
-- **5 Daily Prayers**: Fajr, Dhuhr, Asr, Maghrib, Isha.
-- **Prayer Statuses**:
-  - `pending` (Default state)
-  - `prayed` (Completed on time)
-  - `late` (Completed after primary window)
-  - `missed` (Not performed / queued for Qaza)
-- **Sunnah Toggle**: Track whether accompanying Sunnah prayers were completed (`is_sunnah` boolean).
-- **Personal Notes**: Optional notes per prayer entry.
-- **Dynamic Waqt Highlighting**: Real-time identification and visual highlight of the currently active prayer window based on city prayer times.
-- **Location & Calculation**: City selection (default Dhaka; supports dynamic calculation via Aladhan API with offline approximate time fallbacks).
-- **Date Navigation**: Previous/Next day navigation buttons and calendar selector.
+---
 
-### 3.2 Qaza Management (`Qaza` Tab)
-- Counter for each of the 5 prayers (`total_missed`, `completed`, `remaining`).
-- Quick increment/decrement actions:
-  - Add missed prayer (`+1`)
-  - Mark completed prayer (`-1` remaining, `+1` completed)
-- Lifetime Qaza estimate calculator (calculates missed prayers based on puberty age and years of non-observance).
-- Progress percentage indicator per prayer and total aggregate progress.
+## 3. Core Architecture & Navigation (5 Main Tabs)
 
-### 3.3 Ramadan Tracker (`Ramadan` Tab)
-- Sehri and Iftar countdown clocks and time display.
-- Fasting status tracker (`fasted`, `missed`, `exempt`).
-- Daily deeds checklist (Taraweeh, Quran recitation, Charity/Sadaqah, Dhikr).
-- 30-day Ramadan calendar schedule with timings.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Namaz Tracker v2.2.0                            │
+├────────────────────────────────────────────────────────────────────────┤
+│  [1. Prayers]    [2. Quran]    [3. Ibadah]    [4. Tracker]   [5. More] │
+│   (Home Tab)    (Surah/Hadith) (Dhikr/Dua)     (History)    (Settings) │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-### 3.4 Consistency Analytics & Calendar (`Analytics` Tab)
-- Monthly calendar grid visualizing daily prayer completion levels (color-coded dots / completion bar).
-- Current streak and longest streak counter (consecutive days with all 5 prayers logged as prayed).
-- Monthly breakdown statistics (total prayed, late, missed, Sunnah ratio).
-- Monthly trend charts and distribution summaries.
+### 3.1 Tab 1: Prayers & Today (`HomeScreen.kt`, `PrayerCard.kt`)
+- **Next/Current Waqt Hero Card**: Real-time remaining time countdown, current prayer window detection, and city location selector (Dhaka and all BD districts + worldwide).
+- **5 Daily Prayer Cards**: Fajr, Dhuhr, Asr, Maghrib, Isha with dual status tracking:
+  - Fard Prayer Status: `Pending`, `Jama'at` (জামাত), `On-Time` (আদায়), `Late` (দেরিতে), `Qaza` (কাযা), `Missed` (মিস).
+  - Sunnah Toggle: Companion Sunnah indicator.
+  - Tactile iOS Pill Status Selector with instant haptic ticks and micro-spring scale animations.
+- **Additional Prayers Card**: Tahajjud, Ishraq, Chasht, and Awwabin prayer guidelines and timings.
+- **Friday Jumu'ah Indicator**: Contextual Friday prayer mode replacing Dhuhr when active.
 
-### 3.5 Learning Guides (`Prayer Guide` & `Wudu` Tabs)
-- Step-by-step prayer instructions (Fard, Sunnah, Witr, Janazah, Eid).
-- Visual postures, Arabic text, Bengali transliteration, and translations.
-- Wudu (ablution) steps, Fard/Sunnah components, and invalidating conditions.
+### 3.2 Tab 2: Al-Quran & Authentic Hadith (`QuranHadithScreen.kt`)
+- **iOS Frosted Glass Sub-Tab Switcher**: Seamless switching between **Al-Quran** and **Hadith Sharif**.
+- **Al-Quran Reader (`QuranScreen.kt`)**:
+  - Full catalog of 114 Surahs with Arabic script, Bengali/English phonetics, revelation types (Makki/Madani), and Ayah counts.
+  - Last read resume indicator pill.
+  - Interactive Ayah Reader: Ayah-by-ayah Arabic text, Bengali transliteration, Bengali/English translations, and audio player integration.
+  - Ayah bookmarking and clipboard copy.
+- **Authentic Hadith Collections (`HadithScreen.kt`)**:
+  - 8 Thematic Categories (Faith, Prayer, Character, Knowledge, etc.).
+  - 6 Canonical Books: Sahih Bukhari, Sahih Muslim, Sunan an-Nasa'i, Sunan Abi Dawud, Jami' at-Tirmidhi, Sunan Ibn Majah.
+  - Fast offline full-text search across narrators, Arabic text, and Bengali translations.
+  - Hadith bookmarking and chapter drill-downs.
 
-### 3.6 Al-Quran Reader (`Quran` Tab)
-- Surah index (all 114 Surahs with Arabic name, Bengali phonetic name, English name, Ayah count, and revelation type).
-- Ayah-by-ayah reading interface with Arabic script, Bengali transliteration, Bengali translation, and English translation.
-- Interactive bookmarking (toggle favorite/saved Ayahs).
-- Last-read position tracking with quick resume button.
+### 3.3 Tab 3: Ibadah & Spiritual Tools (`IbadahScreen.kt`)
+- **Featured Daily Dhikr Card**: One-tap quick counter with preset targets (e.g., 100 times).
+- **Spiritual Tool Suite**:
+  1. **Digital Tasbih (`TasbihScreen.kt`)**: Tactile full-screen bead/counter with haptic feedback, audio click option, lap counters, reset controls, and custom dhikr creator.
+  2. **Daily Du'as & Adhkar (`DuaAdhkarScreen.kt`)**: Categorized Duas (Morning, Evening, Namaz, Protection) with target repetitions and completion badges.
+  3. **Asmaul Husna (`AsmaulHusnaScreen.kt`)**: 99 Beautiful Names of Allah with Arabic calligraphy, Bengali phonetics, and detailed spiritual virtues.
 
-### 3.7 Hadith Collections (`Hadith` Tab)
-- Daily Hadith showcase on the main dashboard.
-- Topic/Category browsing (Faith, Prayer, Ramadan, Good Manners, etc.).
-- Complete canonical Hadith books:
-  - Sahih al-Bukhari
-  - Sahih Muslim
-  - Jami' at-Tirmidhi
-  - Sunan Abi Dawud
-  - Sunan an-Nasa'i
-  - Sunan Ibn Majah
-- Chapter-by-chapter reading with pagination, Arabic text, Bengali translation, English translation, and grade classification.
-- Hadith bookmarking and last-read chapter/hadith tracker.
+### 3.4 Tab 4: Tracker & Consistency Analytics (`TrackerScreen.kt`, `QazaScreen.kt`)
+- **iOS Glass Segmented Control**: Fast switching between Weekly, Monthly, Yearly, and History periods.
+- **Visual Progress Graphs**: Completion percentage bar, breakdown metrics (Jama'at vs Solitary vs Missed), and consistency streaks.
+- **Interactive Calendar Log**: Date picker to inspect historical prayer logs for any past date.
+- **Qaza Umri Hub (`QazaScreen.kt`)**:
+  - Dedicated steppers for all 5 prayers: `+1 Missed` and `Prayed ✓` quick actions.
+  - Lifetime missed prayers calculator based on years of missed obligations.
+  - Recovery progress percentage and remaining count tracking.
 
-### 3.8 Bilingual Localization (i18n)
-- Seamless one-click switching between Bengali (`bn`) and English (`en`).
-- Fully localized UI strings, prayer names, statuses, notifications, navigation menus, and reading interfaces.
-
-### 3.9 PWA & Offline Capability
-- Installable web app via `manifest.json`.
-- Service Worker (`sw.js`) caching static assets and providing network-first with cache-fallback for API requests.
-- Full offline functionality for cached data.
-
-### 3.10 Data Backup & Portability
-- Export full user data (prayers log, Qaza records, bookmarks, settings, reading history) as a single JSON file.
-- Safe import/restore mechanism with input validation and deduplication.
+### 3.5 Tab 5: Settings & Utilities (`MoreScreen.kt`)
+- **App Version & Build Status**: Displays **`v2.2.0` (Build 4)** in top bar badge and footer.
+- **Step-by-Step Learning Guides (`GuidesScreen.kt`)**: Detailed prayer and wudu visual postures, conditions, and invalidators.
+- **Qibla Compass (`QiblaScreen.kt`)**: Device sensor-based compass pointing toward the Kaaba in Makkah.
+- **Language Switcher**: Instant app-wide toggle between Bengali and English.
+- **App Theme**: Modern Emerald Light and Dark modes.
+- **Notifications & Reminders**: Daily prayer notification scheduler with test notification trigger.
+- **Data Safety**: Offline JSON export and import for seamless multi-device backup and recovery.
 
 ---
 
 ## 4. Non-Functional Requirements
-- **Performance**: Initial page load < 1.5s; prayer status toggle response < 100ms.
-- **Reliability**: SQLite WAL mode enabled to handle concurrent reads/writes without lock contention; 15-second busy timeout.
-- **Resilience**: Automatic retry backoff for external Hadith and prayer time API calls; fallback to local approximations when offline.
-- **Security & Privacy**: No personal identifiers collected; all prayer and spiritual records stored locally on user device or host database.
-- **Responsive Design**: Mobile-first fluid layout adapting seamlessly across mobile phones (360px+), tablets, and desktops.
-
----
-
-## 5. Acceptance Criteria
-1. Changing date updates prayer list immediately and shows saved statuses accurately.
-2. Clicking status (`prayed`, `late`, `missed`) persists to SQLite immediately without requiring page refresh.
-3. Language toggle switches all visible UI elements instantly and persists preference in `localStorage`.
-4. Qaza increment/decrement updates remaining counts accurately without race conditions.
-5. Exported JSON backup file can be imported into a clean database, completely restoring prayer history and Qaza counts.
-6. Offline mode successfully serves the cached app shell and read-only content when network is disconnected.
+- **Performance**: Zero-latency offline operation; Room DB queries dispatched via Kotlin Coroutines on `Dispatchers.IO`.
+- **UI & UX Quality**: iOS-style frosted glassmorphism, 999.dp capsule rounded pills, multi-stop crystalline rim gradient borders, and `Spring.DampingRatioMediumBouncy` press animations.
+- **Zero Cloud Dependence**: User prayer records, bookmarks, and counters remain confidential on local storage.

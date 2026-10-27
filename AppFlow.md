@@ -1,112 +1,87 @@
-# Application Flow (AppFlow) - Namaz Tracker
+# Application Flow & Navigation (AppFlow) - Namaz Tracker
+**App Version:** `v2.2.0` (Build 4)  
+**Navigation Model:** Single-Activity Compose Architecture with Floating Frosted Glass Dock
 
-## 1. High-Level Architecture & Screen Map
+---
+
+## 1. Top-Level Navigation Map (5 Tabs)
 
 ```
-                  ┌────────────────────────────────────────┐
-                  │           App Shell & Header           │
-                  │ [Logo] [City Pill] [Next Waqt] [Theme] │
-                  │ [i18n BN/EN] [Backup/Restore] [Date]   │
-                  └──────────────────┬─────────────────────┘
-                                     │
-    ┌──────────┬──────────┬──────────┼──────────┬──────────┬──────────┬──────────┐
-    ▼          ▼          ▼          ▼          ▼          ▼          ▼          ▼
-[Today]     [Qaza]    [Ramadan] [Analytics]  [Guide]    [Wudu]    [Quran]   [Hadith]
- Prayers,    Missed     Sehri/     Monthly    Prayer     Wudu      Surahs,    Books,
- Active      Counter,   Iftar      Calendar,  Rules,    Steps,     Ayahs,    Chapters,
- Waqt,       Estimator  Tracker    Streak     Postures  Sunnahs  Bookmarks  Bookmarks
- Notes
+                       [ App Entry / Splash ]
+                                 │
+                                 ▼
+                     [ MainActivity (Compose) ]
+                                 │
+         ┌───────────────┬───────┴───────┬───────────────┬───────────────┐
+         ▼               ▼               ▼               ▼               ▼
+     [ Tab 1 ]       [ Tab 2 ]       [ Tab 3 ]       [ Tab 4 ]       [ Tab 5 ]
+      Prayers          Quran          Ibadah          Tracker          More
+    (Daily Waqt)    (Quran/Hadith)  (Dhikr/Dua)     (Analytics)     (Settings)
 ```
 
 ---
 
-## 2. User Journey Flows
+## 2. Screen-by-Screen User Flows
 
-### 2.1 Daily Prayer Logging Flow
-1. **App Launch**:
-   - Service worker serves cached app shell if offline.
-   - Frontend requests prayer times for current city and fetches today's prayer logs from `GET /api/prayers/<YYYY-MM-DD>?active=<ActiveWaqt>`.
-   - UI renders 5 prayer cards: Fajr, Dhuhr, Asr, Maghrib, Isha.
-   - Currently active prayer card is highlighted with `active-waqt-glow` and animated badge.
-2. **Marking a Prayer**:
-   - User taps status button: `Prayed` (সবুজ / Green), `Late` (কমলা / Amber), or `Missed` (লাল / Red).
-   - Frontend optimistically updates card UI.
-   - `POST /api/prayers` is sent with `{ date, prayer_name, status, is_sunnah, notes }`.
-   - On success, streak indicator and today's summary badge recalculate.
-   - User can toggle Sunnah checkbox or add a note via the note icon modal.
-3. **Navigating Dates**:
-   - User clicks `Previous Day` (`<`) or `Next Day` (`>`) or opens the date picker dropdown.
-   - Active date updates; UI fetches `/api/prayers/<selected_date>`.
-   - If selected date is not today, the active waqt highlight is disabled.
-
-### 2.2 Qaza Tracking & Recovery Flow
-1. **Viewing Missed Counts**:
-   - User switches to `Qaza` tab.
-   - App loads aggregate summary from `GET /api/qaza`.
-   - Displays individual cards for Fajr, Dhuhr, Asr, Maghrib, Isha with missed count, completed count, and remaining progress bar.
-2. **Logging Completed Qaza**:
-   - User taps `-1` on any prayer card when a missed prayer is fulfilled.
-   - Sends `POST /api/qaza` with `{ prayer_name, action: "decrement" }`.
-   - Backend decreases `total_missed`, increments `completed`, and returns updated state.
-3. **Qaza Estimator Modal**:
-   - User clicks "Calculate Lifetime Qaza" button.
-   - Inputs age of puberty (e.g., 14) and years/months of unperformed prayers.
-   - Modal calculates total missed prayers (5 × 365 × years) and offers a one-click button to update baseline Qaza records.
-
-### 2.3 Quran Reading & Navigation Flow
-1. **Surah Selection**:
-   - User selects `Quran` tab.
-   - App fetches Surah list from `GET /api/quran/surahs`.
-   - Surahs displayed with numbers, Arabic title, transliteration, English name, and Ayah count.
-   - "Resume Last Read" banner displays if a prior bookmark exists (`GET /api/quran/last-read`).
-2. **Ayah Reader**:
-   - Clicking a Surah loads Ayahs from `GET /api/quran/surah/<surah_no>`.
-   - Shows Bismillah header (except Surah At-Tawbah).
-   - Each Ayah presents:
-     - Arabic Uthmani text.
-     - Bengali pronunciation (transliteration) & English transliteration.
-     - Bengali & English translations.
-     - Bookmark toggle button.
-     - Copy Ayah button.
-3. **Bookmarking & Position**:
-   - Clicking bookmark icon calls `POST /api/quran/bookmarks` and saves position via `POST /api/quran/last-read`.
-
-### 2.4 Hadith Library & Chapter Reader Flow
-1. **Catalog View**:
-   - User opens `Hadith` tab.
-   - Top section displays Daily Hadith (`GET /api/hadith/daily`).
-   - Category selector filters curated hadiths by theme (`Faith`, `Salah`, `Etiquette`).
-   - Full Books list allows choosing canonical collections (Bukhari, Muslim, Tirmidhi, Abu Dawood, Nasai, Ibn Majah).
-2. **Book & Chapter Hierarchy**:
-   - Selecting a book requests `GET /api/hadith/book/<book_id>/chapters`.
-   - If chapters are not yet in local DB, backend fetches from external API, caches them, and returns them.
-   - Selecting a chapter requests `GET /api/hadith/book/<book_id>/chapter/<chapter_no>`.
-   - Displays Hadiths with Arabic text, English/Bengali translation, narrator attribution, and authenticity grade.
-
-### 2.5 Data Backup & Restore Flow
-1. **Export**:
-   - User clicks `Backup` button in header.
-   - App triggers `GET /api/backup/export`.
-   - Browser downloads JSON file: `namaz_tracker_backup_YYYY-MM-DD.json`.
-2. **Import / Restore**:
-   - User clicks `Restore` button and selects a backup `.json` file.
-   - App validates JSON structure on frontend, then posts payload to `POST /api/backup/import`.
-   - Backend performs transaction validation, updates DB tables, and returns `{ success: true }`.
-   - UI alerts success and reloads today's data.
+### 2.1 Tab 1: Prayers (`HomeScreen.kt`)
+1. **Header Bar**:
+   - App branding and current Gregorian + Hijri date.
+   - Interactive City Badge: Tap opens `CitySelectionDialog` with quick search across 64 Bangladesh districts & global coordinates.
+2. **Next Waqt Hero Card**:
+   - Live countdown timer showing remaining minutes until next prayer.
+   - Dynamic prayer window badge.
+3. **5 Daily Prayer Cards (`PrayerCard.kt`)**:
+   - Displays Waqt name, start time, and end time.
+   - Interactive Status Pill: Quick tap cycles through `Jama'at`, `On-Time`, `Late`, `Qaza`, `Missed`.
+   - Sunnah toggle pill switches companion Sunnah status.
+4. **Additional Prayers**:
+   - Expanding row for Tahajjud, Ishraq, Chasht, and Awwabin timings.
 
 ---
 
-## 3. Offline & PWA Sync State Machine
+### 2.2 Tab 2: Quran & Hadith (`QuranHadithScreen.kt`)
+1. **Top Segmented Control**:
+   - `[Al-Quran]` (আল-কুরআন) vs `[Hadith Sharif]` (হাদীস শরীফ).
+2. **Quran Flow (`QuranScreen.kt`)**:
+   - Search bar for instant Surah filtering by name or number.
+   - Last Read card with one-tap "পড়ুন" (Resume) button.
+   - 114 Surah list items: Tap opens full-screen **Surah Ayah View**.
+   - Ayah View: Play audio recitation, copy Ayah text, toggle bookmark, or mark as last read. Back button returns to Surah index.
+3. **Hadith Flow (`HadithScreen.kt`)**:
+   - 4-pill dock: `Categories`, `Books`, `Search`, `Saved`.
+   - Books drill-down: Select Book (e.g. Sahih Bukhari) -> Chapter index -> Hadith detail with Arabic, Bengali translation, and narrator grade.
 
-```
-              ┌────────────────────────┐
-              │      Page Initialized   │
-              └───────────┬────────────┘
-                          │
-            ┌─────────────┴─────────────┐
-            ▼                           ▼
-    [Online Mode]                [Offline Mode]
-    • Fetch dynamic API          • Service Worker serves cache
-    • Fetch prayer times         • Local approximate Waqt times
-    • Sync pending actions       • SQLite local reads (desktop/host)
-```
+---
+
+### 2.3 Tab 3: Ibadah & Tools (`IbadahScreen.kt`)
+1. **Daily Dhikr Card**:
+   - Featured Dhikr with one-tap count button.
+2. **Spiritual Tools Grid**:
+   - **Digital Tasbih**: Opens `TasbihScreen.kt` with full-screen circular touch area, lap counter, preset picker (33, 99, 100), and custom dhikr creator.
+   - **Du'as & Adhkar**: Opens `DuaAdhkarScreen.kt` with filter chips (Morning, Evening, After Salah, Protection) and repetition counters.
+   - **Asmaul Husna**: Opens `AsmaulHusnaScreen.kt` showing 99 Names grid with dialog detail for virtues and meaning.
+
+---
+
+### 2.4 Tab 4: Tracker & Analytics (`TrackerScreen.kt`)
+1. **Period Switcher**:
+   - iOS Glass Segmented Control: `Weekly`, `Monthly`, `Yearly`, `History`.
+2. **Consistency Analytics**:
+   - Completion rate bar and breakdown ring (Jama'at, Solitary, Missed).
+   - Historical date inspection: Calendar picker allows viewing prayer logs for any past date.
+3. **Qaza Umri Manager (`QazaScreen.kt`)**:
+   - Accessible directly from Tracker tab.
+   - Waqt steppers: Tap `+1 Missed` to increment or `Prayed ✓` to mark recovered.
+   - Lifetime calculator modal calculates total missed prayers based on years and gender rules.
+
+---
+
+### 2.5 Tab 5: Settings & Guides (`MoreScreen.kt`)
+1. **Top Bar**:
+   - App title with live **`v2.2.0`** status pill badge.
+2. **Utilities**:
+   - **Learning Guides (`GuidesScreen.kt`)**: Step-by-step prayer & wudu instructions.
+   - **Qibla Compass (`QiblaScreen.kt`)**: Sensor-driven compass pointing to the Kaaba.
+   - **Language Toggle**: Instant switch between English and Bengali without app restart.
+   - **Notification Manager**: Configure Waqt reminders and test system notifications.
+   - **Backup & Restore**: Export full JSON payload or restore from clipboard/file.
