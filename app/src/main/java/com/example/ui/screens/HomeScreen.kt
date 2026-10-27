@@ -172,7 +172,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 90.dp)
+            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
             // 1. Date Navigation bar (Financy Pill Style)
             item {
@@ -447,132 +447,163 @@ private fun FinancyHeroWaqtCard(
     val progress = (elapsedMins / totalMins).coerceIn(0.05f, 1f)
     val animatedProgress by animateFloatAsState(targetValue = progress, label = "waqt_progress")
 
+    val isCurrentActive = prayer != null
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (colors.isDark) 12.dp else 4.dp,
-                shape = RoundedCornerShape(24.dp),
-                ambientColor = if (colors.isDark) Color(0x60000000) else Color(0x15000000)
+                elevation = if (colors.isDark) 12.dp else 5.dp,
+                shape = RoundedCornerShape(22.dp),
+                ambientColor = if (isCurrentActive) colors.emerald.copy(alpha = 0.3f) else Color(0x15000000),
+                spotColor = if (isCurrentActive) colors.emerald.copy(alpha = 0.4f) else Color(0x20000000)
             ),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = colors.card
-        ),
-        border = BorderStroke(1.2.dp, if (prayer != null) colors.emerald.copy(alpha = 0.6f) else colors.border)
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.card),
+        border = BorderStroke(
+            if (isCurrentActive) 1.5.dp else 1.dp,
+            if (isCurrentActive) colors.emerald else colors.border
+        )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .then(
+                    if (isCurrentActive) {
+                        Modifier.background(
+                            Brush.linearGradient(
+                                colors = if (colors.isDark) {
+                                    listOf(Color(0xFF064E3B), Color(0xFF0F291E))
+                                } else {
+                                    listOf(Color(0xFF047857), Color(0xFF065F46))
+                                }
+                            )
+                        )
+                    } else Modifier
+                )
+                .padding(18.dp)
         ) {
-            // Header Row: Active Badge & Status Tag
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Header Row: Active Badge & Status Tag
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(colors.emerald)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (isCurrentActive) Color(0xFF6EE7B7) else colors.emerald)
+                        )
+                        Text(
+                            text = if (prayer != null) {
+                                if (isBangla) "চলতি ওয়াক্ত • ${prayer.banglaName}" else "Active Waqt • ${prayer.englishName}"
+                            } else {
+                                if (isBangla) "পরবর্তী ওয়াক্ত • ${info.nextPrayer.banglaName}" else "Next Waqt • ${info.nextPrayer.englishName}"
+                            },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isCurrentActive) Color.White else colors.textPrimary
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isCurrentActive) Color.White.copy(alpha = 0.2f) else (if (isDone) colors.emeraldSoft else colors.cardSubtle),
+                        border = BorderStroke(0.8.dp, if (isCurrentActive) Color.White.copy(alpha = 0.35f) else (if (isDone) colors.emerald else colors.border))
+                    ) {
+                        Text(
+                            text = if (isDone) {
+                                if (isBangla) "✓ আদায় সম্পন্ন" else "✓ Done"
+                            } else {
+                                val remFormatted = PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, isBangla)
+                                if (prayer != null) {
+                                    if (isBangla) "$remFormatted বাকি" else "$remFormatted left"
+                                } else {
+                                    if (isBangla) "$remFormatted পর" else "in $remFormatted"
+                                }
+                            },
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isCurrentActive) Color.White else (if (isDone) colors.emerald else colors.textSecondary),
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Waqt Name & Time Range
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (prayer != null) (if (isBangla) prayer.banglaName else prayer.englishName)
+                        else (if (isBangla) info.nextPrayer.banglaName else info.nextPrayer.englishName),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isCurrentActive) Color.White else colors.emerald
                     )
                     Text(
-                        text = if (prayer != null) {
-                            if (isBangla) "চলতি ওয়াক্ত • ${prayer.banglaName}" else "Active Waqt • ${prayer.englishName}"
-                        } else {
-                            if (isBangla) "পরবর্তী ওয়াক্ত • ${info.nextPrayer.banglaName}" else "Next Waqt • ${info.nextPrayer.englishName}"
-                        },
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
+                        text = if (prayer != null) "${info.startTime} — ${info.endTime}" else "${info.startTime} — ${info.endTime}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isCurrentActive) Color.White.copy(alpha = 0.85f) else colors.textSecondary
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = if (isDone) colors.emeraldSoft else colors.cardSubtle,
-                    border = BorderStroke(0.8.dp, if (isDone) colors.emerald else colors.border)
-                ) {
-                    Text(
-                        text = if (isDone) {
-                            if (isBangla) "✓ আদায় সম্পন্ন" else "✓ Done"
-                        } else {
-                            if (isBangla) "বাকি আছে" else "Pending"
-                        },
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isDone) colors.emerald else colors.textMuted,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(10.dp))
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Large Remaining Countdown (Financy Balance typography)
-            Text(
-                text = if (prayer != null) {
-                    if (isBangla) "${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, true)} বাকি"
-                    else "${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, false)} left"
-                } else {
-                    if (isBangla) "${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, true)} পর শুরু"
-                    else "Starts in ${PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, false)}"
-                },
-                fontSize = 26.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.emerald
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Smooth Linear Progress Bar
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = colors.emerald,
-                trackColor = colors.cardSubtle
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Bottom Info: Waqt Range & Next Waqt
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (prayer != null) "🕒 ${info.startTime} — ${info.endTime}" else "🕒 ${info.endTime}",
-                    fontSize = 11.5.sp,
-                    color = colors.textMuted,
-                    fontWeight = FontWeight.Medium
+                // Progress Bar
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = if (isCurrentActive) Color(0xFF34D399) else colors.emerald,
+                    trackColor = if (isCurrentActive) Color.White.copy(alpha = 0.2f) else colors.cardSubtle
                 )
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Bottom Line: Next Waqt Info
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isBangla) "পরবর্তী: ${info.nextPrayer.banglaName}" else "Next: ${info.nextPrayer.englishName}",
+                        text = if (isBangla) "পরবর্তী: ${info.nextPrayer.banglaName} (${info.endTime})"
+                        else "Next: ${info.nextPrayer.englishName} (${info.endTime})",
                         fontSize = 11.5.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary
+                        fontWeight = FontWeight.Medium,
+                        color = if (isCurrentActive) Color.White.copy(alpha = 0.9f) else colors.textSecondary
                     )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier.size(10.dp),
-                        tint = colors.textMuted
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text = if (isBangla) "ওয়াক্তের বিবরণ" else "Details",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isCurrentActive) Color(0xFFA7F3D0) else colors.emerald
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            modifier = Modifier.size(9.dp),
+                            tint = if (isCurrentActive) Color(0xFFA7F3D0) else colors.emerald
+                        )
+                    }
                 }
             }
         }
@@ -590,77 +621,61 @@ private fun FinancyBentoGrid(
     onNavigateToTracker: (() -> Unit)? = null
 ) {
     val colors = FinancyTheme.colors
+    val activeTasbih = uiState.tasbihs.find { it.id == uiState.selectedTasbihId } ?: uiState.tasbihs.firstOrNull()
+    val tasbihCount = activeTasbih?.currentCount ?: 0
+    val tasbihTarget = activeTasbih?.targetCount ?: 33
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Tile 1: Qibla Compass
-            BentoTile(
-                modifier = Modifier.weight(1f),
-                icon = "🧭",
-                title = if (isBangla) "কিবলা দিক" else "Qibla Direction",
-                value = "${uiState.qiblaBearing.toInt()}°",
-                subtitle = if (isBangla) "মক্কাভিমুখী" else "Facing Kaaba",
-                badge = if (uiState.isAlignedWithQibla) "✓ সঠিক" else "কম্পাস",
-                badgeColor = colors.emerald,
-                onClick = onNavigateToQibla
-            )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Tile 1: Qibla Compass
+        CompactActionPill(
+            modifier = Modifier.weight(1f),
+            icon = "🧭",
+            title = if (isBangla) "কিবলা" else "Qibla",
+            value = "${uiState.qiblaBearing.toInt()}°",
+            badgeColor = colors.emerald,
+            onClick = onNavigateToQibla
+        )
 
-            // Tile 2: Digital Tasbih
-            BentoTile(
-                modifier = Modifier.weight(1f),
-                icon = "📿",
-                title = if (isBangla) "তাসবীহ কাউন্টার" else "Digital Tasbih",
-                value = if (isBangla) "সুবহানাল্লাহ" else "SubhanAllah",
-                subtitle = if (isBangla) "দৈনিক যিকির" else "Daily Dhikr",
-                badge = "হ্যাপটিক",
-                badgeColor = colors.cyan,
-                onClick = onNavigateToTasbih
-            )
-        }
+        // Tile 2: Digital Tasbih
+        CompactActionPill(
+            modifier = Modifier.weight(1f),
+            icon = "📿",
+            title = if (isBangla) "তাসবীহ" else "Tasbih",
+            value = if (isBangla) "${DateUtil.toBanglaDigits(tasbihCount.toString())}/${DateUtil.toBanglaDigits(tasbihTarget.toString())}" else "$tasbihCount/$tasbihTarget",
+            badgeColor = colors.cyan,
+            onClick = onNavigateToTasbih
+        )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Tile 3: Streak & Consistency
-            BentoTile(
-                modifier = Modifier.weight(1f),
-                icon = "🔥",
-                title = if (isBangla) "নামাযের স্ট্রিক" else "Daily Streak",
-                value = if (isBangla) "${DateUtil.toBanglaDigits(uiState.currentStreakDays.toString())} দিন"
-                else "${uiState.currentStreakDays} Days",
-                subtitle = if (isBangla) "${DateUtil.toBanglaDigits(uiState.weeklyCompletionRate.toString())}% সাপ্তাহিক হার"
-                else "${uiState.weeklyCompletionRate}% weekly rate",
-                badge = "ধারাবাহিক",
-                badgeColor = colors.amber,
-                onClick = onNavigateToTracker
-            )
+        // Tile 3: Streak & Consistency
+        CompactActionPill(
+            modifier = Modifier.weight(1f),
+            icon = "🔥",
+            title = if (isBangla) "স্ট্রিক" else "Streak",
+            value = if (isBangla) "${DateUtil.toBanglaDigits(uiState.currentStreakDays.toString())} দিন" else "${uiState.currentStreakDays}d",
+            badgeColor = colors.amber,
+            onClick = onNavigateToTracker
+        )
 
-            // Tile 4: Ramadan Sehri / Iftar
-            BentoTile(
-                modifier = Modifier.weight(1f),
-                icon = "🌙",
-                title = if (isBangla) "মাহে রমজান" else "Ramadan & Roza",
-                value = "${uiState.prayerTimes.maghrib}",
-                subtitle = if (isBangla) "ইফতারের সময়" else "Iftar time",
-                badge = if (uiState.isRozaObservedToday) "রোজা সম্পন্ন ✓" else "দোয়া ও নিয়ত",
-                badgeColor = colors.emerald,
-                onClick = onOpenRamadanDua
-            )
-        }
+        // Tile 4: Ramadan Iftar
+        CompactActionPill(
+            modifier = Modifier.weight(1f),
+            icon = "🌙",
+            title = if (isBangla) "ইফতার" else "Iftar",
+            value = uiState.prayerTimes.maghrib.split(" ")[0],
+            badgeColor = colors.emerald,
+            onClick = onOpenRamadanDua
+        )
     }
 }
 
 @Composable
-private fun BentoTile(
+private fun CompactActionPill(
     icon: String,
     title: String,
     value: String,
-    subtitle: String,
-    badge: String,
     badgeColor: Color,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
@@ -669,9 +684,9 @@ private fun BentoTile(
 
     Card(
         modifier = modifier
-            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colors.card),
         border = BorderStroke(1.dp, colors.border),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -679,44 +694,28 @@ private fun BentoTile(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(horizontal = 6.dp, vertical = 9.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = icon, fontSize = 20.sp)
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = colors.cardSubtle,
-                    border = BorderStroke(0.6.dp, colors.border)
-                ) {
-                    Text(
-                        text = badge,
-                        fontSize = 9.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = badgeColor,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
+            Text(text = icon, fontSize = 17.sp)
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = colors.textPrimary,
-                maxLines = 1
+                maxLines = 1,
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(1.dp))
             Text(
-                text = subtitle,
-                fontSize = 10.5.sp,
-                color = colors.textMuted,
-                maxLines = 1
+                text = title,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.textSecondary,
+                maxLines = 1,
+                textAlign = TextAlign.Center
             )
         }
     }

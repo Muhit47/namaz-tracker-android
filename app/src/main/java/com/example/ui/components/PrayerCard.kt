@@ -403,3 +403,30 @@ private fun StatusPill(
         }
     }
 }
+
+@Composable
+fun FinancyPrayerCard(
+    prayerType: PrayerType,
+    timeStr: String,
+    log: PrayerLogEntity?,
+    isBangla: Boolean,
+    isCurrentWaqt: Boolean = false,
+    remainingMinutes: Int? = null,
+    onStatusChange: (PrayerStatus) -> Unit,
+    onToggleSunnah: () -> Unit,
+    onUpdateNotes: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    PrayerCard(
+        prayerType = prayerType,
+        timeString = timeStr,
+        log = log,
+        isBangla = isBangla,
+        onStatusSelected = { code -> onStatusChange(PrayerStatus.fromCode(code)) },
+        onToggleSunnah = onToggleSunnah,
+        onSaveNotes = onUpdateNotes,
+        isActiveWaqt = isCurrentWaqt,
+        remainingMinutes = remainingMinutes,
+        modifier = modifier
+    )
+}
