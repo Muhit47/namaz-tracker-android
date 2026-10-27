@@ -264,11 +264,12 @@ private fun DuaCard(
             ) {
                 Text(
                     text = dua.arabic,
-                    fontSize = 22.sp,
+                    fontFamily = AmiriFontFamily,
+                    fontSize = 23.sp,
                     fontWeight = FontWeight.Bold,
                     color = Slate900,
                     textAlign = TextAlign.Right,
-                    lineHeight = 36.sp,
+                    lineHeight = 42.sp,
                     modifier = Modifier.padding(14.dp)
                 )
             }

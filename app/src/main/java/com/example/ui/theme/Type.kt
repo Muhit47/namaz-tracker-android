@@ -8,100 +8,136 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.R
 
-val HindSiliguriFontFamily = FontFamily(
-    Font(R.font.hind_siliguri, FontWeight.Normal)
+// 1. Noto Sans Bengali (Official Google Font for all Bangla & English UI)
+val NotoSansBengaliFontFamily = FontFamily(
+    Font(R.font.noto_sans_bengali_regular, FontWeight.Normal),
+    Font(R.font.noto_sans_bengali_medium, FontWeight.Medium),
+    Font(R.font.noto_sans_bengali_semibold, FontWeight.SemiBold),
+    Font(R.font.noto_sans_bengali_bold, FontWeight.Bold)
 )
 
+// Backward-compatibility alias
+val HindSiliguriFontFamily = NotoSansBengaliFontFamily
+
+// 2. Amiri Arabic (Standard for Qur'an Ayahs, Duas & Hadith texts)
+val AmiriFontFamily = FontFamily(
+    Font(R.font.amiri_regular, FontWeight.Normal),
+    Font(R.font.amiri_bold, FontWeight.Bold)
+)
+
+// Specialized Arabic Typography Helpers
+val ArabicTitleStyle = TextStyle(
+    fontFamily = AmiriFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 22.sp,
+    lineHeight = 36.sp
+)
+
+val ArabicAyahStyle = TextStyle(
+    fontFamily = AmiriFontFamily,
+    fontWeight = FontWeight.Normal,
+    fontSize = 26.sp,
+    lineHeight = 48.sp
+)
+
+val ArabicLargeCalligraphyStyle = TextStyle(
+    fontFamily = AmiriFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 28.sp,
+    lineHeight = 46.sp
+)
+
+// Global Material 3 Typography tuned for Bengali & English legibility
 val Typography = Typography(
     displayLarge = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 57.sp,
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 54.sp,
         lineHeight = 64.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 45.sp,
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 42.sp,
         lineHeight = 52.sp
     ),
     displaySmall = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 36.sp,
-        lineHeight = 44.sp
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 34.sp,
+        lineHeight = 42.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 32.sp,
-        lineHeight = 40.sp
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 30.sp,
+        lineHeight = 38.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 28.sp,
-        lineHeight = 36.sp
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 26.sp,
+        lineHeight = 34.sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 24.sp,
-        lineHeight = 32.sp
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 30.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
+        fontSize = 20.sp,
         lineHeight = 28.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 24.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
-        fontWeight = FontWeight.Bold,
+        fontFamily = NotoSansBengaliFontFamily,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
-        lineHeight = 20.sp
+        lineHeight = 22.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
+        fontSize = 15.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.2.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp
+        fontSize = 13.5.sp,
+        lineHeight = 21.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 16.sp
+        lineHeight = 18.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp
+        fontSize = 13.5.sp,
+        lineHeight = 19.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 16.sp
+        lineHeight = 17.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = HindSiliguriFontFamily,
+        fontFamily = NotoSansBengaliFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp
+        fontSize = 10.5.sp,
+        lineHeight = 15.sp
     )
 )

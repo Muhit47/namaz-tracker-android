@@ -745,11 +745,12 @@ private fun ChapterFullHadithsView(
                     if (!item.textAr.isNull_or_blank()) {
                         Text(
                             text = item.textAr!!,
-                            fontSize = 18.sp,
+                            fontFamily = AmiriFontFamily,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Slate900,
                             textAlign = TextAlign.End,
-                            lineHeight = 30.sp,
+                            lineHeight = 36.sp,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1138,10 +1139,11 @@ private fun HadithCardItem(
             if (hadith.textAr.isNotBlank()) {
                 Text(
                     text = hadith.textAr,
-                    fontSize = 19.sp,
+                    fontFamily = AmiriFontFamily,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
-                    lineHeight = 31.sp,
+                    lineHeight = 36.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth()
                 )

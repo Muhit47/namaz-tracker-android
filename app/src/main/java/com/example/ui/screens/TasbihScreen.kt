@@ -162,7 +162,8 @@ fun TasbihScreen(
                         // Arabic text
                         Text(
                             text = activeTasbih.arabicText,
-                            fontSize = 28.sp,
+                            fontFamily = AmiriFontFamily,
+                            fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.emerald,
                             textAlign = TextAlign.Center

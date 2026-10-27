@@ -299,7 +299,8 @@ private fun SurahListItem(
             // Arabic name
             Text(
                 text = surah.nameAr,
-                fontSize = 20.sp,
+                fontFamily = AmiriFontFamily,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = colors.emerald
             )
@@ -402,7 +403,8 @@ private fun SurahReaderView(
                 actions = {
                     Text(
                         text = surah.nameAr,
-                        fontSize = 20.sp,
+                        fontFamily = AmiriFontFamily,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.emerald,
                         modifier = Modifier.padding(end = 16.dp)
@@ -520,7 +522,8 @@ private fun SurahReaderView(
                         ) {
                             Text(
                                 text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                                fontSize = 24.sp,
+                                fontFamily = AmiriFontFamily,
+                                fontSize = 26.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.emerald,
                                 textAlign = TextAlign.Center
@@ -680,10 +683,11 @@ private fun SurahReaderView(
                         // Arabic Ayah text
                         Text(
                             text = ayah.textAr,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = AmiriFontFamily,
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Normal,
                             color = colors.textPrimary,
-                            lineHeight = 40.sp,
+                            lineHeight = 46.sp,
                             textAlign = TextAlign.End,
                             modifier = Modifier.fillMaxWidth()
                         )

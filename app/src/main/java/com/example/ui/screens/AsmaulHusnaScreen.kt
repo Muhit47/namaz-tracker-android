@@ -194,7 +194,8 @@ fun AsmaulHusnaScreen(
 
                     Text(
                         text = name.arabic,
-                        fontSize = 28.sp,
+                        fontFamily = AmiriFontFamily,
+                        fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = Emerald800,
                         textAlign = TextAlign.Right
@@ -293,7 +294,8 @@ private fun NameCard(
 
             Text(
                 text = item.arabic,
-                fontSize = 24.sp,
+                fontFamily = AmiriFontFamily,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = Emerald700,
                 textAlign = TextAlign.Center

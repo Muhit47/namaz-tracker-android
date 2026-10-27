@@ -443,7 +443,7 @@ private fun DuaDisplayCard(item: DuaItem, isBangla: Boolean) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = item.title, fontWeight = FontWeight.Bold, color = colors.neonGreen, style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = item.arabic, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth(), lineHeight = 28.sp, color = colors.textPrimary)
+            Text(text = item.arabic, fontFamily = AmiriFontFamily, fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth(), lineHeight = 34.sp, color = colors.textPrimary)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}${item.pron}", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp, color = colors.neonGreen)
             Spacer(modifier = Modifier.height(4.dp))
