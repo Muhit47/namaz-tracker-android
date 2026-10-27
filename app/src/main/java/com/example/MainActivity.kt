@@ -47,7 +47,10 @@ class MainActivity : ComponentActivity() {
             val viewModel: NamazViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-            NamazTrackerTheme(darkTheme = uiState.isDarkMode) {
+            NamazTrackerTheme(
+                darkTheme = uiState.isDarkMode,
+                isBangla = uiState.isBangla
+            ) {
                 NamazAppRoot(viewModel = viewModel)
             }
         }

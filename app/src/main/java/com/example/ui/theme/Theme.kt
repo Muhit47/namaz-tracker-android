@@ -134,6 +134,7 @@ object FinancyTheme {
 @Composable
 fun NamazTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    isBangla: Boolean = true,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -158,11 +159,12 @@ fun NamazTrackerTheme(
     }
 
     val financyTokens = if (darkTheme) DarkFinancyTokens else LightFinancyTokens
+    val typography = if (isBangla) BengaliTypography else EnglishTypography
 
     CompositionLocalProvider(LocalFinancy provides financyTokens) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = typography,
             content = content
         )
     }
@@ -172,7 +174,8 @@ fun NamazTrackerTheme(
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = false,
+    isBangla: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    NamazTrackerTheme(darkTheme = darkTheme, content = content)
+    NamazTrackerTheme(darkTheme = darkTheme, isBangla = isBangla, content = content)
 }

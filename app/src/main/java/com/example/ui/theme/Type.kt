@@ -8,7 +8,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.R
 
-// 1. Noto Sans Bengali (Official Google Font for all Bangla & English UI)
+// 1. Inter Font Family (Modern geometric sans-serif for English UI, numerals, and prayer times)
+val InterFontFamily = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold)
+)
+
+// 2. Noto Sans Bengali (Official Google Font for Bengali UI)
 val NotoSansBengaliFontFamily = FontFamily(
     Font(R.font.noto_sans_bengali_regular, FontWeight.Normal),
     Font(R.font.noto_sans_bengali_medium, FontWeight.Medium),
@@ -19,7 +27,7 @@ val NotoSansBengaliFontFamily = FontFamily(
 // Backward-compatibility alias
 val HindSiliguriFontFamily = NotoSansBengaliFontFamily
 
-// 2. Amiri Arabic (Standard for Qur'an Ayahs, Duas & Hadith texts)
+// 3. Amiri Arabic (Standard for Qur'an Ayahs, Duas & Hadith texts)
 val AmiriFontFamily = FontFamily(
     Font(R.font.amiri_regular, FontWeight.Normal),
     Font(R.font.amiri_bold, FontWeight.Bold)
@@ -47,97 +55,124 @@ val ArabicLargeCalligraphyStyle = TextStyle(
     lineHeight = 46.sp
 )
 
-// Global Material 3 Typography tuned for Bengali & English legibility
-val Typography = Typography(
+// Dedicated Inter English & Numeric Typography Styles
+val InterHeroTimerStyle = TextStyle(
+    fontFamily = InterFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 32.sp,
+    lineHeight = 38.sp
+)
+
+val InterMetricNumberStyle = TextStyle(
+    fontFamily = InterFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+    lineHeight = 26.sp
+)
+
+val InterTimestampStyle = TextStyle(
+    fontFamily = InterFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 13.sp,
+    lineHeight = 18.sp
+)
+
+// Factory function to create complete Material 3 Typography for any FontFamily
+fun createAppTypography(family: FontFamily): Typography = Typography(
     displayLarge = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 54.sp,
         lineHeight = 64.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 42.sp,
         lineHeight = 52.sp
     ),
     displaySmall = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.SemiBold,
         fontSize = 34.sp,
         lineHeight = 42.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 30.sp,
         lineHeight = 38.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 34.sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.SemiBold,
         fontSize = 22.sp,
         lineHeight = 30.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 28.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 24.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
         lineHeight = 22.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.2.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
         fontSize = 13.5.sp,
         lineHeight = 21.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 18.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Medium,
         fontSize = 13.5.sp,
         lineHeight = 19.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 17.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = NotoSansBengaliFontFamily,
+        fontFamily = family,
         fontWeight = FontWeight.Medium,
         fontSize = 10.5.sp,
         lineHeight = 15.sp
     )
 )
+
+// Global Typographies
+val BengaliTypography = createAppTypography(NotoSansBengaliFontFamily)
+val EnglishTypography = createAppTypography(InterFontFamily)
+val Typography = BengaliTypography
