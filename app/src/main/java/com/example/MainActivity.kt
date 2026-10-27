@@ -39,8 +39,8 @@ enum class NamazNavTab(
     HOME(
         titleEn = "Prayers",
         titleBn = "নামায",
-        filledIcon = Icons.Filled.Mosque,
-        outlinedIcon = Icons.Outlined.Mosque,
+        filledResId = R.drawable.ic_mosque_filled,
+        outlinedResId = R.drawable.ic_mosque_outlined,
         testTag = "nav_tab_home"
     ),
     QURAN_HADITH(
