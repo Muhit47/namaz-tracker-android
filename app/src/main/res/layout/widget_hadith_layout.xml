@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_hadith_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_glass_bg"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- Header: Tag & Interactive Shuffle Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:layout_marginEnd="6dp"
+                android:src="@drawable/widget_dot_red" />
+
+            <TextView
+                android:id="@+id/widget_hadith_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/noto_sans_bengali_bold"
+                android:text="দৈনিক হাদিস ও নসিহত"
+                android:textColor="#E2E8F0"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_hadith_shuffle_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_pill_button"
+            android:fontFamily="@font/noto_sans_bengali_bold"
+            android:paddingHorizontal="9dp"
+            android:paddingVertical="4dp"
+            android:text="নতুন হাদিস ↻"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <!-- Hadith Quote Body -->
+    <TextView
+        android:id="@+id/widget_hadith_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="@font/noto_sans_bengali_regular"
+        android:lineSpacingExtra="3dp"
+        android:maxLines="3"
+        android:text="রাসূলুল্লাহ (ﷺ) বলেছেন: যে ব্যক্তি খাঁটি অন্তরে সময়মতো পাঁচ ওয়াক্ত নামায আদায় করে, তার জন্য জান্নাতের ওয়াদা রয়েছে।"
+        android:textColor="#E2E8F0"
+        android:textSize="11.5sp" />
+
+    <!-- Footer Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/widget_hadith_source"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/inter_semibold"
+            android:text="সহীহ বুখারী • হাদিস নং ৫২৮"
+            android:textColor="#10B981"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/widget_hadith_open_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/inter_medium"
+            android:text="অ্যাপে পড়ুন ↗"
+            android:textColor="#94A3B8"
+            android:textSize="9.5sp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -58,17 +58,57 @@
             </intent-filter>
         </receiver>
 
-        <!-- Home Screen App Widget Provider -->
+        <!-- 1. 5-Waqt Daily Prayer Board -->
         <receiver
             android:name=".widget.PrayerWidgetProvider"
             android:exported="true"
-            android:label="নামায সময়সূচী (Prayer Times)">
+            android:label="নামায সময়সূচী (Daily Prayers)">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_info" />
+        </receiver>
+
+        <!-- 2. Active Waqt & Countdown Capsule (Nothing OS 4x1/2x1) -->
+        <receiver
+            android:name=".widget.ActiveWaqtWidgetProvider"
+            android:exported="true"
+            android:label="চলতি ওয়াক্ত ক্যাপসুল (Active Waqt)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_active_waqt_info" />
+        </receiver>
+
+        <!-- 3. Ramadan Sehri & Iftar Timer -->
+        <receiver
+            android:name=".widget.RamadanWidgetProvider"
+            android:exported="true"
+            android:label="মাহে রমজান টাইমার (Ramadan Timer)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_ramadan_info" />
+        </receiver>
+
+        <!-- 4. Interactive Hadith Reader with In-Widget Shuffle -->
+        <receiver
+            android:name=".widget.HadithWidgetProvider"
+            android:exported="true"
+            android:label="দৈনিক হাদিস রিডার (Daily Hadith)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.widget.ACTION_SHUFFLE_HADITH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_hadith_info" />
         </receiver>
     </application>
 

@@ -46,6 +46,7 @@ import com.example.util.DateUtil
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.widget.PrayerWidgetProvider
+import com.example.widget.WidgetHelper
 
 enum class MoreSubScreen {
     INDEX,
@@ -593,11 +594,11 @@ fun MoreScreen(
                         }
                     }
 
-                    // 3. Home Screen Widget Section
+                    // 3. Home Screen Widget Suite Section (Nothing OS + iOS Frosted Glass)
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (isBangla) "হোম স্ক্রিন উইজেট (App Widget)" else "Home Screen Widget",
+                            text = if (isBangla) "হোম স্ক্রিন উইজেট স্যুট (4 Widgets Suite)" else "Home Screen Widgets Suite",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = colors.emerald
@@ -606,7 +607,7 @@ fun MoreScreen(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
                             border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
@@ -618,7 +619,7 @@ fun MoreScreen(
                                     Surface(
                                         shape = CircleShape,
                                         color = colors.emerald.copy(alpha = 0.12f),
-                                        modifier = Modifier.size(40.dp)
+                                        modifier = Modifier.size(42.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = colors.emerald)
@@ -626,43 +627,62 @@ fun MoreScreen(
                                     }
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = if (isBangla) "হোম স্ক্রিন থেকে নামাজের সময় দেখুন" else "Prayer times on your home screen",
+                                            text = if (isBangla) "নাথিং ওএস ও আইওএস গ্লাস স্টাইল উইজেট" else "Nothing OS & iOS Glass Widgets",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
                                             color = colors.textPrimary
                                         )
                                         Text(
-                                            text = if (isBangla) "হোম স্ক্রিনের খালি জায়গায় চাপ দিয়ে ধরে 'Widgets' থেকে 'Namaz Tracker' যোগ করুন।" else "Touch & hold empty space on home screen, select 'Widgets' and add 'Namaz Tracker'.",
+                                            text = if (isBangla) "হোম স্ক্রিনের খালি জায়গায় লং-প্রেস করে 'Widgets' থেকে নামায ট্র্যাকারের যেকোনো উইজেট যোগ করুন।" else "Long-press empty space on home screen, tap 'Widgets' and choose your Namaz Tracker widget.",
                                             fontSize = 11.5.sp,
                                             color = colors.textSecondary
                                         )
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(14.dp))
 
-                                OutlinedButton(
+                                // List of 4 Widgets
+                                val widgetList = listOf(
+                                    Triple("🕌", if (isBangla) "চলতি ওয়াক্ত ক্যাপসুল (৪x১ / ২x১)" else "Active Waqt Capsule (4x1 & 2x1)", if (isBangla) "চলতি নামাজের নাম, সময় ও লাইভ রিমেইনিং কাউন্টডাউন" else "Current prayer name, time & live countdown pill"),
+                                    Triple("📅", if (isBangla) "৫ ওয়াক্ত নামাজের বোর্ড (৪x২)" else "5-Waqt Daily Board (4x2)", if (isBangla) "পাঁচ ওয়াক্তের পূর্ণ সময় ও অ্যাক্টিভ ওয়াক্তের গ্লোয়িং পিল হাইলাইট" else "Full daily schedule with active prayer glowing highlight"),
+                                    Triple("🌙", if (isBangla) "মাহে রমজান টাইমার (৪x২ / ৩x২)" else "Ramadan Fasting Timer (4x2 / 3x2)", if (isBangla) "আজকের সেহরি ও ইফতারের সময় এবং অবশিষ্ট কাউন্টডাউন" else "Sehri & Iftar timings with live countdown dock"),
+                                    Triple("📖", if (isBangla) "দৈনিক হাদিস রিডার (৪x২)" else "Daily Hadith Reader (4x2)", if (isBangla) "সহীহ হাদিস ও উইজেটের উপর থেকেই 'নতুন হাদিস ↻' বোতাম" else "Authentic hadiths with in-widget shuffle button")
+                                )
+
+                                widgetList.forEach { (icon, title, desc) ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = icon, fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(text = title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                                            Text(text = desc, fontSize = 10.5.sp, color = colors.textSecondary)
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                IosGlassPillButton(
+                                    text = if (isBangla) "সমস্ত উইজেট ডাটা রিফ্রেশ করুন" else "Refresh All Widgets Now",
+                                    isPrimary = false,
+                                    leadingIcon = {
+                                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.emerald)
+                                    },
                                     onClick = {
-                                        PrayerWidgetProvider.updateAllWidgets(context)
+                                        WidgetHelper.updateAllWidgets(context)
                                         Toast.makeText(
                                             context,
-                                            if (isBangla) "উইজেট ডাটা আপডেট করা হয়েছে" else "Widget data refreshed",
+                                            if (isBangla) "হোম স্ক্রিনের ৪টি উইজেটই আপডেট করা হয়েছে" else "All 4 widgets refreshed on home screen",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(999.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
-                                ) {
-                                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = if (isBangla) "উইজেট ডাটা রিফ্রেশ করুন" else "Refresh Widget Now",
-                                        fontSize = 12.5.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         }
                     }

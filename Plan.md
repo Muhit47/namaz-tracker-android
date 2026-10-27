@@ -1,7 +1,7 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.3.0` (Build 5)  
+**App Version:** `v2.4.0` (Build 6)  
 **Branch:** `android`  
-**Latest Remote Commit:** `8eef658`
+**Latest Remote Commit:** `3508a87`
 
 ---
 
@@ -17,7 +17,7 @@
 
 | ID | Area | Acceptance Criterion | Verification Method |
 |:---|:---|:---|:---|
-| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `versionCode = 5` and `versionName = "2.3.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.3.0` / `ভার্সন ২.৩.০`). | Verify `build.gradle.kts` and UI text match. |
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `versionCode = 6` and `versionName = "2.4.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.4.0` / `ভার্সন ২.৪.০`). | Verify `build.gradle.kts` and UI text match. |
 | **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
 | **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
 | **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
@@ -57,21 +57,22 @@
 
 ## 4. Remaining Tasks & Roadmap
 
-### Milestone 4: Smart Notifications, Adhan Service & Compose UI Test Suite (`v2.2.0`, Build 4)
-- [x] Implemented Smart Offline Adhan Background Service (`AzanPlaybackService.kt`) with Stop Action Notification.
-- [x] Added authentic offline raw audio files (`azan_makkah.mp3`, `azan_madinah.mp3`, `takbeer.mp3`).
-- [x] Added per-Waqt sound customization dialog, Muezzin picker, and lockscreen ongoing tracker in `MoreScreen.kt`.
-- [x] Verified Notification Service and raw audio integrity via `NotificationServiceTest.kt`.
-- [x] Built automated Compose UI test suite (`IosGlassUiComponentsTest.kt`) via Robolectric + `createComposeRule()` covering:
-  - `IosGlassPillButton`: Primary & secondary click triggers, disabled state click rejection, leading/trailing icon rendering.
-  - `IosGlassChip`: Selection toggling, text rendering, icon placement.
-  - `IosGlassSegmentedControl`: Multi-item tabs rendering, item switching callback, active item suppression.
-  - `HapticUtil` touch feedback integration and system service robustness.
+### Milestone 5: Nothing OS + iOS Frosted Glass Multi-Widget Suite (`v2.4.0`, Build 6)
+- [x] Designed & implemented 4 Nothing OS-inspired Frosted Glass Android App Widgets:
+  1. `ActiveWaqtWidgetProvider`: 4x1 & 2x1 capsule showing current waqt, status, and live countdown.
+  2. `PrayerWidgetProvider`: 4x2 full daily 5-waqt board with active waqt glowing frosted highlight.
+  3. `RamadanWidgetProvider`: 4x2 / 3x2 Ramadan timer showing Sehri end, Iftar, and remaining countdown.
+  4. `HadithWidgetProvider`: 4x2 authentic daily Hadith reader with interactive in-widget shuffle button (`ACTION_SHUFFLE_HADITH`).
+- [x] Centralized `WidgetHelper` with Bengali numeral translation, countdown formatter, and synchronized multi-widget updates.
+- [x] Automated language synchronization: App-wide language toggle immediately updates all 4 widgets.
+- [x] Added unit tests in `WidgetProvidersTest.kt` verifying layout updates, countdown formatting, and Hadith shuffling.
+- [x] Enhanced `MoreScreen` with Nothing OS & iOS Frosted Glass Widget Hub guide.
+- [x] Bumped app version to `v2.4.0` (Build 6).
 
 ---
 
 ## 4. Remaining Tasks & Roadmap
-
-### Task 4.3: Home Screen App Widget Expansion
-- **Goal**: Enhance `PrayerWidgetProvider` with next prayer countdown pill directly on Android home screen.
-- **Verification**: Place widget on device home screen and observe automated Waqt updates.
+- [x] **Task 4.1**: Audio Recitation & Adhan Background Service Polish (Completed in `v2.2.0`)
+- [x] **Task 4.2**: Automated Compose UI Test Suite Expansion (Completed in `v2.3.0`)
+- [x] **Task 4.3**: Home Screen App Multi-Widget Suite Expansion (Completed in `v2.4.0`)
+- [ ] **Milestone 6 (Next Ideas)**: Custom Azan audio upload / recording, Qibla AR camera compass enhancement, or Qaza prayer milestone notifications.

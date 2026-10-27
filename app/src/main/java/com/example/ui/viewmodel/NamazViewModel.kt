@@ -16,6 +16,7 @@ import com.example.util.HapticUtil
 import com.example.util.PrayerTimeCalculator
 import com.example.util.QiblaHelper
 import com.example.widget.PrayerWidgetProvider
+import com.example.widget.WidgetHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -141,7 +142,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         // Create Notification Channel & Schedule Waqt Alarms
         PrayerNotificationHelper.createNotificationChannel(application)
         PrayerAlarmScheduler.scheduleAllPrayers(application)
-        PrayerWidgetProvider.updateAllWidgets(application)
+        WidgetHelper.updateAllWidgets(application)
 
         // Calculate initial prayer times with restored city & Hanafi settings
         val initialCal = Calendar.getInstance()
@@ -549,7 +550,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         if (_uiState.value.isBangla == isBangla) return
         prefs.edit().putBoolean("is_bangla", isBangla).apply()
         _uiState.update { it.copy(isBangla = isBangla) }
-        PrayerWidgetProvider.updateAllWidgets(getApplication())
+        WidgetHelper.updateAllWidgets(getApplication())
     }
 
     fun toggleLanguage() {
@@ -574,7 +575,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         PrayerAlarmScheduler.scheduleAllPrayers(getApplication())
-        PrayerWidgetProvider.updateAllWidgets(getApplication())
+        WidgetHelper.updateAllWidgets(getApplication())
     }
 
     fun toggleHanafiAsr() {
@@ -589,7 +590,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         PrayerAlarmScheduler.scheduleAllPrayers(getApplication())
-        PrayerWidgetProvider.updateAllWidgets(getApplication())
+        WidgetHelper.updateAllWidgets(getApplication())
     }
 
     // Financy Theme: Dark / Light Mode Toggle
@@ -673,7 +674,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
                 if (parsed.qazaRecords.isNotEmpty()) {
                     repository.restoreQazaRecords(parsed.qazaRecords)
                 }
-                PrayerWidgetProvider.updateAllWidgets(getApplication())
+                WidgetHelper.updateAllWidgets(getApplication())
                 val successMsg = if (_uiState.value.isBangla) {
                     "সফলভাবে ${parsed.prayerLogs.size}টি নামায রেকর্ড ও ${parsed.qazaRecords.size}টি কাযা রেকর্ড রিস্টোর হয়েছে!"
                 } else {
