@@ -804,7 +804,7 @@ fun MoreScreen(
                                             try {
                                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Muhit47"))
                                                 context.startActivity(intent)
-                                            } catch (_: Exception) {}
+                                            } catch (e: Exception) {}
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
@@ -825,7 +825,7 @@ fun MoreScreen(
                                             try {
                                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Muhit47/namaz-tracker"))
                                                 context.startActivity(intent)
-                                            } catch (_: Exception) {}
+                                            } catch (e: Exception) {}
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
@@ -848,7 +848,7 @@ fun MoreScreen(
                                                     putExtra(Intent.EXTRA_SUBJECT, "Namaz Tracker v2.0 Feedback")
                                                 }
                                                 context.startActivity(intent)
-                                            } catch (_: Exception) {}
+                                            } catch (e: Exception) {}
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
