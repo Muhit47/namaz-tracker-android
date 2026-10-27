@@ -24,7 +24,7 @@ import java.util.Calendar
 
 data class NamazUiState(
     val selectedDate: String = DateUtil.getTodayIso(),
-    val isBangla: Boolean = true,
+    val isBangla: Boolean = false,
     val selectedCity: CityLocation = PrayerTimeCalculator.predefinedCities[0], // Dhaka
     val isHanafiAsr: Boolean = true,
     val prayerTimes: com.example.util.DailyPrayerTimes = PrayerTimeCalculator.calculateTimes(
@@ -102,7 +102,7 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(
         NamazUiState(
-            isBangla = prefs.getBoolean("is_bangla", true),
+            isBangla = prefs.getBoolean("is_bangla", false),
             isHanafiAsr = prefs.getBoolean("is_hanafi_asr", true),
             prayerNotificationsEnabled = prefs.getBoolean("prayer_notifications_enabled", true),
             notificationSoundMode = prefs.getString("notification_sound_mode", "full_azan") ?: "full_azan",

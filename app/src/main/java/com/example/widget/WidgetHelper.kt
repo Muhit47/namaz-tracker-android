@@ -22,7 +22,7 @@ object WidgetHelper {
 
     fun isBangla(context: Context): Boolean {
         val prefs = context.getSharedPreferences("namaz_app_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean("is_bangla", true)
+        return prefs.getBoolean("is_bangla", false)
     }
 
     fun isHanafi(context: Context): Boolean {

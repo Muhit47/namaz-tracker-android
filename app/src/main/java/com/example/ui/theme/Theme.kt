@@ -134,7 +134,7 @@ object FinancyTheme {
 @Composable
 fun NamazTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    isBangla: Boolean = true,
+    isBangla: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -174,7 +174,7 @@ fun NamazTrackerTheme(
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = false,
-    isBangla: Boolean = true,
+    isBangla: Boolean = false,
     content: @Composable () -> Unit
 ) {
     NamazTrackerTheme(darkTheme = darkTheme, isBangla = isBangla, content = content)

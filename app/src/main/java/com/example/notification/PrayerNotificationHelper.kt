@@ -187,7 +187,7 @@ object PrayerNotificationHelper {
     /**
      * Updates ongoing persistent notification on the lockscreen & status bar with active Waqt countdown.
      */
-    fun updateOngoingTrackerNotification(context: Context, isBangla: Boolean = true) {
+    fun updateOngoingTrackerNotification(context: Context, isBangla: Boolean = false) {
         createNotificationChannel(context)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

@@ -29,7 +29,7 @@ class AzanPlaybackService : Service() {
                 val prayerKey = intent.getStringExtra(EXTRA_PRAYER_KEY) ?: "fajr"
                 val timeStr = intent.getStringExtra(EXTRA_TIME_STR) ?: ""
                 val muezzin = intent.getStringExtra(EXTRA_MUEZZIN) ?: "makkah"
-                val isBangla = intent.getBooleanExtra(EXTRA_IS_BANGLA, true)
+                val isBangla = intent.getBooleanExtra(EXTRA_IS_BANGLA, false)
                 playAzan(prayerKey, timeStr, muezzin, isBangla)
             }
             ACTION_STOP_AZAN -> {
@@ -186,7 +186,7 @@ class AzanPlaybackService : Service() {
             prayerKey: String,
             timeStr: String,
             muezzin: String = "makkah",
-            isBangla: Boolean = true
+            isBangla: Boolean = false
         ) {
             val intent = Intent(context, AzanPlaybackService::class.java).apply {
                 action = ACTION_PLAY_AZAN

@@ -11,7 +11,7 @@ class PrayerAlarmReceiver : BroadcastReceiver() {
 
         val prefs = context.getSharedPreferences("namaz_app_prefs", Context.MODE_PRIVATE)
         val notificationsEnabled = prefs.getBoolean("prayer_notifications_enabled", true)
-        val isBangla = prefs.getBoolean("is_bangla", true)
+        val isBangla = prefs.getBoolean("is_bangla", false)
 
         if (notificationsEnabled) {
             PrayerNotificationHelper.showPrayerNotification(
