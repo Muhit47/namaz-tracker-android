@@ -28,7 +28,8 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerStatus
 import com.example.data.model.PrayerType
-import com.example.ui.components.FinancyPrayerCard
+import androidx.compose.ui.platform.LocalContext
+import com.example.ui.components.PrayerCard
 import com.example.ui.components.IosGlassSegmentedControl
 import com.example.ui.theme.FinancyTheme
 import com.example.ui.viewmodel.NamazUiState
@@ -313,6 +314,7 @@ private fun TrackerCalendarTab(
 ) {
     val colors = FinancyTheme.colors
     val selectedIso = uiState.selectedDate
+    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier
@@ -410,9 +412,9 @@ private fun TrackerCalendarTab(
             val log = uiState.currentDayLogs.find { it.prayerName.equals(prayerType.keyName, ignoreCase = true) }
             val status = log?.status?.let { PrayerStatus.fromCode(it) } ?: PrayerStatus.PENDING
 
-            FinancyPrayerCard(
+            PrayerCard(
                 prayerType = prayerType,
-                timeStr = when (prayerType) {
+                timeString = when (prayerType) {
                     PrayerType.FAJR -> uiState.prayerTimes.fajr
                     PrayerType.DHUHR -> uiState.prayerTimes.dhuhr
                     PrayerType.ASR -> uiState.prayerTimes.asr
@@ -422,14 +424,14 @@ private fun TrackerCalendarTab(
                 },
                 log = log,
                 isBangla = isBangla,
-                isCurrentWaqt = false,
-                onStatusChange = { newStatus ->
-                    viewModel.updatePrayerStatus(prayerType.keyName, newStatus.code)
+                isActiveWaqt = false,
+                onStatusSelected = { statusCode ->
+                    viewModel.updatePrayerStatus(prayerType.keyName, statusCode, context)
                 },
                 onToggleSunnah = {
-                    viewModel.toggleSunnah(prayerType.keyName)
+                    viewModel.toggleSunnah(prayerType.keyName, context)
                 },
-                onUpdateNotes = { notes ->
+                onSaveNotes = { notes ->
                     viewModel.updateNotes(prayerType.keyName, notes)
                 }
             )
@@ -500,7 +502,7 @@ private fun TrackerAutoQazaTab(
 
                     prayerNames.forEach { (type, names) ->
                         val (bn, en) = names
-                        val qazaRecord = uiState.qazaList.find { it.prayerName.equals(type.keyName, ignoreCase = true) }
+                        val qazaRecord = uiState.qazaRecords.find { it.prayerName.equals(type.keyName, ignoreCase = true) }
                         val missedCount = qazaRecord?.totalMissed ?: 0
                         val completedCount = qazaRecord?.completed ?: 0
 

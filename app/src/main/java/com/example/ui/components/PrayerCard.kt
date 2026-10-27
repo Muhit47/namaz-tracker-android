@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import com.example.util.HapticUtil
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -96,7 +97,7 @@ fun PrayerCard(
                         PrayerType.ASR -> "🌤️"
                         PrayerType.MAGHRIB -> "🌇"
                         PrayerType.ISHA -> "🌙"
-                        PrayerType.TAHAJJUD -> "✨"
+                        PrayerType.WITR -> "✨"
                     }
                     val waqtBgColor = when (prayerType) {
                         PrayerType.FAJR -> if (colors.isDark) Color(0x30E11D48) else Color(0xFFFFF1F2)
@@ -104,7 +105,7 @@ fun PrayerCard(
                         PrayerType.ASR -> if (colors.isDark) Color(0x300284C7) else Color(0xFFF0F9FF)
                         PrayerType.MAGHRIB -> if (colors.isDark) Color(0x30D97706) else Color(0xFFFFFBEB)
                         PrayerType.ISHA -> if (colors.isDark) Color(0x306366F1) else Color(0xFFEEF2FF)
-                        PrayerType.TAHAJJUD -> if (colors.isDark) Color(0x308B5CF6) else Color(0xFFF5F3FF)
+                        PrayerType.WITR -> if (colors.isDark) Color(0x308B5CF6) else Color(0xFFF5F3FF)
                     }
 
                     Box(

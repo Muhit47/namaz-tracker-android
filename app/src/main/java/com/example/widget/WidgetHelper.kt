@@ -6,7 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import com.example.MainActivity
-import com.example.data.model.CityLocation
+import com.example.util.CityLocation
 import com.example.util.PrayerTimeCalculator
 import java.util.Calendar
 

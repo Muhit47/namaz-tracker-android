@@ -208,8 +208,8 @@ object PrayerNotificationHelper {
         val times = PrayerTimeCalculator.calculateTimes(now, city, isHanafi)
         val activeInfo = PrayerTimeCalculator.getActiveWaqtInfo(now, times)
 
-        val activeName = if (activeInfo != null) {
-            if (isBangla) activeInfo.currentPrayer.banglaName else activeInfo.currentPrayer.englishName
+        val activeName = if (activeInfo != null && activeInfo.currentPrayer != null) {
+            if (isBangla) activeInfo.currentPrayer?.banglaName ?: "" else activeInfo.currentPrayer?.englishName ?: ""
         } else {
             if (isBangla) "ফজর" else "Fajr"
         }
