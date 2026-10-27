@@ -40,6 +40,7 @@ import com.example.ui.components.IosGlassChip
 import com.example.ui.components.IosGlassPillButton
 import com.example.ui.components.IosGlassSegmentedControl
 import com.example.ui.theme.*
+import com.example.util.AppVersionHelper
 import com.example.util.BackupRestoreHelper
 import com.example.util.DateUtil
 import com.example.ui.viewmodel.NamazUiState
@@ -150,7 +151,7 @@ fun MoreScreen(
                                     modifier = Modifier.padding(end = 12.dp)
                                 ) {
                                     Text(
-                                        text = if (isBangla) "ভার্সন ২.২.০" else "v2.2.0",
+                                        text = AppVersionHelper.getDisplayVersion(isBangla),
                                         fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colors.emerald,
@@ -850,7 +851,7 @@ fun MoreScreen(
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.35f))
                                     ) {
                                         Text(
-                                            text = if (isBangla) "ভার্সন ২.২.০" else "v2.2.0",
+                                            text = AppVersionHelper.getDisplayVersion(isBangla),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = colors.emerald,

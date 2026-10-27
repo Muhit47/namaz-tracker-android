@@ -1,7 +1,7 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.2.0` (Build 4)  
+**App Version:** `v2.3.0` (Build 5)  
 **Branch:** `android`  
-**Latest Remote Commit:** `0b9310c`
+**Latest Remote Commit:** `8eef658`
 
 ---
 
@@ -17,7 +17,7 @@
 
 | ID | Area | Acceptance Criterion | Verification Method |
 |:---|:---|:---|:---|
-| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `versionCode = 4` and `versionName = "2.2.0"`. `MoreScreen` displays `v2.2.0` / `ভার্সন ২.২.০`. | Verify `build.gradle.kts` and UI text match. |
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `versionCode = 5` and `versionName = "2.3.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.3.0` / `ভার্সন ২.৩.০`). | Verify `build.gradle.kts` and UI text match. |
 | **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
 | **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
 | **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
