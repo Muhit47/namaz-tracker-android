@@ -21,6 +21,34 @@ object HapticUtil {
         }
     }
 
+    fun lightTick(context: Context) {
+        try {
+            val vibrator = getVibrator(context)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(10)
+            }
+        } catch (e: Exception) {
+            // Ignore if vibration fails or not available
+        }
+    }
+
+    fun selectionTick(context: Context) {
+        try {
+            val vibrator = getVibrator(context)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(15)
+            }
+        } catch (e: Exception) {
+            // Ignore if vibration fails or not available
+        }
+    }
+
     fun vibrateMilestone(context: Context) {
         try {
             val vibrator = getVibrator(context)

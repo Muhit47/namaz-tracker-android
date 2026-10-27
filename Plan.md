@@ -57,13 +57,20 @@
 
 ## 4. Remaining Tasks & Roadmap
 
-### Task 4.1: Audio Recitation & Adhan Background Service Polish
-- **Goal**: Polish background playback of Ayah recitations and optional gentle Adhan notification audio.
-- **Verification**: Trigger audio in Surah detail; verify audio stops cleanly on back navigation or background pause.
+### Milestone 4: Smart Notifications, Adhan Service & Compose UI Test Suite (`v2.2.0`, Build 4)
+- [x] Implemented Smart Offline Adhan Background Service (`AzanPlaybackService.kt`) with Stop Action Notification.
+- [x] Added authentic offline raw audio files (`azan_makkah.mp3`, `azan_madinah.mp3`, `takbeer.mp3`).
+- [x] Added per-Waqt sound customization dialog, Muezzin picker, and lockscreen ongoing tracker in `MoreScreen.kt`.
+- [x] Verified Notification Service and raw audio integrity via `NotificationServiceTest.kt`.
+- [x] Built automated Compose UI test suite (`IosGlassUiComponentsTest.kt`) via Robolectric + `createComposeRule()` covering:
+  - `IosGlassPillButton`: Primary & secondary click triggers, disabled state click rejection, leading/trailing icon rendering.
+  - `IosGlassChip`: Selection toggling, text rendering, icon placement.
+  - `IosGlassSegmentedControl`: Multi-item tabs rendering, item switching callback, active item suppression.
+  - `HapticUtil` touch feedback integration and system service robustness.
 
-### Task 4.2: Automated Compose UI Test Suite
-- **Goal**: Expand Android instrumentation / Compose UI tests (`createComposeRule`) verifying touch interactions on `IosGlassPillButton` and `IosGlassSegmentedControl`.
-- **Verification**: Run `./gradlew connectedAndroidTest`.
+---
+
+## 4. Remaining Tasks & Roadmap
 
 ### Task 4.3: Home Screen App Widget Expansion
 - **Goal**: Enhance `PrayerWidgetProvider` with next prayer countdown pill directly on Android home screen.
