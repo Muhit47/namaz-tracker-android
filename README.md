@@ -3,7 +3,7 @@
 # 🕌 Namaz Tracker
 ### Modern Offline-First Islamic Companion & Spiritual Habit Tracker for Android
 
-[![Version](https://img.shields.io/badge/version-2.9.0%20(Build%2011)-emerald?style=for-the-badge&logo=android)](app/build.gradle.kts)
+[![Version](https://img.shields.io/badge/version-2.10.0%20(Build%2012)-emerald?style=for-the-badge&logo=android)](app/build.gradle.kts)
 [![Android](https://img.shields.io/badge/Android-API%2024%20to%2036-green?style=for-the-badge&logo=android)](app/build.gradle.kts)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue?style=for-the-badge&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)

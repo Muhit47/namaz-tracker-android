@@ -122,12 +122,6 @@ private fun FinancyNavItem(
     val interactionSource = remember { MutableInteractionSource() }
     val itemShape = RoundedCornerShape(999.dp)
 
-    val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.04f else 1.0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "tab_scale"
-    )
-
     val activePillBrush = if (isSelected) {
         if (colors.isDark) {
             Brush.linearGradient(
@@ -163,7 +157,6 @@ private fun FinancyNavItem(
     Box(
         modifier = modifier
             .padding(horizontal = 2.dp)
-            .scale(scale)
             .then(
                 if (isSelected) {
                     Modifier.shadow(
