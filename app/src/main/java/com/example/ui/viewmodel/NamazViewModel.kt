@@ -74,6 +74,10 @@ data class NamazUiState(
 
     // Notifications
     val prayerNotificationsEnabled: Boolean = true,
+    val notificationSoundMode: String = "full_azan", // "full_azan", "short_takbeer", "system_tone", "silent"
+    val selectedMuezzin: String = "makkah", // "makkah", "madinah"
+    val isLockscreenTrackerEnabled: Boolean = false,
+    val prayerOverrides: Map<String, String> = emptyMap(),
 
     // Dark Mode (Financy Fintech Adaptive Theme)
     val isDarkMode: Boolean = false
@@ -100,6 +104,18 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             isBangla = prefs.getBoolean("is_bangla", true),
             isHanafiAsr = prefs.getBoolean("is_hanafi_asr", true),
             prayerNotificationsEnabled = prefs.getBoolean("prayer_notifications_enabled", true),
+            notificationSoundMode = prefs.getString("notification_sound_mode", "full_azan") ?: "full_azan",
+            selectedMuezzin = prefs.getString("selected_muezzin", "makkah") ?: "makkah",
+            isLockscreenTrackerEnabled = prefs.getBoolean("lockscreen_tracker_enabled", false),
+            prayerOverrides = run {
+                val map = mutableMapOf<String, String>()
+                listOf("fajr", "dhuhr", "asr", "maghrib", "isha").forEach { key ->
+                    prefs.getString("override_$key", null)?.let { mode ->
+                        map[key] = mode
+                    }
+                }
+                map
+            },
             isDarkMode = prefs.getBoolean("is_dark_mode", false),
             selectedCity = run {
                 val savedName = prefs.getString("selected_city_en", "Dhaka")
@@ -592,7 +608,41 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
             PrayerAlarmScheduler.scheduleAllPrayers(context)
         } else {
             PrayerAlarmScheduler.cancelAllAlarms(context)
+            AzanPlaybackService.stopAzan(context)
         }
+    }
+
+    fun setNotificationSoundMode(mode: String) {
+        prefs.edit().putString("notification_sound_mode", mode).apply()
+        _uiState.update { it.copy(notificationSoundMode = mode) }
+    }
+
+    fun setSelectedMuezzin(muezzin: String) {
+        prefs.edit().putString("selected_muezzin", muezzin).apply()
+        _uiState.update { it.copy(selectedMuezzin = muezzin) }
+    }
+
+    fun toggleLockscreenTracker(context: Context) {
+        val newVal = !_uiState.value.isLockscreenTrackerEnabled
+        prefs.edit().putBoolean("lockscreen_tracker_enabled", newVal).apply()
+        _uiState.update { it.copy(isLockscreenTrackerEnabled = newVal) }
+        if (newVal) {
+            PrayerNotificationHelper.updateOngoingTrackerNotification(context, _uiState.value.isBangla)
+        } else {
+            PrayerNotificationHelper.cancelOngoingTrackerNotification(context)
+        }
+    }
+
+    fun setPrayerOverride(prayerKey: String, soundMode: String?) {
+        val current = _uiState.value.prayerOverrides.toMutableMap()
+        if (soundMode != null) {
+            prefs.edit().putString("override_$prayerKey", soundMode).apply()
+            current[prayerKey] = soundMode
+        } else {
+            prefs.edit().remove("override_$prayerKey").apply()
+            current.remove(prayerKey)
+        }
+        _uiState.update { it.copy(prayerOverrides = current) }
     }
 
     fun sendTestNotification(context: Context) {

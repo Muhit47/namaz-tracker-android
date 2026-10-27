@@ -36,6 +36,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.ui.components.IosGlassChip
+import com.example.ui.components.IosGlassPillButton
+import com.example.ui.components.IosGlassSegmentedControl
 import com.example.ui.theme.*
 import com.example.util.BackupRestoreHelper
 import com.example.util.DateUtil
@@ -65,6 +68,8 @@ fun MoreScreen(
     val context = LocalContext.current
     var showRestoreDialog by remember { mutableStateOf(false) }
     var restoreInputText by remember { mutableStateOf("") }
+    var showPerWaqtDialog by remember { mutableStateOf(false) }
+    var selectedOverrideWaqtKey by remember { mutableStateOf<String?>(null) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -376,11 +381,12 @@ fun MoreScreen(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(18.dp),
                             colors = CardDefaults.cardColors(containerColor = colors.surfaceCard),
                             border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
+                                // 1. Master Switch Row
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -394,7 +400,7 @@ fun MoreScreen(
                                             color = colors.textPrimary
                                         )
                                         Text(
-                                            text = if (isBangla) "প্রতিটি ওয়াক্ত শুরু হওয়ার সাথে সাথে অ্যালার্ট ও হাদিস বাণী পান" else "Get notified on exact time when each Waqt begins",
+                                            text = if (isBangla) "ওয়াক্ত শুরু হওয়া মাত্রই অ্যালার্ট ও সুমধুর আজান" else "Get notified on exact time when each Waqt begins",
                                             fontSize = 11.5.sp,
                                             color = colors.textSecondary
                                         )
@@ -418,28 +424,168 @@ fun MoreScreen(
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                if (uiState.prayerNotificationsEnabled) {
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    HorizontalDivider(color = colors.borderSubtle.copy(alpha = 0.5f), thickness = 0.8.dp)
+                                    Spacer(modifier = Modifier.height(14.dp))
 
-                                OutlinedButton(
-                                    onClick = {
-                                        viewModel.sendTestNotification(context)
-                                        Toast.makeText(
-                                            context,
-                                            if (isBangla) "টেস্ট নোটিফিকেশন পাঠানো হয়েছে" else "Test notification sent",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(999.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
-                                ) {
-                                    Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    // 2. Sound Mode Selector
                                     Text(
-                                        text = if (isBangla) "টেস্ট নোটিফিকেশন পরীক্ষা করুন" else "Send Test Notification",
+                                        text = if (isBangla) "ডিফল্ট সাউন্ড ও অ্যালার্ট মোড" else "Default Alert Sound Mode",
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 12.5.sp,
-                                        fontWeight = FontWeight.SemiBold
+                                        color = colors.textPrimary
+                                    )
+                                    Text(
+                                        text = if (isBangla) "ওয়াক্ত হওয়ার সাথে সাথে যে সাউন্ড বেজে উঠবে" else "Sound played immediately when Waqt begins",
+                                        fontSize = 11.sp,
+                                        color = colors.textSecondary
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    val soundModes = listOf("full_azan", "short_takbeer", "system_tone", "silent")
+                                    IosGlassSegmentedControl(
+                                        items = soundModes,
+                                        selectedItem = uiState.notificationSoundMode,
+                                        onItemSelected = { viewModel.setNotificationSoundMode(it) },
+                                        labelProvider = { mode ->
+                                            when (mode) {
+                                                "full_azan" -> if (isBangla) "🔊 আজান" else "🔊 Azan"
+                                                "short_takbeer" -> if (isBangla) "🔔 তাকবীর" else "🔔 Takbeer"
+                                                "system_tone" -> if (isBangla) "🎵 সাধারণ" else "🎵 Tone"
+                                                else -> if (isBangla) "🔕 নীরব" else "🔕 Silent"
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    // 3. Muezzin Choice (Visible when full_azan is selected)
+                                    if (uiState.notificationSoundMode == "full_azan") {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            text = if (isBangla) "মুয়াজ্জিন নির্বাচন করুন:" else "Select Muezzin:",
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = colors.textSecondary
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            IosGlassChip(
+                                                text = if (isBangla) "🕌 মক্কা শরীফ (Makkah)" else "🕌 Makkah Al-Mukarramah",
+                                                isSelected = uiState.selectedMuezzin == "makkah",
+                                                onClick = { viewModel.setSelectedMuezzin("makkah") },
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            IosGlassChip(
+                                                text = if (isBangla) "🕌 মদীনা শরীফ (Madinah)" else "🕌 Madinah Al-Munawwarah",
+                                                isSelected = uiState.selectedMuezzin == "madinah",
+                                                onClick = { viewModel.setSelectedMuezzin("madinah") },
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    HorizontalDivider(color = colors.borderSubtle.copy(alpha = 0.5f), thickness = 0.8.dp)
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    // 4. Per-Waqt Customization Row
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .clickable { showPerWaqtDialog = true },
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = if (isBangla) "ওয়াক্তভিত্তিক সাউন্ড কাস্টমাইজেশন" else "Per-Waqt Sound Customization",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.5.sp,
+                                                color = colors.textPrimary
+                                            )
+                                            Text(
+                                                text = if (isBangla) "যেকোনো নির্দিষ্ট ওয়াক্তে আলাদা সাউন্ড সেট করুন" else "Customize alert tone for individual prayers",
+                                                fontSize = 11.sp,
+                                                color = colors.textSecondary
+                                            )
+                                        }
+                                        Surface(
+                                            shape = RoundedCornerShape(999.dp),
+                                            color = colors.emerald.copy(alpha = 0.12f),
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.35f))
+                                        ) {
+                                            Text(
+                                                text = if (isBangla) "${uiState.prayerOverrides.size} কাস্টমাইজড ⚙️" else "${uiState.prayerOverrides.size} Custom ⚙️",
+                                                fontSize = 10.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.emerald,
+                                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+                                    HorizontalDivider(color = colors.borderSubtle.copy(alpha = 0.5f), thickness = 0.8.dp)
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    // 5. Lock-Screen Ongoing Tracker Switch
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = if (isBangla) "লক-স্ক্রিন চলমান ট্র্যাকার" else "Lock-Screen Ongoing Tracker",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.5.sp,
+                                                color = colors.textPrimary
+                                            )
+                                            Text(
+                                                text = if (isBangla) "লক-স্ক্রিনে বর্তমান ওয়াক্ত ও লাইভ কাউন্টডাউন প্রদর্শন" else "Shows active Waqt & live countdown on lock-screen",
+                                                fontSize = 11.sp,
+                                                color = colors.textSecondary
+                                            )
+                                        }
+
+                                        Switch(
+                                            checked = uiState.isLockscreenTrackerEnabled,
+                                            onCheckedChange = {
+                                                viewModel.toggleLockscreenTracker(context)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = Color.White,
+                                                checkedTrackColor = colors.emerald,
+                                                uncheckedThumbColor = colors.textSecondary,
+                                                uncheckedTrackColor = colors.surfaceSubtle
+                                            )
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    // 6. Test Pill Button
+                                    IosGlassPillButton(
+                                        text = if (isBangla) "আজান ও নোটিফিকেশন পরীক্ষা করুন" else "Test Azan & Notification",
+                                        isPrimary = false,
+                                        leadingIcon = {
+                                            Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.emerald)
+                                        },
+                                        onClick = {
+                                            viewModel.sendTestNotification(context)
+                                            Toast.makeText(
+                                                context,
+                                                if (isBangla) "আজান ও নোটিফিকেশন ট্রিগার করা হয়েছে" else "Azan & notification triggered",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
                             }
@@ -945,6 +1091,148 @@ fun MoreScreen(
                     Text(text = if (isBangla) "বাতিল" else "Cancel", color = colors.textSecondary)
                 }
             }
+        )
+    }
+
+    if (showPerWaqtDialog) {
+        val waqts = listOf(
+            Triple("fajr", if (isBangla) "ফজর" else "Fajr", "Fajr"),
+            Triple("dhuhr", if (isBangla) "যোহর" else "Dhuhr", "Dhuhr"),
+            Triple("asr", if (isBangla) "আসর" else "Asr", "Asr"),
+            Triple("maghrib", if (isBangla) "মাগরিব" else "Maghrib", "Maghrib"),
+            Triple("isha", if (isBangla) "ইশা" else "Isha", "Isha")
+        )
+
+        AlertDialog(
+            onDismissRequest = {
+                showPerWaqtDialog = false
+                selectedOverrideWaqtKey = null
+            },
+            containerColor = colors.surfaceCard,
+            shape = RoundedCornerShape(20.dp),
+            title = {
+                Text(
+                    text = if (isBangla) "ওয়াক্তভিত্তিক সাউন্ড কাস্টমাইজেশন" else "Per-Waqt Sound Customization",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = colors.textPrimary
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = if (isBangla) "যেকোনো নির্দিষ্ট ওয়াক্তের জন্য আলাদা সাউন্ড বেছে নিন:" else "Select specific alert tone for each prayer:",
+                        fontSize = 12.sp,
+                        color = colors.textSecondary
+                    )
+
+                    waqts.forEach { (key, nameBn, nameEn) ->
+                        val currentOverride = uiState.prayerOverrides[key]
+                        val displaySound = when (currentOverride) {
+                            "full_azan" -> if (isBangla) "🔊 পূর্ণ আজান" else "🔊 Full Azan"
+                            "short_takbeer" -> if (isBangla) "🔔 সংক্ষিপ্ত তাকবীর" else "🔔 Takbeer"
+                            "system_tone" -> if (isBangla) "🎵 সাধারণ টোন" else "🎵 System Tone"
+                            "silent" -> if (isBangla) "🔕 নীরব" else "🔕 Silent"
+                            else -> if (isBangla) "ডিফল্ট মোড" else "Default Mode"
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(colors.cardSubtle)
+                                .clickable { selectedOverrideWaqtKey = key }
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isBangla) nameBn else nameEn,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                color = colors.textPrimary
+                            )
+
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = if (currentOverride != null) colors.emerald.copy(alpha = 0.15f) else Color.Transparent,
+                                border = androidx.compose.foundation.BorderStroke(1.dp, if (currentOverride != null) colors.emerald else colors.border)
+                            ) {
+                                Text(
+                                    text = displaySound,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (currentOverride != null) colors.emerald else colors.textSecondary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                IosGlassPillButton(
+                    text = if (isBangla) "সম্পন্ন" else "Done",
+                    fontSize = 12.sp,
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
+                    onClick = {
+                        showPerWaqtDialog = false
+                        selectedOverrideWaqtKey = null
+                    }
+                )
+            }
+        )
+    }
+
+    if (selectedOverrideWaqtKey != null) {
+        val key = selectedOverrideWaqtKey!!
+        val options = listOf(
+            null to (if (isBangla) "ডিফল্ট মোড ব্যবহার করুন" else "Use Global Default"),
+            "full_azan" to (if (isBangla) "🔊 পূর্ণ আজান" else "🔊 Full Azan"),
+            "short_takbeer" to (if (isBangla) "🔔 সংক্ষিপ্ত তাকবীর" else "🔔 Short Takbeer"),
+            "system_tone" to (if (isBangla) "🎵 সাধারণ টোন" else "🎵 System Tone"),
+            "silent" to (if (isBangla) "🔕 নীরব (Silent)" else "🔕 Silent")
+        )
+
+        AlertDialog(
+            onDismissRequest = { selectedOverrideWaqtKey = null },
+            containerColor = colors.surfaceCard,
+            shape = RoundedCornerShape(20.dp),
+            title = {
+                Text(
+                    text = if (isBangla) "সাউন্ড নির্বাচন" else "Select Sound",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = colors.textPrimary
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    options.forEach { (mode, label) ->
+                        val isSelected = uiState.prayerOverrides[key] == mode
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) colors.emerald.copy(alpha = 0.12f) else Color.Transparent)
+                                .clickable {
+                                    viewModel.setPrayerOverride(key, mode)
+                                    selectedOverrideWaqtKey = null
+                                }
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 13.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) colors.emerald else colors.textPrimary
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {}
         )
     }
 }
