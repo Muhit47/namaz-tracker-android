@@ -1,12 +1,15 @@
 package com.example.ui.screens
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -141,7 +145,7 @@ fun MoreScreen(
                                     modifier = Modifier.padding(end = 12.dp)
                                 ) {
                                     Text(
-                                        text = if (isBangla) "ভার্সন ১.০" else "v1.0",
+                                        text = if (isBangla) "ভার্সন ২.০.০" else "v2.0.0",
                                         fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colors.emerald,
@@ -666,9 +670,17 @@ fun MoreScreen(
                         )
                     }
 
-                    // App Branding Footer
+                    // 7. About App & Developer Section
                     item {
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = if (isBangla) "অ্যাপ ও ডেভেলপার পরিচিতি" else "About App & Developer",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.emerald
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
@@ -676,21 +688,192 @@ fun MoreScreen(
                             border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                modifier = Modifier.padding(18.dp)
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.app_header),
-                                    contentDescription = "Namaz Tracker",
-                                    modifier = Modifier.height(38.dp),
-                                    contentScale = ContentScale.Fit
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                // App Header Row
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.app_header),
+                                        contentDescription = "Namaz Tracker",
+                                        modifier = Modifier.height(34.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Surface(
+                                        shape = RoundedCornerShape(999.dp),
+                                        color = colors.emerald.copy(alpha = 0.12f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.35f))
+                                    ) {
+                                        Text(
+                                            text = if (isBangla) "ভার্সন ২.০.০" else "v2.0.0",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colors.emerald,
+                                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
                                 Text(
-                                    text = if (isBangla) "সকল মুসলিম ভাই-বোনদের জন্য পূর্ণাঙ্গ ইসলামিক সহচর। আল কুরআন, সহিহ হাদীস, নামাজ ও আমল ট্র্যাকিং।" else "Complete Islamic companion for tracking daily prayers, Quran, Hadith, and Qaza.",
-                                    fontSize = 11.5.sp,
-                                    color = colors.textSecondary,
-                                    textAlign = TextAlign.Center
+                                    text = if (isBangla)
+                                        "মুসলিম উম্মাহর দৈনন্দিন নামায, আল-কুরআন, সহিহ হাদীস, কিবলা, ডিজিটাল তাসবীহ ও স্বয়ংক্রিয় আমল ট্র্যাকিংয়ের পূর্ণাঙ্গ সহচর।"
+                                    else
+                                        "All-in-one Islamic companion for automated prayer tracking, Holy Qur'an, Sahih Hadith, Qibla compass, and daily Dhikr.",
+                                    fontSize = 12.sp,
+                                    lineHeight = 18.sp,
+                                    color = colors.textSecondary
+                                )
+
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = colors.borderSubtle)
+
+                                // Developer Profile Section
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Avatar
+                                    Box(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                Brush.linearGradient(
+                                                    listOf(Color(0xFF059669), Color(0xFF10B981))
+                                                )
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "M",
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = if (isBangla) "মুহিত (Muhit)" else "Muhit (Muhit47)",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.textPrimary
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Surface(
+                                                shape = RoundedCornerShape(4.dp),
+                                                color = colors.emerald.copy(alpha = 0.15f)
+                                            ) {
+                                                Text(
+                                                    text = if (isBangla) "অথর ও ডিজাইনার" else "Author & Dev",
+                                                    fontSize = 9.5.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = colors.emerald,
+                                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
+                                                )
+                                            }
+                                        }
+                                        Text(
+                                            text = if (isBangla)
+                                                "মোবাইল অ্যাপ ডিজাইনার ও ইঞ্জিনিয়ার"
+                                            else
+                                                "Mobile App Designer & Software Engineer",
+                                            fontSize = 11.5.sp,
+                                            color = colors.textSecondary
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                // Interactive Links (GitHub, Repo, Email)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    // GitHub Profile
+                                    OutlinedButton(
+                                        onClick = {
+                                            try {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Muhit47"))
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {}
+                                        },
+                                        modifier = Modifier.weight(1f).height(36.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp),
+                                        shape = RoundedCornerShape(9.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary)
+                                    ) {
+                                        Text(
+                                            text = "🐙 GitHub",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    // Source Code Repo
+                                    OutlinedButton(
+                                        onClick = {
+                                            try {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Muhit47/namaz-tracker"))
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {}
+                                        },
+                                        modifier = Modifier.weight(1f).height(36.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp),
+                                        shape = RoundedCornerShape(9.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary)
+                                    ) {
+                                        Text(
+                                            text = "⭐ Repo",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    // Email / Contact
+                                    OutlinedButton(
+                                        onClick = {
+                                            try {
+                                                val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:muhitpias@gmail.com")).apply {
+                                                    putExtra(Intent.EXTRA_SUBJECT, "Namaz Tracker v2.0 Feedback")
+                                                }
+                                                context.startActivity(intent)
+                                            } catch (_: Exception) {}
+                                        },
+                                        modifier = Modifier.weight(1f).height(36.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp),
+                                        shape = RoundedCornerShape(9.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald)
+                                    ) {
+                                        Text(
+                                            text = if (isBangla) "✉️ ইমেইল" else "✉️ Email",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+
+                                // Copyright & Ummah Footer
+                                Text(
+                                    text = "Made with ❤️ for the Ummah • © 2026 Muhit",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = colors.textSecondary.copy(alpha = 0.8f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
