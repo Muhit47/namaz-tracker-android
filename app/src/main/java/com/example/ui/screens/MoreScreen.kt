@@ -216,7 +216,7 @@ fun MoreScreen(
 
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = colors.borderSubtle)
 
-                                // Language Toggle
+                                // Language Segmented Capsule Toggle
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,29 +224,102 @@ fun MoreScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = if (isBangla) "অ্যাপের ভাষা" else "App Language",
+                                            text = if (isBangla) "অ্যাপের ভাষা" else "Language",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp,
                                             color = colors.textPrimary
                                         )
                                         Text(
-                                            text = if (isBangla) "বাংলা এবং ইংরেজির মধ্যে পরিবর্তন করুন" else "Switch between Bengali and English",
+                                            text = if (isBangla) "বাংলা এবং ইংরেজির মধ্যে পরিবর্তন" else "Switch between Bengali & English",
                                             fontSize = 11.5.sp,
                                             color = colors.textSecondary
                                         )
                                     }
 
-                                    Button(
-                                        onClick = { viewModel.toggleLanguage() },
-                                        colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary),
-                                        shape = RoundedCornerShape(10.dp)
+                                    Spacer(modifier = Modifier.width(10.dp))
+
+                                    // Capsule Container matching reference design
+                                    Surface(
+                                        shape = RoundedCornerShape(999.dp),
+                                        color = colors.surfaceSubtle,
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
+                                        modifier = Modifier.clip(RoundedCornerShape(999.dp))
                                     ) {
-                                        Text(
-                                            text = if (isBangla) "বাংলা ⇄ EN" else "EN ⇄ বাংলা",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
+                                        Row(
+                                            modifier = Modifier.padding(3.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // English Option
+                                            val isEnglish = !isBangla
+                                            val enBg = if (isEnglish) colors.emerald else Color.Transparent
+                                            val enTextColor = if (isEnglish) {
+                                                if (colors.isDark) Color(0xFF022C22) else Color.White
+                                            } else colors.textSecondary
+
+                                            Surface(
+                                                shape = RoundedCornerShape(999.dp),
+                                                color = enBg,
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(999.dp))
+                                                    .clickable { viewModel.setLanguage(false) }
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    if (isEnglish) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Check,
+                                                            contentDescription = null,
+                                                            tint = enTextColor,
+                                                            modifier = Modifier.size(13.dp)
+                                                        )
+                                                    }
+                                                    Text(
+                                                        text = "English",
+                                                        fontSize = 12.sp,
+                                                        fontWeight = if (isEnglish) FontWeight.Bold else FontWeight.Medium,
+                                                        color = enTextColor
+                                                    )
+                                                }
+                                            }
+
+                                            // Bangla Option
+                                            val bnBg = if (isBangla) colors.emerald else Color.Transparent
+                                            val bnTextColor = if (isBangla) {
+                                                if (colors.isDark) Color(0xFF022C22) else Color.White
+                                            } else colors.textSecondary
+
+                                            Surface(
+                                                shape = RoundedCornerShape(999.dp),
+                                                color = bnBg,
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(999.dp))
+                                                    .clickable { viewModel.setLanguage(true) }
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    if (isBangla) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Check,
+                                                            contentDescription = null,
+                                                            tint = bnTextColor,
+                                                            modifier = Modifier.size(13.dp)
+                                                        )
+                                                    }
+                                                    Text(
+                                                        text = "বাংলা",
+                                                        fontSize = 12.sp,
+                                                        fontWeight = if (isBangla) FontWeight.Bold else FontWeight.Medium,
+                                                        color = bnTextColor
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 

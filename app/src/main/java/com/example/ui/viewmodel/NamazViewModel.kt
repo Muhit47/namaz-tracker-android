@@ -529,11 +529,15 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun toggleLanguage() {
-        val newBangla = !_uiState.value.isBangla
-        prefs.edit().putBoolean("is_bangla", newBangla).apply()
-        _uiState.update { it.copy(isBangla = newBangla) }
+    fun setLanguage(isBangla: Boolean) {
+        if (_uiState.value.isBangla == isBangla) return
+        prefs.edit().putBoolean("is_bangla", isBangla).apply()
+        _uiState.update { it.copy(isBangla = isBangla) }
         PrayerWidgetProvider.updateAllWidgets(getApplication())
+    }
+
+    fun toggleLanguage() {
+        setLanguage(!_uiState.value.isBangla)
     }
 
     fun selectCity(city: CityLocation) {
