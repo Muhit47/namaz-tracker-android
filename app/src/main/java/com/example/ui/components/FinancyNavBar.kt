@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -126,12 +127,32 @@ private fun FinancyNavItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = tab.icon,
-                contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
-                tint = contentColor,
-                modifier = Modifier.size(22.dp)
-            )
+            val resId = if (isSelected) tab.filledResId else tab.outlinedResId
+            val iconVec = if (isSelected) tab.filledIcon else tab.outlinedIcon
+
+            if (resId != null) {
+                Icon(
+                    painter = painterResource(id = resId),
+                    contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
+                    tint = contentColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else if (iconVec != null) {
+                Icon(
+                    imageVector = iconVec,
+                    contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
+                    tint = contentColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = tab.icon,
+                    contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
+                    tint = contentColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = if (isBangla) tab.titleBn else tab.titleEn,

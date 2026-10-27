@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -29,14 +30,49 @@ import com.example.ui.viewmodel.NamazViewModel
 enum class NamazNavTab(
     val titleEn: String,
     val titleBn: String,
-    val icon: ImageVector,
+    val filledIcon: ImageVector? = null,
+    val outlinedIcon: ImageVector? = null,
+    val filledResId: Int? = null,
+    val outlinedResId: Int? = null,
     val testTag: String
 ) {
-    HOME("Prayers", "নামায", Icons.Default.AccessTime, "nav_tab_home"),
-    QURAN_HADITH("Qur'an & Hadith", "কুরআন ও হাদীস", Icons.AutoMirrored.Filled.MenuBook, "nav_tab_quran_hadith"),
-    IBADAH("Ibadah", "ইবাদাত", Icons.Default.Spa, "nav_tab_ibadah"),
-    TRACKER("Tracker", "ট্র্যাকার", Icons.Default.BarChart, "nav_tab_tracker"),
-    SETTINGS("Settings", "সেটিংস", Icons.Default.Settings, "nav_tab_settings")
+    HOME(
+        titleEn = "Prayers",
+        titleBn = "নামায",
+        filledIcon = Icons.Filled.Mosque,
+        outlinedIcon = Icons.Outlined.Mosque,
+        testTag = "nav_tab_home"
+    ),
+    QURAN_HADITH(
+        titleEn = "Qur'an & Hadith",
+        titleBn = "কুরআন ও হাদীস",
+        filledResId = R.drawable.ic_quran_crescent_filled,
+        outlinedResId = R.drawable.ic_quran_crescent_outlined,
+        testTag = "nav_tab_quran_hadith"
+    ),
+    IBADAH(
+        titleEn = "Ibadah",
+        titleBn = "ইবাদাত",
+        filledIcon = Icons.Filled.SelfImprovement,
+        outlinedIcon = Icons.Outlined.SelfImprovement,
+        testTag = "nav_tab_ibadah"
+    ),
+    TRACKER(
+        titleEn = "Tracker",
+        titleBn = "ট্র্যাকার",
+        filledIcon = Icons.Filled.PieChart,
+        outlinedIcon = Icons.Outlined.PieChart,
+        testTag = "nav_tab_tracker"
+    ),
+    SETTINGS(
+        titleEn = "More",
+        titleBn = "আরও",
+        filledIcon = Icons.Filled.Menu,
+        outlinedIcon = Icons.Outlined.Menu,
+        testTag = "nav_tab_settings"
+    );
+
+    val icon: ImageVector get() = filledIcon ?: Icons.Default.MenuBook
 }
 
 class MainActivity : ComponentActivity() {
