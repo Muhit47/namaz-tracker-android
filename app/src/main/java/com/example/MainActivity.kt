@@ -60,8 +60,8 @@ enum class NamazNavTab(
     TRACKER(
         titleEn = "Tracker",
         titleBn = "ট্র্যাকার",
-        filledIcon = Icons.Filled.PieChart,
-        outlinedIcon = Icons.Outlined.PieChart,
+        filledResId = R.drawable.ic_tracker_chart_filled,
+        outlinedResId = R.drawable.ic_tracker_chart_outlined,
         testTag = "nav_tab_tracker"
     ),
     SETTINGS(
