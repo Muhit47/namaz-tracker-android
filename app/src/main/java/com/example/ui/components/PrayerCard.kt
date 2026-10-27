@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PrayerLogEntity
@@ -80,20 +81,41 @@ fun PrayerCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    val waqtEmoji = when (prayerType) {
+                        PrayerType.FAJR -> "🌅"
+                        PrayerType.DHUHR -> "☀️"
+                        PrayerType.ASR -> "🌤️"
+                        PrayerType.MAGHRIB -> "🌇"
+                        PrayerType.ISHA -> "🌙"
+                        PrayerType.TAHAJJUD -> "✨"
+                    }
+                    val waqtBgColor = when (prayerType) {
+                        PrayerType.FAJR -> if (colors.isDark) Color(0x30E11D48) else Color(0xFFFFF1F2)
+                        PrayerType.DHUHR -> if (colors.isDark) Color(0x30F59E0B) else Color(0xFFFEF3C7)
+                        PrayerType.ASR -> if (colors.isDark) Color(0x300284C7) else Color(0xFFF0F9FF)
+                        PrayerType.MAGHRIB -> if (colors.isDark) Color(0x30D97706) else Color(0xFFFFFBEB)
+                        PrayerType.ISHA -> if (colors.isDark) Color(0x306366F1) else Color(0xFFEEF2FF)
+                        PrayerType.TAHAJJUD -> if (colors.isDark) Color(0x308B5CF6) else Color(0xFFF5F3FF)
+                    }
+
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(42.dp)
                             .clip(CircleShape)
                             .background(
-                                if (isCompleted || isActiveWaqt) colors.emeraldSoft else colors.cardSubtle
+                                if (isCompleted || isActiveWaqt) colors.emeraldSoft else waqtBgColor
+                            )
+                            .border(
+                                1.dp,
+                                if (isCompleted || isActiveWaqt) colors.emerald.copy(alpha = 0.5f) else colors.border,
+                                CircleShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = prayerType.arabicName.take(1),
-                            fontWeight = FontWeight.Bold,
-                            color = if (isCompleted || isActiveWaqt) colors.emerald else colors.textSecondary,
-                            fontSize = 17.sp
+                            text = waqtEmoji,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
 
