@@ -114,12 +114,41 @@ fun MoreScreen(
                 topBar = {
                     TopAppBar(
                         title = {
-                            Text(
-                                text = if (isBangla) "অ্যাপ সেটিংস" else "Settings",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.textPrimary
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = if (isBangla) "অ্যাপ সেটিংস ও পছন্দসমূহ" else "Settings & Preferences",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.textPrimary
+                                    )
+                                    Text(
+                                        text = if (isBangla) "থিম, ভাষা, নোটিফিকেশন ও ব্যাকআপ" else "Theme, language, notifications & backup",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontSize = 11.sp,
+                                        color = colors.textSecondary
+                                    )
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = colors.emerald.copy(alpha = 0.12f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f)),
+                                    modifier = Modifier.padding(end = 12.dp)
+                                ) {
+                                    Text(
+                                        text = if (isBangla) "ভার্সন ১.০" else "v1.0",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.emerald,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                    )
+                                }
+                            }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surfaceCard)
                     )
@@ -130,7 +159,7 @@ fun MoreScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                         .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(bottom = 90.dp)
+                    contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp)
                 ) {
                     // 1. Language, Dark Mode & App Settings Section
                     item {
@@ -139,7 +168,7 @@ fun MoreScreen(
                             text = if (isBangla) "অ্যাপ সেটিংস ও থিম" else "App Preferences & Theme",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -178,7 +207,7 @@ fun MoreScreen(
                                         onCheckedChange = { viewModel.toggleDarkMode() },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
-                                            checkedTrackColor = colors.neonGreen,
+                                            checkedTrackColor = colors.emerald,
                                             uncheckedThumbColor = colors.textSecondary,
                                             uncheckedTrackColor = colors.surfaceSubtle
                                         )
@@ -251,7 +280,7 @@ fun MoreScreen(
                                         onCheckedChange = { viewModel.toggleHanafiAsr() },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
-                                            checkedTrackColor = colors.neonGreen,
+                                            checkedTrackColor = colors.emerald,
                                             uncheckedThumbColor = colors.textSecondary,
                                             uncheckedTrackColor = colors.surfaceSubtle
                                         )
@@ -268,7 +297,7 @@ fun MoreScreen(
                             text = if (isBangla) "ওয়াক্ত পুশ নোটিফিকেশন" else "Prayer Push Notifications",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -309,7 +338,7 @@ fun MoreScreen(
                                         },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = Color.White,
-                                            checkedTrackColor = colors.neonGreen,
+                                            checkedTrackColor = colors.emerald,
                                             uncheckedThumbColor = colors.textSecondary,
                                             uncheckedTrackColor = colors.surfaceSubtle
                                         )
@@ -329,8 +358,8 @@ fun MoreScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                 ) {
                                     Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -351,7 +380,7 @@ fun MoreScreen(
                             text = if (isBangla) "হোম স্ক্রিন উইজেট (App Widget)" else "Home Screen Widget",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -368,11 +397,11 @@ fun MoreScreen(
                                 ) {
                                     Surface(
                                         shape = CircleShape,
-                                        color = colors.neonGreen.copy(alpha = 0.12f),
+                                        color = colors.emerald.copy(alpha = 0.12f),
                                         modifier = Modifier.size(40.dp)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = colors.neonGreen)
+                                            Icon(imageVector = Icons.Default.Widgets, contentDescription = null, tint = colors.emerald)
                                         }
                                     }
                                     Column(modifier = Modifier.weight(1f)) {
@@ -403,8 +432,8 @@ fun MoreScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                 ) {
                                     Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -425,7 +454,7 @@ fun MoreScreen(
                             text = if (isBangla) "ডাটা ব্যাকআপ ও রিস্টোর" else "Data Backup & Restore",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -469,8 +498,8 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(10.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.neonGreen),
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.neonGreen.copy(alpha = 0.5f))
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                     ) {
                                         Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -488,7 +517,7 @@ fun MoreScreen(
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                                 ) {
-                                    Icon(imageVector = Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.neonGreen)
+                                    Icon(imageVector = Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp), tint = colors.emerald)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = if (isBangla) "ডাটা রিস্টোর করুন (Restore Data)" else "Restore Data from JSON",
@@ -507,7 +536,7 @@ fun MoreScreen(
                             text = if (isBangla) "দ্বীনি শিক্ষা ও নিয়মাবলী" else "Knowledge & Guides",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -528,7 +557,7 @@ fun MoreScreen(
                             text = if (isBangla) "আমল ও ট্র্যাকিং টুলস" else "Tools & Analytics",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = colors.neonGreen
+                            color = colors.emerald
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -700,11 +729,11 @@ private fun ToolNavCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = colors.neonGreen.copy(alpha = 0.12f),
+                    color = colors.emerald.copy(alpha = 0.12f),
                     modifier = Modifier.size(42.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(imageVector = icon, contentDescription = null, tint = colors.neonGreen, modifier = Modifier.size(22.dp))
+                        Icon(imageVector = icon, contentDescription = null, tint = colors.emerald, modifier = Modifier.size(22.dp))
                     }
                 }
 
@@ -714,13 +743,13 @@ private fun ToolNavCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = colors.neonGreen.copy(alpha = 0.15f)
+                            color = colors.emerald.copy(alpha = 0.15f)
                         ) {
                             Text(
                                 text = badge,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = colors.neonGreen,
+                                color = colors.emerald,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
