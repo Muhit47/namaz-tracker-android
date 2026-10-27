@@ -473,9 +473,9 @@ private fun FinancyHeroWaqtCard(
                         Modifier.background(
                             Brush.linearGradient(
                                 colors = if (colors.isDark) {
-                                    listOf(Color(0xFF064E3B), Color(0xFF0F291E))
+                                    listOf(Color(0xFF064E3B), Color(0xFF0F1E19))
                                 } else {
-                                    listOf(Color(0xFF047857), Color(0xFF065F46))
+                                    listOf(Color(0xFF059669), Color(0xFF047857))
                                 }
                             )
                         )

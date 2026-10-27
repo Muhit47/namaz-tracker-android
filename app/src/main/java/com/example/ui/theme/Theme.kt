@@ -20,16 +20,16 @@ import androidx.core.view.WindowCompat
 // --- Material 3 Official Color Schemes ---
 val DarkColorScheme = darkColorScheme(
     primary = MintPrimaryDark,
-    onPrimary = EmeraldContainerDark,
+    onPrimary = Color.White,
     primaryContainer = EmeraldContainerDark,
-    onPrimaryContainer = MintPrimaryDark,
-    secondary = AmberAccentDark,
-    onSecondary = Color(0xFF1E293B),
+    onPrimaryContainer = Color(0xFFA7F3D0),
+    secondary = Color(0xFF38BDF8),
+    onSecondary = Color(0xFF082F49),
     background = DarkBackground,
     surface = DarkSurface,
     onBackground = TextPrimaryDark,
     onSurface = TextPrimaryDark,
-    surfaceVariant = Color(0xFF253347),
+    surfaceVariant = Color(0xFF1A2620),
     onSurfaceVariant = TextSecondaryDark,
     outline = OutlineDark
 )
@@ -105,22 +105,22 @@ val DarkFinancyTokens = FinancyColorTokens(
     isDark = true,
     background = DarkBackground,
     card = DarkSurface,
-    cardSubtle = Color(0xFF151C2C),
+    cardSubtle = Color(0xFF1A2620),
     border = OutlineDark,
     textPrimary = TextPrimaryDark,
     textSecondary = TextSecondaryDark,
     textMuted = Color(0xFF64748B),
     emerald = MintPrimaryDark,
     emeraldDark = EmeraldContainerDark,
-    emeraldSoft = Color(0x2610B981),
+    emeraldSoft = Color(0x2810B981),
     cyan = Color(0xFF38BDF8),
     cyanSoft = Color(0x260EA5E9),
     amber = AmberAccentDark,
     amberSoft = Color(0x26FBBF24),
-    rose = Color(0xFFFB7185),
+    rose = Color(0xFFF87171),
     roseSoft = Color(0x26F43F5E),
-    navBackground = Color(0xF2151C2C),
-    navBorder = OutlineDark
+    navBackground = Color(0xF2101915),
+    navBorder = Color(0x3510B981)
 )
 
 val LocalFinancy = staticCompositionLocalOf { LightFinancyTokens }

@@ -12,15 +12,15 @@ val TextPrimaryLight = Color(0xFF1E293B)
 val TextSecondaryLight = Color(0xFF64748B)
 val OutlineLight = Color(0xFFE2E8F0)
 
-// --- Dark Theme Colors ---
-val MintPrimaryDark = Color(0xFFA7F3D0) // ডার্ক মোডে আরও ভালো রিডেবিলিটির জন্য একটু সফট
+// --- Dark Theme Colors (Obsidian & Glowing Islamic Emerald) ---
+val MintPrimaryDark = Color(0xFF10B981) // Glowing emerald 500 for dark mode
 val EmeraldContainerDark = Color(0xFF064E3B)
 val AmberAccentDark = Color(0xFFFBBF24)
-val DarkBackground = Color(0xFF0B0F19)
-val DarkSurface = Color(0xFF1E293B)
-val TextPrimaryDark = Color(0xFFF1F5F9)
+val DarkBackground = Color(0xFF0B120F) // Soothing obsidian midnight canvas with organic emerald undertone
+val DarkSurface = Color(0xFF131D18)    // Elevated dark charcoal card
+val TextPrimaryDark = Color(0xFFF8FAFC)
 val TextSecondaryDark = Color(0xFF94A3B8)
-val OutlineDark = Color(0xFF334155)
+val OutlineDark = Color(0xFF22352C)    // Harmonious emerald-tinted dark border
 
 // --- Secondary / Brand Accent Tokens ---
 val CyanAccent = Color(0xFF0284C7)

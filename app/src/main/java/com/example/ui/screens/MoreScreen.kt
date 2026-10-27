@@ -256,9 +256,7 @@ fun MoreScreen(
                                             // English Option
                                             val isEnglish = !isBangla
                                             val enBg = if (isEnglish) colors.emerald else Color.Transparent
-                                            val enTextColor = if (isEnglish) {
-                                                if (colors.isDark) Color(0xFF022C22) else Color.White
-                                            } else colors.textSecondary
+                                            val enTextColor = if (isEnglish) Color.White else colors.textSecondary
 
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
@@ -291,9 +289,7 @@ fun MoreScreen(
 
                                             // Bangla Option
                                             val bnBg = if (isBangla) colors.emerald else Color.Transparent
-                                            val bnTextColor = if (isBangla) {
-                                                if (colors.isDark) Color(0xFF022C22) else Color.White
-                                            } else colors.textSecondary
+                                            val bnTextColor = if (isBangla) Color.White else colors.textSecondary
 
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
