@@ -1,6 +1,6 @@
 # Technical Requirements Document (TRD) - Namaz Tracker (নামায ট্র্যাকার)
 **Target Platform:** Android (Native)  
-**App Version:** `v2.8.0` (Build 10)  
+**App Version:** `v2.9.0` (Build 11)  
 **Package Name:** `com.namaztracker.app`
 
 ---

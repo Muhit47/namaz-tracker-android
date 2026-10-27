@@ -1,5 +1,5 @@
 # Application Flow & Navigation (AppFlow) - Namaz Tracker
-**App Version:** `v2.8.0` (Build 10)  
+**App Version:** `v2.9.0` (Build 11)  
 **Navigation Model:** Single-Activity Compose Architecture with Floating Frosted Glass Dock
 
 ---

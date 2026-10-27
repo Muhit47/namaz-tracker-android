@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.MainActivity.NamazNavTab
@@ -87,8 +88,8 @@ fun FinancyFloatingNavBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 7.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
+                    .padding(horizontal = 4.dp, vertical = 5.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 NamazNavTab.entries.forEach { tab ->
@@ -97,7 +98,10 @@ fun FinancyFloatingNavBar(
                         tab = tab,
                         isSelected = isSelected,
                         isBangla = isBangla,
-                        onClick = { onTabSelected(tab) }
+                        onClick = { onTabSelected(tab) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
                     )
                 }
             }
@@ -110,7 +114,8 @@ private fun FinancyNavItem(
     tab: NamazNavTab,
     isSelected: Boolean,
     isBangla: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colors = FinancyTheme.colors
     val context = LocalContext.current
@@ -118,7 +123,7 @@ private fun FinancyNavItem(
     val itemShape = RoundedCornerShape(999.dp)
 
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.06f else 1.0f,
+        targetValue = if (isSelected) 1.04f else 1.0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "tab_scale"
     )
@@ -134,8 +139,8 @@ private fun FinancyNavItem(
         } else {
             Brush.linearGradient(
                 listOf(
-                    Color(0xFF059669).copy(alpha = 0.12f),
-                    Color(0xFF059669).copy(alpha = 0.22f)
+                    Color(0xFF059669).copy(alpha = 0.14f),
+                    Color(0xFF059669).copy(alpha = 0.24f)
                 )
             )
         }
@@ -145,8 +150,8 @@ private fun FinancyNavItem(
 
     val activeBorder = if (isSelected) {
         BorderStroke(
-            1.dp,
-            if (colors.isDark) Color(0xFF10B981).copy(alpha = 0.65f) else Color(0xFF059669).copy(alpha = 0.35f)
+            1.2.dp,
+            if (colors.isDark) Color(0xFF10B981).copy(alpha = 0.65f) else Color(0xFF059669).copy(alpha = 0.45f)
         )
     } else BorderStroke(0.dp, Color.Transparent)
 
@@ -156,7 +161,8 @@ private fun FinancyNavItem(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
+            .padding(horizontal = 2.dp)
             .scale(scale)
             .then(
                 if (isSelected) {
@@ -178,13 +184,13 @@ private fun FinancyNavItem(
                     onClick()
                 }
             )
-            .testTag(tab.testTag)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .testTag(tab.testTag),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             val resId = if (isSelected) tab.filledResId else tab.outlinedResId
             val iconVec = if (isSelected) tab.filledIcon else tab.outlinedIcon
@@ -194,30 +200,32 @@ private fun FinancyNavItem(
                     painter = painterResource(id = resId),
                     contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
                     tint = contentColor,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             } else if (iconVec != null) {
                 Icon(
                     imageVector = iconVec,
                     contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
                     tint = contentColor,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             } else {
                 Icon(
                     imageVector = tab.icon,
                     contentDescription = if (isBangla) tab.titleBn else tab.titleEn,
                     tint = contentColor,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = if (isBangla) tab.titleBn else tab.titleEn,
-                fontSize = 10.5.sp,
+                fontSize = 10.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = contentColor
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

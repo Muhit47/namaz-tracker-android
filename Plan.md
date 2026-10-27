@@ -1,7 +1,7 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.8.0` (Build 10)  
+**App Version:** `v2.9.0` (Build 11)  
 **Branch:** `android`  
-**Latest Remote Commit:** `0350af1`
+**Latest Remote Commit:** `be2c271`
 
 ---
 
@@ -17,7 +17,7 @@
 
 | ID | Area | Acceptance Criterion | Verification Method |
 |:---|:---|:---|:---|
-| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 10` and `versionName = "2.8.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.8.0` / `ভার্সন ২.৮.০`). | Verify `build.gradle.kts` and UI text match. |
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 11` and `versionName = "2.9.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.9.0` / `ভার্সন ২.৯.০`). | Verify `build.gradle.kts` and UI text match. |
 | **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
 | **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
 | **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
@@ -75,7 +75,9 @@
 - [x] **Task 4.1**: Audio Recitation & Adhan Background Service Polish (Completed in `v2.2.0`)
 - [x] **Task 4.2**: Automated Compose UI Test Suite Expansion (Completed in `v2.3.0`)
 - [x] **Task 4.3**: Home Screen App Multi-Widget Suite Expansion (Completed in `v2.4.0`)
-### Milestone 9: Primary Default Language Set to English (`v2.8.0`, Build 10)
-- [x] Set English as the primary default language across `NamazViewModel`, `NamazUiState`, `PrayerAlarmReceiver`, `AzanPlaybackService`, `PrayerNotificationHelper`, `Theme`, and `WidgetHelper`.
-- [x] Bengali remains fully available as a one-tap switchable secondary language in Settings.
-- [x] Bumped app version to `v2.8.0` (Build 10).
+### Milestone 10: Fixed Dimensions & Balanced Symmetrical Navigation Dock (`v2.9.0`, Build 11)
+- [x] Fixed bottom navigation bar (`FinancyNavBar.kt`) item widths and heights:
+  - Every nav button now uses `Modifier.weight(1f)` and a fixed `height(52.dp)`, ensuring an exact 1:1:1:1:1 equal-width 5-column grid.
+  - Active glowing pill indicator has an identical fixed width and height on every tab.
+  - Updated second tab label to "Quran" / "কুরআন" with `maxLines = 1` and `TextOverflow.Ellipsis`.
+- [x] Bumped app version to `v2.9.0` (Build 11).

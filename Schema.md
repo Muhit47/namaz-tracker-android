@@ -1,7 +1,7 @@
 # Database Schema (Schema) - Namaz Tracker (নামায ট্র্যাকার)
 **Database Engine:** SQLite (managed via AndroidX Room Database 2.6.1)  
 **Database File:** Embedded prepackaged asset `app/src/main/assets/namaz_tracker.db`  
-**App Version:** `v2.8.0` (Build 10)
+**App Version:** `v2.9.0` (Build 11)
 
 ---
 

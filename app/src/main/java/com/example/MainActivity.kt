@@ -44,8 +44,8 @@ enum class NamazNavTab(
         testTag = "nav_tab_home"
     ),
     QURAN_HADITH(
-        titleEn = "Qur'an & Hadith",
-        titleBn = "কুরআন ও হাদীস",
+        titleEn = "Quran",
+        titleBn = "কুরআন",
         filledResId = R.drawable.ic_quran_crescent_filled,
         outlinedResId = R.drawable.ic_quran_crescent_outlined,
         testTag = "nav_tab_quran_hadith"
