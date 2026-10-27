@@ -145,7 +145,7 @@ fun MoreScreen(
                                     modifier = Modifier.padding(end = 12.dp)
                                 ) {
                                     Text(
-                                        text = if (isBangla) "ভার্সন ২.১.০" else "v2.1.0",
+                                        text = if (isBangla) "ভার্সন ২.২.০" else "v2.2.0",
                                         fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colors.emerald,
@@ -704,7 +704,7 @@ fun MoreScreen(
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.35f))
                                     ) {
                                         Text(
-                                            text = if (isBangla) "ভার্সন ২.১.০" else "v2.1.0",
+                                            text = if (isBangla) "ভার্সন ২.২.০" else "v2.2.0",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = colors.emerald,
