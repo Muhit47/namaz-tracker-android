@@ -31,7 +31,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val prefs = context.getSharedPreferences("namaz_app_prefs", Context.MODE_PRIVATE)
-            val isBangla = prefs.getBoolean("is_bangla", false)
+            val isBangla = prefs.getBoolean("is_bangla", true)
             val isHanafi = prefs.getBoolean("is_hanafi_asr", true)
             val cityName = prefs.getString("selected_city_en", "Dhaka (ঢাকা)")
 

@@ -3,10 +3,10 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // --- Light Theme Colors ---
-val EmeraldPrimary = Color(0xFF0F382B)
+val EmeraldPrimary = Color(0xFF059669)
 val MintContainer = Color(0xFFD1FAE5)
 val AmberAccent = Color(0xFFD97706)
-val LightBackground = Color(0xFFF8FAFC)
+val LightBackground = Color(0xFFF1F5F9)
 val LightSurface = Color(0xFFFFFFFF)
 val TextPrimaryLight = Color(0xFF1E293B)
 val TextSecondaryLight = Color(0xFF64748B)
