@@ -1,7 +1,7 @@
 # UI Specification (UI_Spec) - Namaz Tracker (নামায ট্র্যাকার)
 **Design System:** iOS Frosted Glassmorphic & Rounded Pill Design System  
 **Framework:** Jetpack Compose (Material 3 + Custom Glass Primitives)  
-**App Version:** `v2.6.0` (Build 8)
+**App Version:** `v2.7.0` (Build 9)
 
 ---
 

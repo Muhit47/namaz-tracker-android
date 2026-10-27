@@ -1,7 +1,7 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.6.0` (Build 8)  
+**App Version:** `v2.7.0` (Build 9)  
 **Branch:** `android`  
-**Latest Remote Commit:** `d91a9eb`
+**Latest Remote Commit:** `41985ea`
 
 ---
 
@@ -17,7 +17,7 @@
 
 | ID | Area | Acceptance Criterion | Verification Method |
 |:---|:---|:---|:---|
-| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 8` and `versionName = "2.6.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.6.0` / `ভার্সন ২.৬.০`). | Verify `build.gradle.kts` and UI text match. |
+| **AC-1** | App Versioning | `app/build.gradle.kts` specifies `applicationId = "com.namaztracker.app"`, `versionCode = 9` and `versionName = "2.7.0"`. `MoreScreen` displays dynamic version via `AppVersionHelper` (`v2.7.0` / `ভার্সন ২.৭.০`). | Verify `build.gradle.kts` and UI text match. |
 | **AC-2** | Navigation UI | Floating bottom dock (`FinancyNavBar`) uses `RoundedCornerShape(999.dp)` capsule shape with 5 pure vector icon tabs. | Inspect `FinancyNavBar.kt` shape and icon assets. |
 | **AC-3** | Pill Buttons & Chips | All primary/secondary action buttons and status chips use `IosGlassPillButton` / `IosGlassChip` with `RoundedCornerShape(999.dp)`. | Inspect Compose files across all 5 tabs. |
 | **AC-4** | Segmented Docks | Sub-tab switchers (Quran/Hadith, Tracker periods, Qaza tabs) use `IosGlassSegmentedControl`. | Inspect `QuranHadithScreen.kt`, `TrackerScreen.kt`, `QazaScreen.kt`. |
@@ -75,14 +75,14 @@
 - [x] **Task 4.1**: Audio Recitation & Adhan Background Service Polish (Completed in `v2.2.0`)
 - [x] **Task 4.2**: Automated Compose UI Test Suite Expansion (Completed in `v2.3.0`)
 - [x] **Task 4.3**: Home Screen App Multi-Widget Suite Expansion (Completed in `v2.4.0`)
-### Milestone 7: Visual Screenshot Gallery & GitHub README Overhaul (`v2.6.0`, Build 8)
-- [x] Generated 7 high-resolution device screenshots in `docs/screenshots/`:
+### Milestone 8: Full English International Visual Assets & README Suite (`v2.7.0`, Build 9)
+- [x] Regenerated all 7 device screenshots in 100% clean, professional international English:
   - `00_hero_showcase.png`: Panoramic 1200x600 header banner.
-  - `01_namaz_tab.png`: 5 Waqt tracker, active Waqt countdown & status pills.
-  - `02_quran_hadith_tab.png`: Complete 114 Surahs, last read card & Hadith books.
-  - `03_ibadah_tab.png`: Digital Haptic Tasbih, 360° Qibla compass & Masnoon Duas.
+  - `01_namaz_tab.png`: English prayer names, Jama'at status pills, active Asr countdown.
+  - `02_quran_hadith_tab.png`: 114 Surahs directory, last read bento card & Hadith books.
+  - `03_ibadah_tab.png`: Tactile haptic digital Tasbih, 360° Qibla compass & Masnoon Duas.
   - `04_tracker_tab.png`: 21-day streak, weekly completion bar chart & Qaza debt counter.
-  - `05_more_tab.png`: Smart offline Azan, Muezzin selection, lockscreen ongoing tracker & widget hub.
-  - `06_home_widgets.png`: 4 Nothing OS-inspired Frosted Glass widgets on Android launcher.
-- [x] Overhauled `README.md` with visual preview gallery tables, technical badges, and bilingual documentation.
-- [x] Bumped app version to `v2.6.0` (Build 8).
+  - `05_more_tab.png`: Smart offline Azan, Muezzin selection (Makkah/Madinah), and backup.
+  - `06_home_widgets.png`: 4 Nothing OS-inspired Frosted Glass widgets in English.
+- [x] Overhauled `README.md` into 100% professional English documentation.
+- [x] Bumped app version to `v2.7.0` (Build 9).
