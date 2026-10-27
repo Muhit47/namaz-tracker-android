@@ -53,8 +53,8 @@ enum class NamazNavTab(
     IBADAH(
         titleEn = "Ibadah",
         titleBn = "ইবাদাত",
-        filledIcon = Icons.Filled.SelfImprovement,
-        outlinedIcon = Icons.Outlined.SelfImprovement,
+        filledResId = R.drawable.ic_ibadah_filled,
+        outlinedResId = R.drawable.ic_ibadah_outlined,
         testTag = "nav_tab_ibadah"
     ),
     TRACKER(
