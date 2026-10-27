@@ -322,7 +322,7 @@ private fun IbadahHubContent(
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Text(
-                                    text = if (isBangla) "জপুন ▶" else "Dhikr ▶",
+                                    text = if (isBangla) "পড়ুন ▶" else "Dhikr ▶",
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold
                                 )
