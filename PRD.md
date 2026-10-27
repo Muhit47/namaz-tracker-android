@@ -1,5 +1,5 @@
 # Product Requirements Document (PRD) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.10.0` (Build 12)  
+**App Version:** `v2.11.0` (Build 13)  
 **Platform:** Native Android (Kotlin + Jetpack Compose)  
 **Target SDK:** 36 (Android 14+ compatible, minSdk 24)
 

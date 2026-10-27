@@ -1,5 +1,5 @@
 # Project Plan & Roadmap (Plan) - Namaz Tracker (নামায ট্র্যাকার)
-**App Version:** `v2.10.0` (Build 12)  
+**App Version:** `v2.11.0` (Build 13)  
 **Branch:** `android`  
 **Latest Remote Commit:** `be2c271`
 
