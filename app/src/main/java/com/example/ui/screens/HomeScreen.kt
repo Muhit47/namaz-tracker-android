@@ -111,7 +111,7 @@ fun HomeScreen(
                         )
                         Surface(
                             color = colors.emeraldSoft,
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(999.dp),
                             border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f)),
                             modifier = Modifier.clickable { showCityDialog = true }
                         ) {
@@ -151,7 +151,7 @@ fun HomeScreen(
                                 containerColor = colors.cyanSoft,
                                 contentColor = colors.cyan
                             ),
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(999.dp),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             modifier = Modifier
                                 .height(32.dp)
@@ -239,7 +239,7 @@ fun HomeScreen(
                     }
                     Surface(
                         color = colors.emeraldSoft,
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(999.dp),
                         border = BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f))
                     ) {
                         Text(
@@ -411,7 +411,7 @@ private fun AdditionalPrayerRow(title: String, time: String, rakah: String, isBa
             Text(text = time, fontSize = 10.5.sp, color = colors.textMuted)
         }
         Surface(
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(999.dp),
             color = colors.emeraldSoft
         ) {
             Text(
@@ -513,7 +513,7 @@ private fun FinancyHeroWaqtCard(
                     }
 
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(999.dp),
                         color = if (isCurrentActive) Color.White.copy(alpha = 0.2f) else (if (isDone) colors.emeraldSoft else colors.cardSubtle),
                         border = BorderStroke(0.8.dp, if (isCurrentActive) Color.White.copy(alpha = 0.35f) else (if (isDone) colors.emerald else colors.border))
                     ) {
@@ -857,6 +857,7 @@ private fun JumuahDeedsDialog(isBangla: Boolean, onDismiss: () -> Unit) {
         confirmButton = {
             Button(
                 onClick = onDismiss,
+                shape = RoundedCornerShape(999.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
             ) { Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold) }
         }
@@ -965,6 +966,7 @@ private fun RamadanDuaDialog(isBangla: Boolean, onDismiss: () -> Unit) {
         confirmButton = {
             Button(
                 onClick = onDismiss,
+                shape = RoundedCornerShape(999.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
             ) { Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold) }
         }
@@ -1178,6 +1180,7 @@ private fun CitySelectionDialog(
         confirmButton = {
             Button(
                 onClick = onDismiss,
+                shape = RoundedCornerShape(999.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
             ) {
                 Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold)

@@ -1,6 +1,15 @@
 package com.example.ui.components
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import com.example.util.HapticUtil
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -392,13 +401,57 @@ private fun StatusPill(
         else -> colors.textSecondary
     }
 
+    val context = LocalContext.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.94f else 1.0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "chip_scale"
+    )
+
+    val chipShape = RoundedCornerShape(999.dp)
+    val rimBrush = if (isSelected) {
+        Brush.linearGradient(
+            listOf(
+                borderCol.copy(alpha = 0.9f),
+                borderCol.copy(alpha = 0.45f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                if (isDark) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.8f),
+                if (isDark) Color.White.copy(alpha = 0.04f) else Color(0xFFCBD5E1).copy(alpha = 0.4f)
+            )
+        )
+    }
+
     Box(
         modifier = modifier
             .height(34.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .scale(scale)
+            .then(
+                if (isSelected) {
+                    Modifier.shadow(
+                        elevation = 4.dp,
+                        shape = chipShape,
+                        spotColor = borderCol.copy(alpha = 0.35f)
+                    )
+                } else Modifier
+            )
+            .clip(chipShape)
             .background(bg)
-            .border(1.dp, borderCol, RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick),
+            .border(BorderStroke(1.dp, rimBrush), chipShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = {
+                    HapticUtil.lightTick(context)
+                    onClick()
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Row(

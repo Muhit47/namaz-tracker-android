@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.QuranAyahEntity
 import com.example.data.model.QuranSurahEntity
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -184,18 +185,13 @@ fun QuranScreen(
                                         }
                                     }
 
-                                    Button(
+                                    IosGlassPillButton(
+                                        text = if (isBangla) "পড়ুন" else "Read",
                                         onClick = { viewModel.openSurah(lrSurah) },
-                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                        modifier = Modifier.height(34.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = colors.emerald,
-                                            contentColor = Color.White
-                                        ),
-                                        shape = RoundedCornerShape(10.dp)
-                                    ) {
-                                        Text(if (isBangla) "পড়ুন" else "Read", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
-                                    }
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                                        fontSize = 11.5.sp,
+                                        modifier = Modifier.height(34.dp)
+                                    )
                                 }
                             }
                             Spacer(modifier = Modifier.height(10.dp))

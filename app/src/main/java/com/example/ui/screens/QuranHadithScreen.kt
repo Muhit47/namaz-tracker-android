@@ -105,51 +105,22 @@ fun QuranHadithScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Segmented Tabs Row
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = colors.cardSubtle,
-                        border = BorderStroke(1.dp, colors.border)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(3.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            QuranHadithSubTab.entries.forEach { tab ->
-                                val isSelected = selectedTab == tab
-                                val bg = if (isSelected) colors.emerald else Color.Transparent
-                                val textCol = if (isSelected) Color.White else colors.textSecondary
-
-                                Row(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(9.dp))
-                                        .background(bg)
-                                        .clickable { selectedTab = tab }
-                                        .padding(vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = tab.icon,
-                                        contentDescription = null,
-                                        tint = textCol,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (isBangla) tab.titleBn else tab.titleEn,
-                                        fontSize = 12.5.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = textCol
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    // iOS-style Frosted Glass Segmented Control
+                    com.example.ui.components.IosGlassSegmentedControl(
+                        items = QuranHadithSubTab.entries,
+                        selectedItem = selectedTab,
+                        onItemSelected = { selectedTab = it },
+                        labelProvider = { tab -> if (isBangla) tab.titleBn else tab.titleEn },
+                        iconProvider = { tab, iconTint ->
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = null,
+                                tint = iconTint,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }

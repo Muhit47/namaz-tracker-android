@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.TasbihCounterEntity
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -277,29 +278,27 @@ fun TasbihScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(
+                    IosGlassPillButton(
+                        text = if (isBangla) "রিসেট করুন" else "Reset Count",
+                        isPrimary = false,
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = "Reset", modifier = Modifier.size(16.dp))
+                        },
+                        fontSize = 12.5.sp,
+                        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
                         onClick = {
                             viewModel.resetTasbih(activeTasbih.id, context)
                         },
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, colors.border),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textSecondary),
-                        modifier = Modifier
-                            .height(44.dp)
-                            .testTag("btn_reset_tasbih")
-                    ) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Reset", modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(if (isBangla) "রিসেট করুন" else "Reset Count", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
-                    }
+                        modifier = Modifier.testTag("btn_reset_tasbih")
+                    )
 
                     Surface(
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(999.dp),
                         color = colors.card,
-                        border = BorderStroke(1.dp, colors.border),
+                        border = BorderStroke(1.2.dp, colors.border.copy(alpha = 0.8f)),
                         modifier = Modifier.height(44.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 18.dp)) {
                             val laps = activeTasbih.currentCount / target
                             Text(
                                 text = if (isBangla) "পূর্ণ চক্কর: ${DateUtil.toBanglaDigits(laps.toString())}"
@@ -372,7 +371,10 @@ fun TasbihScreen(
                 }
             },
             confirmButton = {
-                Button(
+                IosGlassPillButton(
+                    text = if (isBangla) "যোগ করুন" else "Add",
+                    fontSize = 12.5.sp,
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
                     onClick = {
                         if (newTitle.isNotBlank()) {
                             val targetInt = newTarget.toIntOrNull() ?: 33
@@ -390,11 +392,8 @@ fun TasbihScreen(
                             newTarget = "33"
                             showAddDialog = false
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
-                ) {
-                    Text(if (isBangla) "যোগ করুন" else "Add", fontWeight = FontWeight.Bold)
-                }
+                    }
+                )
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {

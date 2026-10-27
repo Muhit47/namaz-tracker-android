@@ -5,9 +5,15 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +34,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -37,10 +46,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.*
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.DateUtil
+import com.example.util.HapticUtil
 import com.example.util.TransliterationUtil
 
 private enum class HadithTabMode {
@@ -85,20 +96,22 @@ fun HadithScreen(
             .fillMaxSize()
             .background(colors.background)
     ) {
-            // Tab row
-            Surface(
-                color = colors.cardSubtle,
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, colors.border),
+            // iOS Frosted Glass Tab Row
+            val dockShape = RoundedCornerShape(999.dp)
+            val dockBg = if (colors.isDark) Color(0xFF09100C).copy(alpha = 0.65f) else Color(0xFFE2E8F0).copy(alpha = 0.6f)
+            val dockBorder = if (colors.isDark) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.7f)
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(dockShape)
+                    .background(dockBg)
+                    .border(BorderStroke(1.dp, dockBorder), dockShape)
+                    .padding(4.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     TabCapsuleButton(
                         label = if (isBangla) "বিষয়ভিত্তিক" else "Categories",
@@ -253,26 +266,78 @@ private fun TabCapsuleButton(
     onClick: () -> Unit
 ) {
     val colors = FinancyTheme.colors
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = if (isSelected) colors.emerald else Color.Transparent,
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable { onClick() }
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 2.dp)
-        ) {
-            Text(
-                text = label,
-                fontSize = 11.5.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else colors.textSecondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+    val context = LocalContext.current
+    val itemShape = RoundedCornerShape(999.dp)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.94f else if (isSelected) 1.0f else 0.98f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "tab_capsule_scale"
+    )
+
+    val itemBg = if (isSelected) {
+        if (colors.isDark) {
+            Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFF10B981).copy(alpha = 0.88f),
+                    Color(0xFF059669).copy(alpha = 0.96f)
+                )
+            )
+        } else {
+            Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFF059669).copy(alpha = 0.92f),
+                    Color(0xFF047857).copy(alpha = 0.98f)
+                )
             )
         }
+    } else {
+        Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+    }
+
+    val itemRim = if (isSelected) {
+        BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
+    } else {
+        BorderStroke(0.dp, Color.Transparent)
+    }
+
+    val textColor = if (isSelected) Color.White else colors.textMuted
+
+    Box(
+        modifier = modifier
+            .scale(scale)
+            .then(
+                if (isSelected) {
+                    Modifier.shadow(4.dp, itemShape, spotColor = colors.emerald.copy(alpha = 0.4f))
+                } else Modifier
+            )
+            .clip(itemShape)
+            .background(itemBg)
+            .then(if (isSelected) Modifier.border(itemRim, itemShape) else Modifier)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = {
+                    HapticUtil.selectionTick(context)
+                    onClick()
+                }
+            )
+            .padding(vertical = 7.dp, horizontal = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 11.5.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = textColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -1268,18 +1333,12 @@ private fun EmptyStateCard(
                 lineHeight = 18.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
+            IosGlassPillButton(
+                text = buttonLabel,
                 onClick = onAction,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Emerald500)
-            ) {
-                Text(
-                    text = buttonLabel,
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+                fontSize = 12.5.sp,
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 9.dp)
+            )
         }
     }
 }

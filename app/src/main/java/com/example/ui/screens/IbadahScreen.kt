@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.FinancyTheme
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -272,7 +273,7 @@ private fun IbadahHubContent(
                                 )
                             }
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
+                                shape = RoundedCornerShape(999.dp),
                                 color = colors.emerald
                             ) {
                                 Text(
@@ -311,22 +312,12 @@ private fun IbadahHubContent(
 
                             Spacer(modifier = Modifier.width(10.dp))
 
-                            Button(
+                            IosGlassPillButton(
+                                text = if (isBangla) "পড়ুন ▶" else "Dhikr ▶",
                                 onClick = { onSelect(IbadahSubScreen.TASBIH) },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                modifier = Modifier.height(34.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.emerald,
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text(
-                                    text = if (isBangla) "পড়ুন ▶" else "Dhikr ▶",
-                                    fontSize = 11.5.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                                fontSize = 11.5.sp,
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                            )
                         }
                     }
                 }
@@ -401,7 +392,7 @@ private fun IbadahBentoTile(
 
                 Surface(
                     color = item.accentColor.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(6.dp)
+                    shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
                         text = if (isBangla) item.badgeBn else item.badgeEn,

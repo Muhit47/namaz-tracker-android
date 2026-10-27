@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.IosGlassChip
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.*
 import com.example.util.HapticUtil
 
@@ -116,32 +118,12 @@ fun DuaAdhkarScreen(
             ) {
                 items(categories) { (catKey, catLabel) ->
                     val isSelected = selectedCategory == catKey
-                    FilterChip(
-                        selected = isSelected,
+                    IosGlassChip(
+                        text = catLabel,
+                        isSelected = isSelected,
                         onClick = {
                             selectedCategory = catKey
-                            HapticUtil.vibrateClick(context)
-                        },
-                        label = {
-                            Text(
-                                text = catLabel,
-                                fontSize = 12.5.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Emerald600,
-                            selectedLabelColor = Color.White,
-                            containerColor = GlassCardWhite,
-                            labelColor = Slate700
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = isSelected,
-                            borderColor = GlassBorder,
-                            selectedBorderColor = Emerald600
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                        }
                     )
                 }
             }
@@ -336,9 +318,20 @@ private fun DuaCard(
                     color = Slate400
                 )
 
-                Button(
+                val isDone = count >= dua.targetCount && dua.targetCount > 0
+                IosGlassPillButton(
+                    text = if (isDone) "পঠিত (Done)" else "পাঠ করুন (Read)",
+                    isPrimary = isDone,
+                    fontSize = 11.5.sp,
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (isDone) Icons.Default.Check else Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(13.dp)
+                        )
+                    },
                     onClick = {
-                        HapticUtil.vibrateClick(context)
                         if (dua.targetCount > 1) {
                             if (count < dua.targetCount) {
                                 count++
@@ -351,26 +344,8 @@ private fun DuaCard(
                         } else {
                             count = if (count == 0) 1 else 0
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (count >= dua.targetCount && dua.targetCount > 0) Emerald600 else Slate100,
-                        contentColor = if (count >= dua.targetCount && dua.targetCount > 0) Color.White else Slate800
-                    ),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Icon(
-                        imageVector = if (count >= dua.targetCount && dua.targetCount > 0) Icons.Default.Check else Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (count >= dua.targetCount && dua.targetCount > 0) "পঠিত (Done)" else "পাঠ করুন (Read)",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    }
+                )
             }
         }
     }

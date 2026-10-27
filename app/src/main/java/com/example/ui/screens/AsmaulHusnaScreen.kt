@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.IosGlassPillButton
 import com.example.ui.theme.*
 import com.example.util.HapticUtil
 
@@ -240,13 +241,12 @@ fun AsmaulHusnaScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedName = null }) {
-                    Text(
-                        text = if (isBangla) "বন্ধ করুন" else "Close",
-                        fontWeight = FontWeight.Bold,
-                        color = Emerald700
-                    )
-                }
+                IosGlassPillButton(
+                    text = if (isBangla) "বন্ধ করুন" else "Close",
+                    onClick = { selectedName = null },
+                    fontSize = 12.sp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 7.dp)
+                )
             },
             containerColor = GlassCardWhite,
             shape = RoundedCornerShape(20.dp)

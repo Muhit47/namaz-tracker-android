@@ -29,6 +29,7 @@ import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerStatus
 import com.example.data.model.PrayerType
 import com.example.ui.components.FinancyPrayerCard
+import com.example.ui.components.IosGlassSegmentedControl
 import com.example.ui.theme.FinancyTheme
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -107,45 +108,17 @@ fun TrackerScreen(
                 .padding(innerPadding)
         ) {
             // Top Tab Row
-            Surface(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = colors.card,
-                border = BorderStroke(1.dp, colors.border)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    TrackerSubTab.entries.forEach { tab ->
-                        val isSelected = selectedTab == tab
-                        val bg = if (isSelected) colors.emerald else Color.Transparent
-                        val textCol = if (isSelected) Color.White else colors.textSecondary
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(bg)
-                                .clickable { selectedTab = tab }
-                                .padding(vertical = 9.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = if (isBangla) tab.titleBn else tab.titleEn,
-                                fontSize = 11.5.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = textCol,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
+                IosGlassSegmentedControl(
+                    items = TrackerSubTab.entries,
+                    selectedItem = selectedTab,
+                    onItemSelected = { selectedTab = it },
+                    labelProvider = { if (isBangla) it.titleBn else it.titleEn }
+                )
             }
 
             AnimatedContent(
@@ -411,7 +384,7 @@ private fun TrackerCalendarTab(
                 )
                 Surface(
                     color = colors.emeraldSoft,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
                         text = if (isBangla) "${DateUtil.toBanglaDigits(uiState.totalPrayedToday.toString())}/৫ আদায়"
@@ -559,7 +532,7 @@ private fun TrackerAutoQazaTab(
                             ) {
                                 Surface(
                                     color = if (missedCount > 0) colors.amber.copy(alpha = 0.12f) else colors.emeraldSoft,
-                                    shape = RoundedCornerShape(8.dp)
+                                    shape = RoundedCornerShape(999.dp)
                                 ) {
                                     Text(
                                         text = if (isBangla) "বাকি কাযা: ${DateUtil.toBanglaDigits(missedCount.toString())}"
@@ -574,7 +547,7 @@ private fun TrackerAutoQazaTab(
                                 if (completedCount > 0) {
                                     Surface(
                                         color = colors.cyan.copy(alpha = 0.12f),
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(999.dp)
                                     ) {
                                         Text(
                                             text = if (isBangla) "আদায়: ${DateUtil.toBanglaDigits(completedCount.toString())}"

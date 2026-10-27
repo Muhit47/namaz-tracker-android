@@ -430,7 +430,7 @@ fun MoreScreen(
                                         ).show()
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = RoundedCornerShape(999.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                 ) {
@@ -504,7 +504,7 @@ fun MoreScreen(
                                         ).show()
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = RoundedCornerShape(999.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                 ) {
@@ -555,7 +555,7 @@ fun MoreScreen(
                                             }
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = RoundedCornerShape(999.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary)
                                     ) {
                                         Icon(imageVector = Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
@@ -570,7 +570,7 @@ fun MoreScreen(
                                             }
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = RoundedCornerShape(999.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald),
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.emerald.copy(alpha = 0.5f))
                                     ) {
@@ -586,7 +586,7 @@ fun MoreScreen(
                                         showRestoreDialog = true
                                     },
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = RoundedCornerShape(999.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle)
                                 ) {
@@ -804,7 +804,7 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
-                                        shape = RoundedCornerShape(9.dp),
+                                        shape = RoundedCornerShape(999.dp),
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary)
                                     ) {
@@ -825,7 +825,7 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
-                                        shape = RoundedCornerShape(9.dp),
+                                        shape = RoundedCornerShape(999.dp),
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textPrimary)
                                     ) {
@@ -848,7 +848,7 @@ fun MoreScreen(
                                         },
                                         modifier = Modifier.weight(1f).height(36.dp),
                                         contentPadding = PaddingValues(horizontal = 6.dp),
-                                        shape = RoundedCornerShape(9.dp),
+                                        shape = RoundedCornerShape(999.dp),
                                         border = androidx.compose.foundation.BorderStroke(1.dp, colors.borderSubtle),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.emerald)
                                     ) {
@@ -934,6 +934,7 @@ fun MoreScreen(
                             }
                         }
                     },
+                    shape = RoundedCornerShape(999.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.emeraldPrimary)
                 ) {
                     Text(text = if (isBangla) "রিস্টোর নিশ্চিত করুন" else "Confirm Restore", color = Color.White)

@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PrayerType
 import com.example.data.model.QazaRecordEntity
+import com.example.ui.components.IosGlassPillButton
+import com.example.ui.components.IosGlassSegmentedControl
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -224,55 +226,19 @@ fun QazaScreen(
 
             // 2. Tab Capsule Selector (Steppers vs Analytics)
             item {
-                Surface(
-                    color = colors.cardSubtle,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, colors.border),
+                IosGlassSegmentedControl(
+                    items = listOf(0, 1),
+                    selectedItem = selectedQazaTab,
+                    onItemSelected = { selectedQazaTab = it },
+                    labelProvider = { tab ->
+                        if (tab == 0) {
+                            if (isBangla) "ওয়াক্ত ভিত্তিক কাযা" else "Waqt Steppers"
+                        } else {
+                            if (isBangla) "ধারাবাহিকতা ও অ্যানালিটিক্স" else "Analytics & Stats"
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (selectedQazaTab == 0) colors.emerald else Color.Transparent,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable { selectedQazaTab = 0 }
-                        ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp)) {
-                                Text(
-                                    text = if (isBangla) "ওয়াক্ত ভিত্তিক কাযা" else "Waqt Steppers",
-                                    fontSize = 12.sp,
-                                    fontWeight = if (selectedQazaTab == 0) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (selectedQazaTab == 0) Color.White else colors.textSecondary
-                                )
-                            }
-                        }
-
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (selectedQazaTab == 1) colors.emerald else Color.Transparent,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable { selectedQazaTab = 1 }
-                        ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp)) {
-                                Text(
-                                    text = if (isBangla) "ধারাবাহিকতা ও অ্যানালিটিক্স" else "Analytics & Stats",
-                                    fontSize = 12.sp,
-                                    fontWeight = if (selectedQazaTab == 1) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (selectedQazaTab == 1) Color.White else colors.textSecondary
-                                )
-                            }
-                        }
-                    }
-                }
+                )
                 Spacer(modifier = Modifier.height(14.dp))
             }
 
@@ -345,18 +311,18 @@ fun QazaScreen(
                 }
             },
             confirmButton = {
-                Button(
+                IosGlassPillButton(
+                    text = if (isBangla) "সংরক্ষণ" else "Save",
+                    fontSize = 12.5.sp,
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
                     onClick = {
                         val count = editCountInput.toIntOrNull() ?: 0
                         editPrayerName?.let { name ->
                             viewModel.setQazaDirect(name, count)
                         }
                         editPrayerName = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.emerald, contentColor = Color.White)
-                ) {
-                    Text(if (isBangla) "সংরক্ষণ" else "Save", fontWeight = FontWeight.Bold)
-                }
+                    }
+                )
             },
             dismissButton = {
                 TextButton(onClick = { editPrayerName = null }) {
@@ -496,38 +462,35 @@ private fun FinancyQazaStepperCard(
                 // Quick Action Buttons
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     // +1 Missed
-                    OutlinedButton(
+                    IosGlassPillButton(
+                        text = if (isBangla) "১ মিস" else "+1 Missed",
+                        isPrimary = false,
+                        fontSize = 11.sp,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(13.dp))
+                        },
                         onClick = onAddOne,
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp),
                         modifier = Modifier
                             .height(36.dp)
-                            .testTag("btn_add_missed_${prayer.keyName}"),
-                        border = BorderStroke(1.dp, colors.border),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textSecondary)
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(13.dp))
-                        Text(text = "১ মিস", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
+                            .testTag("btn_add_missed_${prayer.keyName}")
+                    )
 
                     // +1 Prayed
-                    Button(
-                        onClick = onPrayed,
+                    IosGlassPillButton(
+                        text = if (isBangla) "আদায় ✓" else "Prayed ✓",
+                        isPrimary = true,
+                        fontSize = 11.5.sp,
                         enabled = qazaRecord.totalMissed > 0,
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(13.dp))
+                        },
+                        onClick = onPrayed,
                         modifier = Modifier
                             .height(36.dp)
-                            .testTag("btn_prayed_${prayer.keyName}"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.emerald,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(text = if (isBangla) "আদায় ✓" else "Prayed ✓", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
-                    }
+                            .testTag("btn_prayed_${prayer.keyName}")
+                    )
                 }
             }
         }

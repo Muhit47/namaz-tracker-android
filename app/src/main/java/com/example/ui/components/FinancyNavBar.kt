@@ -4,13 +4,15 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,15 +24,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.NamazNavTab
+import com.example.MainActivity.NamazNavTab
 import com.example.ui.theme.FinancyTheme
+import com.example.util.HapticUtil
 
+/**
+ * iOS-style Frosted Glass Floating Pill Dock Bottom Navigation Bar.
+ */
 @Composable
 fun FinancyFloatingNavBar(
     currentTab: NamazNavTab,
@@ -39,6 +47,20 @@ fun FinancyFloatingNavBar(
     modifier: Modifier = Modifier
 ) {
     val colors = FinancyTheme.colors
+    val dockShape = RoundedCornerShape(999.dp)
+
+    val dockBg = if (colors.isDark) {
+        Color(0xFF111C16).copy(alpha = 0.78f)
+    } else {
+        Color.White.copy(alpha = 0.85f)
+    }
+
+    val dockGlassRim = Brush.linearGradient(
+        colors = listOf(
+            if (colors.isDark) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.9f),
+            if (colors.isDark) Color.White.copy(alpha = 0.06f) else Color(0xFFCBD5E1).copy(alpha = 0.45f)
+        )
+    )
 
     Box(
         modifier = modifier
@@ -51,21 +73,21 @@ fun FinancyFloatingNavBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = if (colors.isDark) 16.dp else 10.dp,
-                    shape = RoundedCornerShape(28.dp),
+                    elevation = if (colors.isDark) 18.dp else 12.dp,
+                    shape = dockShape,
                     ambientColor = if (colors.isDark) Color(0x60000000) else Color(0x20000000),
-                    spotColor = if (colors.isDark) Color(0x80000000) else Color(0x25000000)
+                    spotColor = if (colors.isDark) Color(0xFF10B981).copy(alpha = 0.2f) else Color(0x25000000)
                 )
-                .clip(RoundedCornerShape(28.dp))
-                .background(colors.navBackground)
-                .border(1.dp, colors.navBorder, RoundedCornerShape(28.dp)),
-            color = colors.navBackground,
-            shape = RoundedCornerShape(28.dp)
+                .clip(dockShape)
+                .background(dockBg)
+                .border(BorderStroke(1.2.dp, dockGlassRim), dockShape),
+            color = Color.Transparent,
+            shape = dockShape
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 8.dp),
+                    .padding(horizontal = 6.dp, vertical = 7.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -91,18 +113,42 @@ private fun FinancyNavItem(
     onClick: () -> Unit
 ) {
     val colors = FinancyTheme.colors
+    val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
+    val itemShape = RoundedCornerShape(999.dp)
 
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.08f else 1.0f,
+        targetValue = if (isSelected) 1.06f else 1.0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "tab_scale"
     )
 
-    val activePillBg by animateColorAsState(
-        targetValue = if (isSelected) colors.emeraldSoft else Color.Transparent,
-        label = "tab_bg"
-    )
+    val activePillBrush = if (isSelected) {
+        if (colors.isDark) {
+            Brush.linearGradient(
+                listOf(
+                    Color(0xFF10B981).copy(alpha = 0.28f),
+                    Color(0xFF059669).copy(alpha = 0.46f)
+                )
+            )
+        } else {
+            Brush.linearGradient(
+                listOf(
+                    Color(0xFF059669).copy(alpha = 0.12f),
+                    Color(0xFF059669).copy(alpha = 0.22f)
+                )
+            )
+        }
+    } else {
+        Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+    }
+
+    val activeBorder = if (isSelected) {
+        BorderStroke(
+            1.dp,
+            if (colors.isDark) Color(0xFF10B981).copy(alpha = 0.65f) else Color(0xFF059669).copy(alpha = 0.35f)
+        )
+    } else BorderStroke(0.dp, Color.Transparent)
 
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) colors.emerald else colors.textMuted,
@@ -112,15 +158,28 @@ private fun FinancyNavItem(
     Box(
         modifier = Modifier
             .scale(scale)
-            .clip(RoundedCornerShape(20.dp))
-            .background(activePillBg)
+            .then(
+                if (isSelected) {
+                    Modifier.shadow(
+                        elevation = 4.dp,
+                        shape = itemShape,
+                        spotColor = colors.emerald.copy(alpha = 0.35f)
+                    )
+                } else Modifier
+            )
+            .clip(itemShape)
+            .background(activePillBrush)
+            .then(if (isSelected) Modifier.border(activeBorder, itemShape) else Modifier)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick
+                onClick = {
+                    HapticUtil.selectionTick(context)
+                    onClick()
+                }
             )
             .testTag(tab.testTag)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
