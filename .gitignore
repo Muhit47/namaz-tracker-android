@@ -22,6 +22,6 @@ __pycache__/
 metadata.json
 public/
 *.html
-*.jpg
+!docs/screenshots/*.jpg
 secret_docs/
 
