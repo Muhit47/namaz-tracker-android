@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Namaz Tracker</string>
+    <string name="auto_sync_badge">100% Auto-Sync</string>
+    <string name="auto_sync_badge_bn">১০০% অটো-সিঙ্ক</string>
 </resources>

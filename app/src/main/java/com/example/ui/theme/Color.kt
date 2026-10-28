@@ -27,6 +27,10 @@ val CyanAccent = Color(0xFF0284C7)
 val CyanAccentSoft = Color(0xFFF0F9FF)
 val RoseAccent = Color(0xFFE11D48)
 val RoseAccentSoft = Color(0xFFFFF1F2)
+val IndigoAccent = Color(0xFF6366F1)
+val IndigoAccentSoft = Color(0xFFEEF2FF)
+val VioletAccent = Color(0xFF8B5CF6)
+val VioletAccentSoft = Color(0xFFF5F3FF)
 
 // --- Compatibility Aliases for Design Tokens ---
 val Slate950 = Color(0xFF020617)
@@ -122,3 +126,7 @@ val FinancyAmber = AmberAccent
 val FinancyAmberSoft = Color(0xFFFFFBEB)
 val FinancyRose = RoseAccent
 val FinancyRoseSoft = RoseAccentSoft
+val FinancyIndigo = IndigoAccent
+val FinancyIndigoSoft = IndigoAccentSoft
+val FinancyViolet = VioletAccent
+val FinancyVioletSoft = VioletAccentSoft

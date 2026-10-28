@@ -8,6 +8,7 @@ import android.content.Intent
 import android.widget.RemoteViews
 import com.example.R
 import com.example.data.model.PrayerType
+import com.example.util.CityLocation
 import com.example.util.PrayerTimeCalculator
 import java.util.Calendar
 

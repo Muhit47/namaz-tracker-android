@@ -511,20 +511,44 @@ private fun BooksListView(
         }
 
         items(books, key = { it.id }) { book ->
-            Card(
+            val context = LocalContext.current
+            val (bookAccent, bookBg, bookRim) = remember(book.id, colors.isDark) {
+                getHadithBookTheme(book.id, colors.isDark)
+            }
+            val cardShape = RoundedCornerShape(22.dp)
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (isPressed) 0.97f else 1.0f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                label = "book_scale"
+            )
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 5.dp)
-                    .clickable { onSelectBook(book) },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colors.card),
-                border = BorderStroke(1.dp, colors.border),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    .padding(vertical = 4.5.dp)
+                    .scale(scale)
+                    .shadow(
+                        elevation = if (colors.isDark) 4.dp else 2.dp,
+                        shape = cardShape,
+                        spotColor = bookAccent.copy(alpha = 0.25f)
+                    )
+                    .clip(cardShape)
+                    .background(bookBg)
+                    .border(BorderStroke(1.1.dp, bookRim), cardShape)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = {
+                            HapticUtil.lightTick(context)
+                            onSelectBook(book)
+                        }
+                    )
+                    .padding(16.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -533,37 +557,52 @@ private fun BooksListView(
                             Text(
                                 text = if (isBangla) book.nameBn else (book.nameEn ?: book.nameBn),
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.textPrimary
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (colors.isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A),
+                                fontSize = 15.5.sp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(
-                                color = colors.emeraldSoft,
-                                shape = RoundedCornerShape(6.dp)
+                                color = bookAccent.copy(alpha = if (colors.isDark) 0.20f else 0.15f),
+                                shape = RoundedCornerShape(999.dp),
+                                border = BorderStroke(0.6.dp, bookAccent.copy(alpha = 0.40f))
                             ) {
                                 Text(
                                     text = book.nameAr,
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = colors.emerald,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    color = bookAccent,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = if (isBangla) "সকল অধ্যায় ও সহীহ সনদসহ পড়া যাবে" else "Browse chapters & full Hadith text",
-                            fontSize = 12.sp,
-                            color = colors.textMuted
+                            fontSize = 11.5.sp,
+                            color = if (colors.isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
+                            fontWeight = FontWeight.Medium
                         )
                     }
 
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = "Open Book",
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(14.dp)
-                    )
+                    Surface(
+                        shape = CircleShape,
+                        color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.White,
+                        border = BorderStroke(
+                            0.6.dp,
+                            if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0)
+                        ),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = "Open Book",
+                                tint = bookAccent,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -1119,22 +1158,44 @@ private fun HadithCardItem(
     onCopy: () -> Unit
 ) {
     val colors = FinancyTheme.colors
+    val cardShape = RoundedCornerShape(22.dp)
+    val cardBg = if (colors.isDark) {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.05f),
+                Color.White.copy(alpha = 0.02f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.96f),
+                Color(0xFFF8FAFC).copy(alpha = 0.92f)
+            )
+        )
+    }
 
-    Card(
+    val cardRim = BorderStroke(
+        1.dp,
+        if (colors.isDark) Color.White.copy(alpha = 0.12f) else Color(0xFFE2E8F0)
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
-            .testTag("hadith_card_${hadith.id}"),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.card),
-        border = BorderStroke(1.dp, colors.border),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .shadow(
+                elevation = if (colors.isDark) 4.dp else 2.dp,
+                shape = cardShape,
+                spotColor = Color.Black.copy(alpha = 0.10f)
+            )
+            .clip(cardShape)
+            .background(cardBg)
+            .border(cardRim, cardShape)
+            .testTag("hadith_card_${hadith.id}")
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1145,16 +1206,16 @@ private fun HadithCardItem(
                     modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Surface(
-                        color = colors.cyanSoft,
-                        shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(0.8.dp, colors.cyan.copy(alpha = 0.3f))
+                        color = if (colors.isDark) colors.cyan.copy(alpha = 0.18f) else colors.cyanSoft,
+                        shape = RoundedCornerShape(999.dp),
+                        border = BorderStroke(0.6.dp, colors.cyan.copy(alpha = 0.35f))
                     ) {
                         Text(
                             text = if (isBangla) hadith.bookNameBn else (hadith.bookNameEn ?: hadith.bookNameBn),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.cyan,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -1162,7 +1223,7 @@ private fun HadithCardItem(
                         text = "• ${if (isBangla) hadith.chapterBn else (if (hadith.chapterEn.isNullOrBlank()) hadith.chapterBn else hadith.chapterEn!!)}",
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Medium,
-                        color = colors.textMuted,
+                        color = if (colors.isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1170,16 +1231,16 @@ private fun HadithCardItem(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
-                        color = colors.emeraldSoft,
-                        shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f))
+                        color = if (colors.isDark) colors.emerald.copy(alpha = 0.18f) else colors.emeraldSoft,
+                        shape = RoundedCornerShape(999.dp),
+                        border = BorderStroke(0.6.dp, colors.emerald.copy(alpha = 0.35f))
                     ) {
                         Text(
                             text = if (isBangla) hadith.gradeBn else (if (hadith.gradeEn.isNullOrBlank()) hadith.gradeBn else hadith.gradeEn!!),
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.emerald,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                         )
                     }
 
@@ -1192,23 +1253,23 @@ private fun HadithCardItem(
                         Icon(
                             imageVector = if (isBookmarked) Icons.Default.Star else Icons.Default.StarBorder,
                             contentDescription = "Bookmark",
-                            tint = if (isBookmarked) colors.amber else colors.textMuted,
+                            tint = if (isBookmarked) Color(0xFFFBBF24) else (if (colors.isDark) Color(0xFF64748B) else Color(0xFF94A3B8)),
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(11.dp))
 
             if (hadith.textAr.isNotBlank()) {
                 Text(
                     text = hadith.textAr,
                     fontFamily = AmiriFontFamily,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary,
-                    lineHeight = 36.sp,
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = if (colors.isDark) Color.White else Color(0xFF0F172A),
+                    lineHeight = 38.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1223,8 +1284,8 @@ private fun HadithCardItem(
                 Text(
                     text = "${if (isBangla) "উচ্চারণ: " else "Pronunciation: "}$translit",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.cyan,
+                    fontWeight = FontWeight.Bold,
+                    color = if (colors.isDark) Color(0xFFFBBF24) else Color(0xFFB45309),
                     lineHeight = 18.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -1244,8 +1305,9 @@ private fun HadithCardItem(
             Text(
                 text = if (isBangla) hadith.textBn else (if (hadith.textEn.isNullOrBlank()) hadith.textBn else hadith.textEn!!),
                 fontSize = 13.5.sp,
-                color = colors.textSecondary,
-                lineHeight = 21.sp
+                color = if (colors.isDark) Color(0xFFCBD5E1) else Color(0xFF1E293B),
+                lineHeight = 21.sp,
+                fontWeight = FontWeight.Normal
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -1259,33 +1321,34 @@ private fun HadithCardItem(
                 Text(
                     text = "${if (isBangla) "হাদিস নং: " else "Hadith No: "}$ref",
                     fontSize = 11.5.sp,
-                    color = colors.textMuted
+                    color = if (colors.isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
+                    fontWeight = FontWeight.Medium
                 )
 
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = colors.cardSubtle,
-                    border = BorderStroke(0.8.dp, colors.border),
+                    shape = RoundedCornerShape(999.dp),
+                    color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFF1F5F9),
+                    border = BorderStroke(0.6.dp, if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFCBD5E1)),
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(999.dp))
                         .clickable { onCopy() }
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.5.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy",
-                            tint = Slate600,
+                            tint = if (colors.isDark) Color(0xFFE2E8F0) else Color(0xFF334155),
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = if (isBangla) "কপি করুন" else "Copy",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Slate700
+                            fontWeight = FontWeight.Bold,
+                            color = if (colors.isDark) Color(0xFFE2E8F0) else Color(0xFF334155)
                         )
                     }
                 }
@@ -1383,4 +1446,196 @@ private fun copyHadithToClipboard(context: Context, hadith: HadithEntity, isBang
         }
     }
     copyToClipboard(context, shareText, isBangla)
+}
+
+private data class HadithBookTheme(
+    val accentColor: Color,
+    val backgroundBrush: Brush,
+    val rimBrush: Brush
+)
+
+private fun getHadithBookTheme(bookId: String, isDark: Boolean): HadithBookTheme {
+    return when (bookId.lowercase()) {
+        "bukhari" -> {
+            val accent = if (isDark) Color(0xFF34D399) else Color(0xFF047857)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF064E3B).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFECFDF5).copy(alpha = 0.98f),
+                        Color(0xFFD1FAE5).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFF34D399).copy(alpha = 0.40f) else Color(0xFF10B981).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        "muslim" -> {
+            val accent = if (isDark) Color(0xFF38BDF8) else Color(0xFF0369A1)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF082F49).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFF0F9FF).copy(alpha = 0.98f),
+                        Color(0xFFE0F2FE).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFF38BDF8).copy(alpha = 0.40f) else Color(0xFF0284C7).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        "tirmidhi" -> {
+            val accent = if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF451A03).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFFFFBEB).copy(alpha = 0.98f),
+                        Color(0xFFFEF3C7).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFFFBBF24).copy(alpha = 0.40f) else Color(0xFFF59E0B).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        "abudawud" -> {
+            val accent = if (isDark) Color(0xFFA78BFA) else Color(0xFF6D28D9)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF2E1065).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFFAF5FF).copy(alpha = 0.98f),
+                        Color(0xFFF3E8FF).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFFA78BFA).copy(alpha = 0.40f) else Color(0xFF8B5CF6).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        "nasai" -> {
+            val accent = if (isDark) Color(0xFF22D3EE) else Color(0xFF0E7490)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF083344).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFECFEFF).copy(alpha = 0.98f),
+                        Color(0xFFCFFAFE).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFF22D3EE).copy(alpha = 0.40f) else Color(0xFF06B6D4).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        "ibnmajah" -> {
+            val accent = if (isDark) Color(0xFFFB7185) else Color(0xFFBE123C)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF4C0519).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFFFF1F2).copy(alpha = 0.98f),
+                        Color(0xFFFFE4E6).copy(alpha = 0.88f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color(0xFFFB7185).copy(alpha = 0.40f) else Color(0xFFF43F5E).copy(alpha = 0.45f),
+                    if (isDark) Color.White.copy(alpha = 0.08f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+        else -> {
+            val accent = if (isDark) Color(0xFF34D399) else Color(0xFF047857)
+            val bg = if (isDark) {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF064E3B).copy(alpha = 0.50f),
+                        Color(0xFF0F172A).copy(alpha = 0.70f)
+                    )
+                )
+            } else {
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFECFDF5).copy(alpha = 0.98f),
+                        Color.White.copy(alpha = 0.98f)
+                    )
+                )
+            }
+            val rim = Brush.linearGradient(
+                listOf(
+                    if (isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0),
+                    if (isDark) Color.White.copy(alpha = 0.05f) else Color.White
+                )
+            )
+            HadithBookTheme(accent, bg, rim)
+        }
+    }
 }

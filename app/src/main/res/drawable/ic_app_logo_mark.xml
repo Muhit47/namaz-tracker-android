@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Squircle Base Tile -->
+    <path
+        android:fillColor="#1E293B"
+        android:strokeColor="#334155"
+        android:strokeWidth="1.2"
+        android:pathData="M18,2 L46,2 A16,16 0 0,1 62,18 L62,46 A16,16 0 0,1 46,62 L18,62 A16,16 0 0,1 2,46 L2,18 A16,16 0 0,1 18,2 Z" />
+
+    <!-- Letter N Monogram -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M17,43.5 V23.5 C17,20.5 19.5,19.5 21.5,21 L31.5,38 V21" />
+
+    <!-- Letter T Crossbar -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:pathData="M26.5,21 H49.5" />
+
+    <!-- Letter T Stem Flourish -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M39,21 V38 C39,42 41.5,44 45,42.5" />
+
+    <!-- Islamic Nuqta Diamond Accent Dot -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M30.75,9.6 L33.9,12.75 L30.75,15.9 L27.6,12.75 Z" />
+</vector>

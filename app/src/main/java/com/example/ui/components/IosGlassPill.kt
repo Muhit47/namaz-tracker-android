@@ -69,15 +69,15 @@ fun IosGlassPillButton(
         if (colors.isDark) {
             Brush.linearGradient(
                 colors = listOf(
-                    Color(0xFF10B981).copy(alpha = 0.88f),
-                    Color(0xFF059669).copy(alpha = 0.96f)
+                    colors.emerald.copy(alpha = 0.88f),
+                    colors.emeraldDark.copy(alpha = 0.96f)
                 )
             )
         } else {
             Brush.linearGradient(
                 colors = listOf(
-                    Color(0xFF059669).copy(alpha = 0.92f),
-                    Color(0xFF047857).copy(alpha = 0.98f)
+                    colors.emerald.copy(alpha = 0.92f),
+                    colors.emeraldDark.copy(alpha = 0.98f)
                 )
             )
         }
@@ -85,8 +85,8 @@ fun IosGlassPillButton(
         if (colors.isDark) {
             Brush.linearGradient(
                 colors = listOf(
-                    Color(0xFF1A2821).copy(alpha = 0.75f),
-                    Color(0xFF131D18).copy(alpha = 0.85f)
+                    colors.cardSubtle.copy(alpha = 0.75f),
+                    colors.card.copy(alpha = 0.85f)
                 )
             )
         } else {
@@ -314,7 +314,7 @@ fun <T> IosGlassSegmentedControl(
     val dockShape = RoundedCornerShape(999.dp)
 
     val dockBg = if (colors.isDark) {
-        Color(0xFF09100C).copy(alpha = 0.65f)
+        colors.cardSubtle.copy(alpha = 0.65f)
     } else {
         Color(0xFFE2E8F0).copy(alpha = 0.6f)
     }
@@ -351,15 +351,15 @@ fun <T> IosGlassSegmentedControl(
                     if (colors.isDark) {
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF10B981).copy(alpha = 0.85f),
-                                Color(0xFF059669).copy(alpha = 0.95f)
+                                colors.emerald.copy(alpha = 0.85f),
+                                colors.emeraldDark.copy(alpha = 0.95f)
                             )
                         )
                     } else {
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF059669).copy(alpha = 0.9f),
-                                Color(0xFF047857).copy(alpha = 0.98f)
+                                colors.emerald.copy(alpha = 0.9f),
+                                colors.emeraldDark.copy(alpha = 0.98f)
                             )
                         )
                     }

@@ -69,6 +69,10 @@ data class FinancyColorTokens(
     val amberSoft: Color,
     val rose: Color,
     val roseSoft: Color,
+    val indigo: Color,
+    val indigoSoft: Color,
+    val violet: Color,
+    val violetSoft: Color,
     val navBackground: Color,
     val navBorder: Color
 ) {
@@ -97,6 +101,10 @@ val LightFinancyTokens = FinancyColorTokens(
     amberSoft = Color(0xFFFFFBEB),
     rose = RoseAccent,
     roseSoft = RoseAccentSoft,
+    indigo = IndigoAccent,
+    indigoSoft = IndigoAccentSoft,
+    violet = VioletAccent,
+    violetSoft = VioletAccentSoft,
     navBackground = Color(0xF5FFFFFF),
     navBorder = OutlineLight
 )
@@ -119,6 +127,10 @@ val DarkFinancyTokens = FinancyColorTokens(
     amberSoft = Color(0x26FBBF24),
     rose = Color(0xFFF87171),
     roseSoft = Color(0x26F43F5E),
+    indigo = Color(0xFF818CF8),
+    indigoSoft = Color(0x266366F1),
+    violet = Color(0xFFA78BFA),
+    violetSoft = Color(0x268B5CF6),
     navBackground = Color(0xF2101915),
     navBorder = Color(0x3510B981)
 )

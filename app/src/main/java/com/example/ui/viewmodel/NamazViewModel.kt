@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.database.AppDatabase
 import com.example.data.model.*
 import com.example.data.repository.PrayerRepository
+import com.example.notification.AzanPlaybackService
 import com.example.notification.PrayerAlarmScheduler
 import com.example.notification.PrayerNotificationHelper
 import com.example.util.BackupRestoreHelper
@@ -298,7 +299,11 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
         val todayDone = (byDate[today] ?: emptyList()).count {
             it.prayerName in fardh && (it.status == "jamaah" || it.status == "on_time")
         }
-        if (todayDone >= 5) streak++
+        if (todayDone >= 5) {
+            streak = 1
+        } else {
+            streak = 0
+        }
 
         for (i in 1..30) {
             cal.add(Calendar.DAY_OF_YEAR, -1)
@@ -311,12 +316,12 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
 
         val calW = Calendar.getInstance()
         var weekCount = 0
-        for (i in 0..6) {
+        for (i in 1..7) {
+            calW.add(Calendar.DAY_OF_YEAR, -1)
             val d = DateUtil.getIsoForCalendar(calW)
             weekCount += (byDate[d] ?: emptyList()).count {
                 it.prayerName in fardh && (it.status == "jamaah" || it.status == "on_time")
             }
-            calW.add(Calendar.DAY_OF_YEAR, -1)
         }
         val rate = ((weekCount.toFloat() / 35f) * 100).toInt().coerceIn(0, 100)
 

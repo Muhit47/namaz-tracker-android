@@ -1,4 +1,7 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Properties
 
 plugins {
   alias(libs.plugins.android.application)
@@ -8,6 +11,30 @@ plugins {
   alias(libs.plugins.google.services)
 }
 
+// -----------------------------------------------------------------------------
+// Dynamic Versioning Configuration via version.properties
+// -----------------------------------------------------------------------------
+val versionPropsFile = rootProject.file("version.properties")
+val versionProps = Properties()
+
+if (versionPropsFile.exists()) {
+  versionPropsFile.inputStream().use { versionProps.load(it) }
+} else {
+  versionProps["VERSION_MAJOR"] = "3"
+  versionProps["VERSION_MINOR"] = "0"
+  versionProps["VERSION_PATCH"] = "0"
+  versionProps["VERSION_BUILD"] = "17"
+  versionPropsFile.outputStream().use { versionProps.store(it, "Initial Version Configuration") }
+}
+
+val verMajor = versionProps.getProperty("VERSION_MAJOR", "3").trim().toInt()
+val verMinor = versionProps.getProperty("VERSION_MINOR", "0").trim().toInt()
+val verPatch = versionProps.getProperty("VERSION_PATCH", "0").trim().toInt()
+val verBuild = versionProps.getProperty("VERSION_BUILD", "17").trim().toInt()
+
+val currentVersionName = "$verMajor.$verMinor.$verPatch"
+val currentVersionCode = verBuild
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -16,8 +43,8 @@ android {
     applicationId = "com.namaztracker.app"
     minSdk = 24
     targetSdk = 36
-    versionCode = 12
-    versionName = "2.10.0"
+    versionCode = currentVersionCode
+    versionName = currentVersionName
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -141,4 +168,71 @@ dependencies {
   debugImplementation(libs.androidx.compose.ui.tooling)
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
+}
+
+// -----------------------------------------------------------------------------
+// Automated Versioning Tasks
+// -----------------------------------------------------------------------------
+tasks.register("bumpBuild") {
+  description = "Increments build number (versionCode) in version.properties"
+  group = "versioning"
+  doLast {
+    val nextBuild = verBuild + 1
+    versionProps["VERSION_BUILD"] = nextBuild.toString()
+    versionPropsFile.outputStream().use { versionProps.store(it, "Updated by bumpBuild") }
+    println("Successfully bumped build number to $nextBuild (versionCode = $nextBuild)")
+  }
+}
+
+tasks.register("bumpPatch") {
+  description = "Increments patch version and build number in version.properties"
+  group = "versioning"
+  doLast {
+    val nextPatch = verPatch + 1
+    val nextBuild = verBuild + 1
+    versionProps["VERSION_PATCH"] = nextPatch.toString()
+    versionProps["VERSION_BUILD"] = nextBuild.toString()
+    versionPropsFile.outputStream().use { versionProps.store(it, "Updated by bumpPatch") }
+    println("Successfully bumped version to $verMajor.$verMinor.$nextPatch (Build $nextBuild)")
+  }
+}
+
+tasks.register("bumpMinor") {
+  description = "Increments minor version, resets patch to 0, and increments build number"
+  group = "versioning"
+  doLast {
+    val nextMinor = verMinor + 1
+    val nextBuild = verBuild + 1
+    versionProps["VERSION_MINOR"] = nextMinor.toString()
+    versionProps["VERSION_PATCH"] = "0"
+    versionProps["VERSION_BUILD"] = nextBuild.toString()
+    versionPropsFile.outputStream().use { versionProps.store(it, "Updated by bumpMinor") }
+    println("Successfully bumped version to $verMajor.$nextMinor.0 (Build $nextBuild)")
+  }
+}
+
+tasks.register("bumpMajor") {
+  description = "Increments major version, resets minor/patch to 0, and increments build number"
+  group = "versioning"
+  doLast {
+    val nextMajor = verMajor + 1
+    val nextBuild = verBuild + 1
+    versionProps["VERSION_MAJOR"] = nextMajor.toString()
+    versionProps["VERSION_MINOR"] = "0"
+    versionProps["VERSION_PATCH"] = "0"
+    versionProps["VERSION_BUILD"] = nextBuild.toString()
+    versionPropsFile.outputStream().use { versionProps.store(it, "Updated by bumpMajor") }
+    println("Successfully bumped version to $nextMajor.0.0 (Build $nextBuild)")
+  }
+}
+
+tasks.register("showVersion") {
+  description = "Displays the current versionName and versionCode"
+  group = "versioning"
+  doLast {
+    println("==================================================")
+    println("Namaz Tracker Version: $currentVersionName")
+    println("Namaz Tracker Build Code: $currentVersionCode")
+    println("==================================================")
+  }
 }

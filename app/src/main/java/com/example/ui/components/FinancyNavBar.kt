@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.MainActivity.NamazNavTab
+import com.example.NamazNavTab
 import com.example.ui.theme.FinancyTheme
 import com.example.util.HapticUtil
 
@@ -51,9 +51,9 @@ fun FinancyFloatingNavBar(
     val dockShape = RoundedCornerShape(999.dp)
 
     val dockBg = if (colors.isDark) {
-        Color(0xFF111C16).copy(alpha = 0.78f)
+        colors.cardSubtle.copy(alpha = 0.78f)
     } else {
-        Color.White.copy(alpha = 0.85f)
+        colors.card.copy(alpha = 0.85f)
     }
 
     val dockGlassRim = Brush.linearGradient(
@@ -220,6 +220,15 @@ private fun FinancyNavItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            if (isSelected) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Box(
+                    modifier = Modifier
+                        .size(3.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(colors.emerald)
+                )
+            }
         }
     }
 }

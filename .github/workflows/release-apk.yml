@@ -1,0 +1,141 @@
+name: Build and Release Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g. v3.0.0)'
+        required: false
+        default: 'v3.0.0'
+      release_name:
+        description: 'Release Title'
+        required: false
+        default: 'Namaz Tracker v3.0.0 (Build 17) - Official Release'
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
+
+      - name: Prepare Keystore for Signing
+        run: |
+          if [ ! -f my-upload-key.jks ]; then
+            echo "Generating release signing keystore..."
+            keytool -genkey -v -keystore my-upload-key.jks \
+              -alias upload \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass "${STORE_PASSWORD:-namaztracker123}" \
+              -keypass "${KEY_PASSWORD:-namaztracker123}" \
+              -dname "CN=NamazTracker, OU=Mobile, O=IslamicApp, L=Dhaka, S=Dhaka, C=BD"
+          fi
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'namaztracker123' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'namaztracker123' }}
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'namaztracker123' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'namaztracker123' }}
+
+      - name: Locate and Package APK
+        id: package_apk
+        run: |
+          RELEASE_DIR="app/build/outputs/apk/release"
+          APK_FILE=$(find $RELEASE_DIR -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "ERROR: Release APK not found in $RELEASE_DIR"
+            exit 1
+          fi
+          
+          if [ -f version.properties ]; then
+            V_MAJ=$(grep 'VERSION_MAJOR=' version.properties | cut -d'=' -f2 | tr -d '\r\n ')
+            V_MIN=$(grep 'VERSION_MINOR=' version.properties | cut -d'=' -f2 | tr -d '\r\n ')
+            V_PAT=$(grep 'VERSION_PATCH=' version.properties | cut -d'=' -f2 | tr -d '\r\n ')
+            GRADLE_VER="${V_MAJ}.${V_MIN}.${V_PAT}"
+          else
+            GRADLE_VER=$(grep 'versionName = ' app/build.gradle.kts | head -1 | awk -F'"' '{print $2}')
+          fi
+          VERSION="v${GRADLE_VER:-3.0.0}"
+          if [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            VERSION="${{ github.event.inputs.release_tag }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          
+          FINAL_NAME="Namaz-Tracker-${VERSION}.apk"
+          cp "$APK_FILE" "$FINAL_NAME"
+          echo "apk_path=$FINAL_NAME" >> $GITHUB_OUTPUT
+          echo "tag_name=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release APK packaged: $FINAL_NAME"
+
+      - name: Upload APK as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Namaz-Tracker-Release-APK
+          path: ${{ steps.package_apk.outputs.apk_path }}
+          retention-days: 30
+
+      - name: Create GitHub Release and Upload APK
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.package_apk.outputs.tag_name }}
+          name: ${{ github.event.inputs.release_name || steps.package_apk.outputs.tag_name }}
+          files: ${{ steps.package_apk.outputs.apk_path }}
+          draft: false
+          prerelease: false
+          make_latest: true
+          body: |
+            ## 🕌 Namaz Tracker Android Release (${{ steps.package_apk.outputs.tag_name }})
+
+            Welcome to the official release of **Namaz Tracker** — a modern, privacy-first Android application designed with an iOS frosted glass aesthetic and Nothing OS minimalist home screen widgets.
+
+            ### 📦 Download & Installation
+            1. Download the **`Namaz-Tracker-${{ steps.package_apk.outputs.tag_name }}.apk`** asset attached below.
+            2. Open the downloaded `.apk` file on your Android device (Android 7.0+ supported).
+            3. Grant notification & exact alarm permissions to enable accurate Adhan reminders and prayer countdowns.
+
+            ---
+
+            ### ✨ Key Features in this Release:
+            - **🕌 5 Daily Prayers & Visual Countdown:** Dynamic active waqt indicator, real-time countdown, and precise prayer times calculated for your city.
+            - **📖 Quran & Authentic Hadith:** Read Surahs, bookmark verses, search Hadith, and listen to soothing audio recitations.
+            - **📿 Ibadah Suite:** Digital Tasbih counter, Qibla compass with sensor calibration, and daily Dua collection.
+            - **📊 30-Day Prayer Consistency Tracker:** Visual monthly analytics tracking your prayer habits.
+            - **🎨 iOS-Style Frosted Glass Floating Dock:** Strictly balanced and symmetrical navigation buttons with equal dimensions and haptic feedback.
+            - **📱 4-Suite Nothing OS & Frosted Glass Widgets:**
+              - Next Waqt Countdown widget
+              - All-5 Prayer Schedule widget
+              - Ramadan Sehri & Iftar widget
+              - Daily Hadith & Dua of the Day widget
+            - **🌐 English Primary Default:** Clean English interface by default with instant toggle to Bengali.
+            - **🛡️ 100% Offline & Privacy-First:** No tracking, no data collection, zero telemetry.
+
+            ---
+            *Built with Android Jetpack Compose, Material 3, and Kotlin.*

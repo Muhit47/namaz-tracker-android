@@ -3,12 +3,15 @@ package com.example.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,26 +27,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
 import com.example.data.model.PrayerLogEntity
 import com.example.data.model.PrayerType
+import com.example.ui.components.NamazHeaderLogo
 import com.example.ui.components.PrayerCard
-import com.example.ui.theme.*
+import com.example.ui.theme.FinancyTheme
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.ActiveWaqtInfo
 import com.example.util.DateUtil
+import com.example.util.HapticUtil
 import com.example.util.PrayerTimeCalculator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -97,280 +100,237 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.app_header),
-                            contentDescription = if (isBangla) "নামায ট্র্যাকার" else "Namaz Tracker",
-                            modifier = Modifier
-                                .height(38.dp)
-                                .padding(vertical = 2.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                        Surface(
-                            color = colors.emeraldSoft,
-                            shape = RoundedCornerShape(999.dp),
-                            border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.3f)),
-                            modifier = Modifier.clickable { showCityDialog = true }
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.LocationOn,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(12.dp),
-                                    tint = colors.emerald
-                                )
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text(
-                                    text = if (isBangla) uiState.selectedCity.nameBn else uiState.selectedCity.nameEn.split(" ")[0],
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontSize = 11.5.sp,
-                                    color = colors.emerald,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = colors.emerald
-                                )
-                            }
-                        }
-                    }
+                    NamazHeaderLogo(isBangla = isBangla)
                 },
                 actions = {
+                    // Frosted Glass City Selector Capsule
+                    Surface(
+                        color = if (colors.isDark) colors.emerald.copy(alpha = 0.18f) else colors.emeraldSoft.copy(alpha = 0.85f),
+                        shape = RoundedCornerShape(999.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            if (colors.isDark) colors.emerald.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.90f)
+                        ),
+                        modifier = Modifier
+                            .clickable { showCityDialog = true }
+                            .padding(end = 4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = colors.emerald
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (isBangla) uiState.selectedCity.nameBn else uiState.selectedCity.nameEn.split(" ")[0],
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 11.5.sp,
+                                color = if (colors.isDark) Color(0xFFF1F5F9) else colors.emerald,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = colors.emerald
+                            )
+                        }
+                    }
+
+                    // Special Friday Jumuah Pill
                     if (isFriday) {
                         FilledTonalButton(
                             onClick = { showJumuahDialog = true },
                             colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = colors.cyanSoft,
+                                containerColor = if (colors.isDark) colors.cyan.copy(alpha = 0.20f) else colors.cyanSoft,
                                 contentColor = colors.cyan
                             ),
                             shape = RoundedCornerShape(999.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                             modifier = Modifier
                                 .height(32.dp)
                                 .padding(end = 8.dp)
                         ) {
-                            Text(if (isBangla) "🕌 জুমু'আ" else "🕌 Jumu'ah", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (isBangla) "🕌 জুমু'আ" else "🕌 Jumu'ah",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colors.card
+                    containerColor = colors.card.copy(alpha = if (colors.isDark) 0.60f else 0.85f)
                 )
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // 1. Date Navigation bar (Financy Pill Style)
-            item {
-                Spacer(modifier = Modifier.height(10.dp))
-                DateNavigationHeader(
-                    selectedDate = uiState.selectedDate,
-                    isBangla = isBangla,
-                    isToday = isToday,
-                    onPrevClick = { viewModel.changeDateOffset(-1) },
-                    onNextClick = { viewModel.changeDateOffset(1) },
-                    onTodayClick = { viewModel.resetToToday() }
-                )
-                Spacer(modifier = Modifier.height(14.dp))
-            }
-
-            // 2. Active Waqt Hero Card (Financy Balance Style)
-            if (isToday && activeWaqtInfo != null) {
-                val activeLog = activeWaqt?.let { p ->
-                    uiState.currentDayLogs.find { it.prayerName.equals(p.keyName, ignoreCase = true) }
-                }
-                item {
-                    FinancyHeroWaqtCard(
-                        info = activeWaqtInfo,
-                        currentLog = activeLog,
-                        isBangla = isBangla
+            // -------------------------------------------------------------
+            // AMBIENT GLOWING LIGHT MESH (Real iOS Glass Refraction Base)
+            // -------------------------------------------------------------
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                colors.background,
+                                if (colors.isDark) Color(0xFF07120D) else Color(0xFFF8FAFC),
+                                colors.background
+                            )
+                        )
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(bottom = 120.dp)
+            ) {
+                // -------------------------------------------------------------
+                // 1. FLOATING DATE NAVIGATION PILL DOCK
+                // -------------------------------------------------------------
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    FloatingDateNavigationDock(
+                        selectedDate = uiState.selectedDate,
+                        calendar = calendar,
+                        isBangla = isBangla,
+                        isToday = isToday,
+                        onPrevClick = { viewModel.changeDateOffset(-1) },
+                        onNextClick = { viewModel.changeDateOffset(1) },
+                        onTodayClick = { viewModel.resetToToday() }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // 3. 2x2 Bento Quick Actions Grid
-            item {
-                FinancyBentoGrid(
-                    uiState = uiState,
-                    isBangla = isBangla,
-                    onToggleRoza = { viewModel.toggleRoza() },
-                    onOpenRamadanDua = { showRamadanDuaDialog = true },
-                    onNavigateToQibla = { onNavigateToTab?.invoke(com.example.NamazNavTab.IBADAH) },
-                    onNavigateToTasbih = { onNavigateToTab?.invoke(com.example.NamazNavTab.IBADAH) },
-                    onNavigateToTracker = { onNavigateToTab?.invoke(com.example.NamazNavTab.TRACKER) }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // 4. Section Title (Activity Feed Style)
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = if (isBangla) "দৈনিক ৫ ওয়াক্ত নামায" else "5 Daily Prayers",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Text(
-                            text = if (isBangla) "সঠিক সময়ে জামাতে নামায আদায় করুন" else "Track your daily Salah in Jama'at",
-                            fontSize = 11.sp,
-                            color = colors.textMuted
-                        )
+                // -------------------------------------------------------------
+                // 2. ULTRA-MINIMALIST FLOATING LIVE WAQT BAR (Dynamic Island)
+                // -------------------------------------------------------------
+                if (isToday && activeWaqtInfo != null) {
+                    val activeLog = activeWaqt?.let { p ->
+                        uiState.currentDayLogs.find { it.prayerName.equals(p.keyName, ignoreCase = true) }
                     }
-                    Surface(
-                        color = colors.emeraldSoft,
-                        shape = RoundedCornerShape(999.dp),
-                        border = BorderStroke(0.8.dp, colors.emerald.copy(alpha = 0.3f))
-                    ) {
-                        Text(
-                            text = if (isBangla) "${DateUtil.toBanglaDigits(uiState.totalPrayedToday.toString())}/৫ সম্পন্ন"
-                            else "${uiState.totalPrayedToday}/5 Done",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.emerald,
-                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-
-            // 5. Prayers list
-            items(fardhPrayers) { prayer ->
-                val log = uiState.currentDayLogs.find { it.prayerName.equals(prayer.keyName, ignoreCase = true) }
-                val timeStr = when (prayer) {
-                    PrayerType.FAJR -> uiState.prayerTimes.fajr
-                    PrayerType.DHUHR -> uiState.prayerTimes.dhuhr
-                    PrayerType.ASR -> uiState.prayerTimes.asr
-                    PrayerType.MAGHRIB -> uiState.prayerTimes.maghrib
-                    PrayerType.ISHA -> uiState.prayerTimes.isha
-                    else -> ""
-                }
-                PrayerCard(
-                    prayerType = prayer,
-                    timeString = timeStr,
-                    log = log,
-                    isBangla = isBangla,
-                    isActiveWaqt = isToday && prayer == activeWaqt,
-                    remainingMinutes = if (isToday && prayer == activeWaqt) activeWaqtInfo?.minutesRemaining else null,
-                    onStatusSelected = { status ->
-                        viewModel.updatePrayerStatus(prayer.keyName, status, context)
-                    },
-                    onToggleSunnah = {
-                        viewModel.toggleSunnah(prayer.keyName, context)
-                    },
-                    onSaveNotes = { notes ->
-                        viewModel.updateNotes(prayer.keyName, notes)
-                    }
-                )
-            }
-
-            // 6. Additional Nafal Prayers (Tahajjud, Ishraq, Duha, Awwabin)
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showAdditionalPrayers = !showAdditionalPrayers },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.card),
-                    border = BorderStroke(1.dp, colors.border)
-                ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = colors.emeraldSoft,
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Default.Nightlight,
-                                            contentDescription = null,
-                                            tint = colors.emerald,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                    item {
+                        UltraMinimalLiveWaqtBar(
+                            info = activeWaqtInfo,
+                            currentLog = activeLog,
+                            isBangla = isBangla,
+                            onQuickLogJamaat = {
+                                activeWaqt?.let { prayer ->
+                                    viewModel.updatePrayerStatus(prayer.keyName, "jamaah", context)
                                 }
-                                Text(
-                                    text = if (isBangla) "নফল ও তাহাজ্জুদ নামাযের সময়" else "Nafl & Voluntary Prayers",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = colors.textPrimary
-                                )
                             }
-                            Icon(
-                                imageVector = if (showAdditionalPrayers) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = null,
-                                tint = colors.textMuted
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+                }
+
+                // -------------------------------------------------------------
+                // 3. SECTION HEADER: 5 DAILY PRAYERS
+                // -------------------------------------------------------------
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = if (isBangla) "দৈনিক ৫ ওয়াক্ত নামায" else "5 Daily Prayers",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = colors.textPrimary,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = if (isBangla) "সঠিক সময়ে জামাতে নামায আদায় করুন" else "Track your daily Salah in Jama'at",
+                                fontSize = 11.sp,
+                                color = colors.textMuted
                             )
                         }
 
-                        AnimatedVisibility(visible = showAdditionalPrayers) {
-                            Column(
-                                modifier = Modifier.padding(top = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                AdditionalPrayerRow(
-                                    title = if (isBangla) "তাহাজ্জুদ (Tahajjud)" else "Tahajjud (Night Prayer)",
-                                    time = if (isBangla) "মধ্যরাত থেকে ফজরের পূর্ব পর্যন্ত" else "Midnight until before Fajr",
-                                    rakah = if (isBangla) "২-১২ রাকাত" else "2-12 Rakahs",
-                                    isBangla = isBangla
-                                )
-                                AdditionalPrayerRow(
-                                    title = if (isBangla) "ইশরাক (Ishraq)" else "Ishraq (Post-Sunrise)",
-                                    time = if (isBangla) "সূর্যোদয়ের ১৫-২০ মিনিট পর" else "15-20 mins after sunrise",
-                                    rakah = if (isBangla) "২-৪ রাকাত" else "2-4 Rakahs",
-                                    isBangla = isBangla
-                                )
-                                AdditionalPrayerRow(
-                                    title = if (isBangla) "চাশত / দুহা (Duha)" else "Duha / Chasht (Forenoon)",
-                                    time = if (isBangla) "সূর্য দ্বিপ্রহরে উঠার পূর্বে" else "Mid-morning before midday",
-                                    rakah = if (isBangla) "২-৮ রাকাত" else "2-8 Rakahs",
-                                    isBangla = isBangla
-                                )
-                                AdditionalPrayerRow(
-                                    title = if (isBangla) "আউওয়াবিন (Awwabin)" else "Awwabin (Post-Maghrib)",
-                                    time = if (isBangla) "মাগরিবের পর থেকে ইশার পূর্বে" else "Between Maghrib and Isha",
-                                    rakah = if (isBangla) "৬ রাকাত" else "6 Rakahs",
-                                    isBangla = isBangla
-                                )
-                            }
+                        // Completed Count Pill Badge
+                        Surface(
+                            color = if (colors.isDark) colors.emerald.copy(alpha = 0.20f) else colors.emeraldSoft,
+                            shape = RoundedCornerShape(999.dp),
+                            border = BorderStroke(
+                                0.8.dp,
+                                if (colors.isDark) colors.emerald.copy(alpha = 0.45f) else Color.White
+                            )
+                        ) {
+                            Text(
+                                text = if (isBangla) "${DateUtil.toBanglaDigits(uiState.totalPrayedToday.toString())}/৫ সম্পন্ন"
+                                else "${uiState.totalPrayedToday}/5 Done",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.emerald,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                fontSize = 11.sp
+                            )
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // -------------------------------------------------------------
+                // 4. THE 5 PRAYER CARDS
+                // -------------------------------------------------------------
+                items(fardhPrayers) { prayer ->
+                    val log = uiState.currentDayLogs.find { it.prayerName.equals(prayer.keyName, ignoreCase = true) }
+                    val timeStr = when (prayer) {
+                        PrayerType.FAJR -> uiState.prayerTimes.fajr
+                        PrayerType.DHUHR -> uiState.prayerTimes.dhuhr
+                        PrayerType.ASR -> uiState.prayerTimes.asr
+                        PrayerType.MAGHRIB -> uiState.prayerTimes.maghrib
+                        PrayerType.ISHA -> uiState.prayerTimes.isha
+                        else -> ""
+                    }
+                    PrayerCard(
+                        prayerType = prayer,
+                        timeString = timeStr,
+                        log = log,
+                        isBangla = isBangla,
+                        isActiveWaqt = isToday && prayer == activeWaqt,
+                        remainingMinutes = if (isToday && prayer == activeWaqt) activeWaqtInfo?.minutesRemaining else null,
+                        onStatusSelected = { status ->
+                            viewModel.updatePrayerStatus(prayer.keyName, status, context)
+                        },
+                        onToggleSunnah = {
+                            viewModel.toggleSunnah(prayer.keyName, context)
+                        }
+                    )
+                }
+
+                // -------------------------------------------------------------
+                // 5. NAFL & VOLUNTARY PRAYERS FROSTED GLASS ACCESSORY CARD
+                // -------------------------------------------------------------
+                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    IosGlassNaflCard(
+                        isBangla = isBangla,
+                        isExpanded = showAdditionalPrayers,
+                        onToggle = { showAdditionalPrayers = !showAdditionalPrayers }
+                    )
                 }
             }
         }
     }
 
+    // Dialogs
     if (showCityDialog) {
         CitySelectionDialog(
             currentCity = uiState.selectedCity,
@@ -394,14 +354,495 @@ fun HomeScreen(
     }
 }
 
+/**
+ * iOS Floating Frosted Glass Date Navigation Dock.
+ */
 @Composable
-private fun AdditionalPrayerRow(title: String, time: String, rakah: String, isBangla: Boolean) {
+private fun FloatingDateNavigationDock(
+    selectedDate: String,
+    calendar: Calendar,
+    isBangla: Boolean,
+    isToday: Boolean,
+    onPrevClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onTodayClick: () -> Unit
+) {
+    val colors = FinancyTheme.colors
+    val context = LocalContext.current
+    val dockShape = RoundedCornerShape(999.dp)
+
+    val dockBg = if (colors.isDark) {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.08f),
+                Color.White.copy(alpha = 0.03f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.88f),
+                Color(0xFFF1F5F9).copy(alpha = 0.95f)
+            )
+        )
+    }
+
+    val rimBrush = Brush.linearGradient(
+        listOf(
+            if (colors.isDark) Color.White.copy(alpha = 0.22f) else Color.White,
+            if (colors.isDark) Color.White.copy(alpha = 0.05f) else Color(0xFFCBD5E1).copy(alpha = 0.50f)
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (colors.isDark) 4.dp else 2.dp,
+                shape = dockShape,
+                ambientColor = Color.Black.copy(alpha = 0.15f),
+                spotColor = Color.Black.copy(alpha = 0.10f)
+            )
+            .clip(dockShape)
+            .background(dockBg)
+            .border(BorderStroke(1.dp, rimBrush), dockShape)
+            .padding(horizontal = 6.dp, vertical = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Previous Day Button
+            Surface(
+                shape = CircleShape,
+                color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.White,
+                border = BorderStroke(
+                    0.6.dp,
+                    if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0)
+                ),
+                modifier = Modifier
+                    .size(34.dp)
+                    .testTag("btn_prev_day")
+                    .clickable {
+                        HapticUtil.lightTick(context)
+                        onPrevClick()
+                    }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Previous Day",
+                        tint = if (colors.isDark) Color(0xFFCBD5E1) else Color(0xFF334155),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            // Center Date and Hijri Information
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = DateUtil.formatDisplayDate(selectedDate, isBangla),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary,
+                    fontSize = 13.5.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                val hijriText = remember(calendar, isBangla) {
+                    DateUtil.getApproximateHijriDate(calendar, isBangla)
+                }
+
+                Text(
+                    text = hijriText,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.emerald,
+                    textAlign = TextAlign.Center
+                )
+
+                if (!isToday) {
+                    Text(
+                        text = if (isBangla) "আজকের তারিখে ফিরুন" else "Return to Today",
+                        fontSize = 11.sp,
+                        color = colors.emerald,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clickable {
+                                HapticUtil.lightTick(context)
+                                onTodayClick()
+                            }
+                            .padding(top = 1.dp)
+                    )
+                }
+            }
+
+            // Next Day Button
+            Surface(
+                shape = CircleShape,
+                color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.White,
+                border = BorderStroke(
+                    0.6.dp,
+                    if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0)
+                ),
+                modifier = Modifier
+                    .size(34.dp)
+                    .testTag("btn_next_day")
+                    .clickable {
+                        HapticUtil.lightTick(context)
+                        onNextClick()
+                    }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Next Day",
+                        tint = if (colors.isDark) Color(0xFFCBD5E1) else Color(0xFF334155),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Ultra-Minimalist Floating Live Waqt Bar (Dynamic Island style).
+ * Displays live countdown, progress bar, and one-tap quick Jama'at log action.
+ */
+@Composable
+private fun UltraMinimalLiveWaqtBar(
+    info: ActiveWaqtInfo,
+    currentLog: PrayerLogEntity?,
+    isBangla: Boolean,
+    onQuickLogJamaat: () -> Unit
+) {
+    val colors = FinancyTheme.colors
+    val context = LocalContext.current
+    val prayer = info.currentPrayer
+    val isDone = currentLog?.status == "jamaah" || currentLog?.status == "on_time"
+
+    // Calculate elapsed time within waqt
+    val totalMins = (info.startTimeMinutes?.let { start ->
+        info.endTimeMinutes?.let { end ->
+            if (end > start) end - start else (end + 1440 - start)
+        }
+    } ?: 240).toFloat()
+
+    val elapsedMins = (totalMins - info.minutesRemaining).coerceIn(0f, totalMins)
+    val progress = (elapsedMins / totalMins).coerceIn(0.04f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "waqt_progress"
+    )
+
+    val shape = RoundedCornerShape(26.dp)
+
+    val bgBrush = if (colors.isDark) {
+        Brush.linearGradient(
+            listOf(
+                Color(0xFF064E3B).copy(alpha = 0.40f),
+                Color(0xFF042F2E).copy(alpha = 0.50f),
+                Color(0xFF0F172A).copy(alpha = 0.70f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                Color(0xFFECFDF5).copy(alpha = 0.95f),
+                Color(0xFFF0FDFA).copy(alpha = 0.90f),
+                Color.White.copy(alpha = 0.95f)
+            )
+        )
+    }
+
+    val rimBrush = Brush.linearGradient(
+        listOf(
+            colors.emerald.copy(alpha = if (colors.isDark) 0.65f else 0.40f),
+            if (colors.isDark) Color.White.copy(alpha = 0.12f) else Color.White
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (colors.isDark) 10.dp else 4.dp,
+                shape = shape,
+                spotColor = colors.emerald.copy(alpha = 0.35f)
+            )
+            .clip(shape)
+            .background(bgBrush)
+            .border(BorderStroke(1.2.dp, rimBrush), shape)
+            .padding(horizontal = 16.dp, vertical = 13.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Row 1: Active Status Indicator + Quick Log Action Pill
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(colors.emerald)
+                    )
+                    Text(
+                        text = if (prayer != null) {
+                            if (isBangla) "বর্তমান ওয়াক্ত: ${prayer.banglaName}" else "Active Waqt: ${prayer.englishName}"
+                        } else {
+                            if (isBangla) "পরবর্তী ওয়াক্ত: ${info.nextPrayer.banglaName}" else "Next: ${info.nextPrayer.englishName}"
+                        },
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = colors.emerald,
+                        letterSpacing = 0.2.sp
+                    )
+                }
+
+                // Interactive Quick Log Pill
+                val actionInteractionSource = remember { MutableInteractionSource() }
+                val isActionPressed by actionInteractionSource.collectIsPressedAsState()
+                val actionScale by animateFloatAsState(
+                    targetValue = if (isActionPressed) 0.94f else 1.0f,
+                    label = "quick_log_scale"
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = if (isDone) {
+                        colors.emeraldSoft
+                    } else {
+                        colors.emerald
+                    },
+                    border = BorderStroke(
+                        0.8.dp,
+                        if (isDone) colors.emerald else Color.White.copy(alpha = 0.40f)
+                    ),
+                    modifier = Modifier
+                        .scale(actionScale)
+                        .clickable(
+                            interactionSource = actionInteractionSource,
+                            indication = null,
+                            onClick = {
+                                HapticUtil.lightTick(context)
+                                onQuickLogJamaat()
+                            }
+                        )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = if (isDone) colors.emerald else Color.White,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = if (isDone) {
+                                if (isBangla) "আদায় সম্পন্ন" else "Done"
+                            } else {
+                                if (isBangla) "জামাতে আদায়" else "Mark Jama'at"
+                            },
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isDone) colors.emerald else Color.White
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Row 2: Time Range & Live Countdown
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${info.startTime} — ${info.endTime}",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (colors.isDark) Color(0xFFF1F5F9) else Color(0xFF0F172A)
+                )
+
+                val remFormatted = PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, isBangla)
+                Text(
+                    text = if (prayer != null) {
+                        if (isBangla) "$remFormatted বাকি" else "$remFormatted left"
+                    } else {
+                        if (isBangla) "$remFormatted পর" else "in $remFormatted"
+                    },
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (colors.isDark) Color(0xFFFBBF24) else Color(0xFFD97706)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(7.dp))
+
+            // Row 3: Glowing Linear Progress Bar
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(999.dp)),
+                color = colors.emerald,
+                trackColor = if (colors.isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFCBD5E1).copy(alpha = 0.50f)
+            )
+        }
+    }
+}
+
+/**
+ * iOS Heavy Glass Nafl & Voluntary Prayers Accessory Card.
+ */
+@Composable
+private fun IosGlassNaflCard(
+    isBangla: Boolean,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
+) {
+    val colors = FinancyTheme.colors
+    val context = LocalContext.current
+    val cardShape = RoundedCornerShape(22.dp)
+
+    val bgBrush = if (colors.isDark) {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.05f),
+                Color.White.copy(alpha = 0.02f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            listOf(
+                Color.White.copy(alpha = 0.85f),
+                Color(0xFFF8FAFC).copy(alpha = 0.90f)
+            )
+        )
+    }
+
+    val rimBrush = Brush.linearGradient(
+        listOf(
+            if (colors.isDark) Color.White.copy(alpha = 0.16f) else Color.White,
+            if (colors.isDark) Color.White.copy(alpha = 0.04f) else Color(0xFFCBD5E1).copy(alpha = 0.40f)
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(bgBrush)
+            .border(BorderStroke(1.dp, rimBrush), cardShape)
+            .clickable {
+                HapticUtil.lightTick(context)
+                onToggle()
+            }
+            .padding(14.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(if (colors.isDark) Color(0xFF3B0764).copy(alpha = 0.35f) else Color(0xFFF3E8FF))
+                            .border(
+                                0.6.dp,
+                                if (colors.isDark) Color.White.copy(alpha = 0.20f) else Color(0xFFE9D5FF),
+                                RoundedCornerShape(11.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🌌", fontSize = 16.sp)
+                    }
+                    Text(
+                        text = if (isBangla) "নফল ও তাহাজ্জুদ নামাযের সময়" else "Nafl & Voluntary Prayers",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = colors.textPrimary
+                    )
+                }
+
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = colors.textMuted
+                )
+            }
+
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    modifier = Modifier.padding(top = 11.dp),
+                    verticalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    NaflPrayerGlassRow(
+                        title = if (isBangla) "তাহাজ্জুদ (Tahajjud)" else "Tahajjud (Night Prayer)",
+                        time = if (isBangla) "মধ্যরাত থেকে ফজরের পূর্ব পর্যন্ত" else "Midnight until before Fajr",
+                        rakah = if (isBangla) "২-১২ রাকাত" else "2-12 Rakahs"
+                    )
+                    NaflPrayerGlassRow(
+                        title = if (isBangla) "ইশরাক (Ishraq)" else "Ishraq (Post-Sunrise)",
+                        time = if (isBangla) "সূর্যোদয়ের ১৫-২০ মিনিট পর" else "15-20 mins after sunrise",
+                        rakah = if (isBangla) "২-৪ রাকাত" else "2-4 Rakahs"
+                    )
+                    NaflPrayerGlassRow(
+                        title = if (isBangla) "চাশত / দুহা (Duha)" else "Duha / Chasht (Forenoon)",
+                        time = if (isBangla) "সূর্য দ্বিপ্রহরে উঠার পূর্বে" else "Mid-morning before midday",
+                        rakah = if (isBangla) "২-৮ রাকাত" else "2-8 Rakahs"
+                    )
+                    NaflPrayerGlassRow(
+                        title = if (isBangla) "আউওয়াবিন (Awwabin)" else "Awwabin (Post-Maghrib)",
+                        time = if (isBangla) "মাগরিবের পর থেকে ইশার পূর্বে" else "Between Maghrib and Isha",
+                        rakah = if (isBangla) "৬ রাকাত" else "6 Rakahs"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NaflPrayerGlassRow(title: String, time: String, rakah: String) {
     val colors = FinancyTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(colors.cardSubtle)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (colors.isDark) Color.White.copy(alpha = 0.04f) else Color.White.copy(alpha = 0.70f))
+            .border(
+                BorderStroke(
+                    0.6.dp,
+                    if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0)
+                ),
+                RoundedCornerShape(12.dp)
+            )
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -412,398 +853,15 @@ private fun AdditionalPrayerRow(title: String, time: String, rakah: String, isBa
         }
         Surface(
             shape = RoundedCornerShape(999.dp),
-            color = colors.emeraldSoft
+            color = if (colors.isDark) colors.emerald.copy(alpha = 0.20f) else colors.emeraldSoft
         ) {
             Text(
                 text = rakah,
-                fontSize = 10.5.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = colors.emerald,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun FinancyHeroWaqtCard(
-    info: ActiveWaqtInfo,
-    currentLog: PrayerLogEntity?,
-    isBangla: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val colors = FinancyTheme.colors
-    val prayer = info.currentPrayer
-    val isDone = currentLog?.status == "jamaah" || currentLog?.status == "on_time"
-
-    // Calculate approximate progress
-    val totalMins = (info.startTimeMinutes?.let { start ->
-        info.endTimeMinutes?.let { end ->
-            if (end > start) end - start else (end + 1440 - start)
-        }
-    } ?: 240).toFloat()
-
-    val elapsedMins = (totalMins - info.minutesRemaining).coerceIn(0f, totalMins)
-    val progress = (elapsedMins / totalMins).coerceIn(0.05f, 1f)
-    val animatedProgress by animateFloatAsState(targetValue = progress, label = "waqt_progress")
-
-    val isCurrentActive = prayer != null
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = if (colors.isDark) 12.dp else 5.dp,
-                shape = RoundedCornerShape(22.dp),
-                ambientColor = if (isCurrentActive) colors.emerald.copy(alpha = 0.3f) else Color(0x15000000),
-                spotColor = if (isCurrentActive) colors.emerald.copy(alpha = 0.4f) else Color(0x20000000)
-            ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.card),
-        border = BorderStroke(
-            if (isCurrentActive) 1.5.dp else 1.dp,
-            if (isCurrentActive) colors.emerald else colors.border
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(
-                    if (isCurrentActive) {
-                        Modifier.background(
-                            Brush.linearGradient(
-                                colors = if (colors.isDark) {
-                                    listOf(Color(0xFF064E3B), Color(0xFF0F1E19))
-                                } else {
-                                    listOf(Color(0xFF059669), Color(0xFF047857))
-                                }
-                            )
-                        )
-                    } else Modifier
-                )
-                .padding(18.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Header Row: Active Badge & Status Tag
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(if (isCurrentActive) Color(0xFF6EE7B7) else colors.emerald)
-                        )
-                        Text(
-                            text = if (prayer != null) {
-                                if (isBangla) "চলতি ওয়াক্ত • ${prayer.banglaName}" else "Active Waqt • ${prayer.englishName}"
-                            } else {
-                                if (isBangla) "পরবর্তী ওয়াক্ত • ${info.nextPrayer.banglaName}" else "Next Waqt • ${info.nextPrayer.englishName}"
-                            },
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isCurrentActive) Color.White else colors.textPrimary
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(999.dp),
-                        color = if (isCurrentActive) Color.White.copy(alpha = 0.2f) else (if (isDone) colors.emeraldSoft else colors.cardSubtle),
-                        border = BorderStroke(0.8.dp, if (isCurrentActive) Color.White.copy(alpha = 0.35f) else (if (isDone) colors.emerald else colors.border))
-                    ) {
-                        Text(
-                            text = if (isDone) {
-                                if (isBangla) "✓ আদায় সম্পন্ন" else "✓ Done"
-                            } else {
-                                val remFormatted = PrayerTimeCalculator.formatRemainingTime(info.minutesRemaining, isBangla)
-                                if (prayer != null) {
-                                    if (isBangla) "$remFormatted বাকি" else "$remFormatted left"
-                                } else {
-                                    if (isBangla) "$remFormatted পর" else "in $remFormatted"
-                                }
-                            },
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isCurrentActive) Color.White else (if (isDone) colors.emerald else colors.textSecondary),
-                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Waqt Name & Time Range
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = if (prayer != null) (if (isBangla) prayer.banglaName else prayer.englishName)
-                        else (if (isBangla) info.nextPrayer.banglaName else info.nextPrayer.englishName),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (isCurrentActive) Color.White else colors.emerald
-                    )
-                    Text(
-                        text = if (prayer != null) "${info.startTime} — ${info.endTime}" else "${info.startTime} — ${info.endTime}",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (isCurrentActive) Color.White.copy(alpha = 0.85f) else colors.textSecondary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Progress Bar
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = if (isCurrentActive) Color(0xFF34D399) else colors.emerald,
-                    trackColor = if (isCurrentActive) Color.White.copy(alpha = 0.2f) else colors.cardSubtle
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Bottom Line: Next Waqt Info
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isBangla) "পরবর্তী: ${info.nextPrayer.banglaName} (${info.endTime})"
-                        else "Next: ${info.nextPrayer.englishName} (${info.endTime})",
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (isCurrentActive) Color.White.copy(alpha = 0.9f) else colors.textSecondary
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        Text(
-                            text = if (isBangla) "ওয়াক্তের বিবরণ" else "Details",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isCurrentActive) Color(0xFFA7F3D0) else colors.emerald
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                            modifier = Modifier.size(9.dp),
-                            tint = if (isCurrentActive) Color(0xFFA7F3D0) else colors.emerald
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FinancyBentoGrid(
-    uiState: NamazUiState,
-    isBangla: Boolean,
-    onToggleRoza: () -> Unit,
-    onOpenRamadanDua: () -> Unit,
-    onNavigateToQibla: (() -> Unit)? = null,
-    onNavigateToTasbih: (() -> Unit)? = null,
-    onNavigateToTracker: (() -> Unit)? = null
-) {
-    val colors = FinancyTheme.colors
-    val activeTasbih = uiState.tasbihs.find { it.id == uiState.selectedTasbihId } ?: uiState.tasbihs.firstOrNull()
-    val tasbihCount = activeTasbih?.currentCount ?: 0
-    val tasbihTarget = activeTasbih?.targetCount ?: 33
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Tile 1: Qibla Compass
-        CompactActionPill(
-            modifier = Modifier.weight(1f),
-            icon = "🧭",
-            title = if (isBangla) "কিবলা" else "Qibla",
-            value = "${uiState.qiblaBearing.toInt()}°",
-            badgeColor = colors.emerald,
-            onClick = onNavigateToQibla
-        )
-
-        // Tile 2: Digital Tasbih
-        CompactActionPill(
-            modifier = Modifier.weight(1f),
-            icon = "📿",
-            title = if (isBangla) "তাসবীহ" else "Tasbih",
-            value = if (isBangla) "${DateUtil.toBanglaDigits(tasbihCount.toString())}/${DateUtil.toBanglaDigits(tasbihTarget.toString())}" else "$tasbihCount/$tasbihTarget",
-            badgeColor = colors.cyan,
-            onClick = onNavigateToTasbih
-        )
-
-        // Tile 3: Streak & Consistency
-        CompactActionPill(
-            modifier = Modifier.weight(1f),
-            icon = "🔥",
-            title = if (isBangla) "স্ট্রিক" else "Streak",
-            value = if (isBangla) "${DateUtil.toBanglaDigits(uiState.currentStreakDays.toString())} দিন" else "${uiState.currentStreakDays}d",
-            badgeColor = colors.amber,
-            onClick = onNavigateToTracker
-        )
-
-        // Tile 4: Ramadan Iftar
-        CompactActionPill(
-            modifier = Modifier.weight(1f),
-            icon = "🌙",
-            title = if (isBangla) "ইফতার" else "Iftar",
-            value = uiState.prayerTimes.maghrib.split(" ")[0],
-            badgeColor = colors.emerald,
-            onClick = onOpenRamadanDua
-        )
-    }
-}
-
-@Composable
-private fun CompactActionPill(
-    icon: String,
-    title: String,
-    value: String,
-    badgeColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    val colors = FinancyTheme.colors
-
-    Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.card),
-        border = BorderStroke(1.dp, colors.border),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 9.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = icon, fontSize = 17.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                fontSize = 11.5.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
-                maxLines = 1,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(1.dp))
-            Text(
-                text = title,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                color = colors.textSecondary,
-                maxLines = 1,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-private fun DateNavigationHeader(
-    selectedDate: String,
-    isBangla: Boolean,
-    isToday: Boolean,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit,
-    onTodayClick: () -> Unit
-) {
-    val colors = FinancyTheme.colors
-
-    Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.card),
-        border = BorderStroke(1.dp, colors.border),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onPrevClick,
-                modifier = Modifier.testTag("btn_prev_day")
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous Day",
-                    tint = colors.textSecondary
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = DateUtil.formatDisplayDate(selectedDate, isBangla),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary,
-                    textAlign = TextAlign.Center
-                )
-                if (isToday) {
-                    Surface(
-                        color = colors.emeraldSoft,
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.padding(top = 2.dp)
-                    ) {
-                        Text(
-                            text = if (isBangla) "আজ" else "Today",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.emerald,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-                        )
-                    }
-                } else {
-                    Text(
-                        text = if (isBangla) "আজকে ফিরে যান" else "Return to Today",
-                        fontSize = 11.sp,
-                        color = colors.emerald,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .clickable { onTodayClick() }
-                            .padding(top = 2.dp)
-                    )
-                }
-            }
-
-            IconButton(
-                onClick = onNextClick,
-                modifier = Modifier.testTag("btn_next_day")
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next Day",
-                    tint = colors.textSecondary
-                )
-            }
         }
     }
 }
