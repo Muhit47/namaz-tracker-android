@@ -23,14 +23,14 @@
 
 | 🕌 Daily Prayers & Waqt | 📖 Holy Qur'an & Hadith | 🤲 Ibadah & Tasbih |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/01_namaz_tab.png" width="280" alt="Prayers Tab Screenshot" /> | <img src="docs/screenshots/02_quran_hadith_tab.png" width="280" alt="Quran and Hadith Tab Screenshot" /> | <img src="docs/screenshots/03_ibadah_tab.png" width="280" alt="Ibadah and Tasbih Tab Screenshot" /> |
+| <img src="docs/screenshots/01_namaz_tab.jpg" width="280" alt="Prayers Tab Screenshot" /> | <img src="docs/screenshots/02_quran_hadith_tab.jpg" width="280" alt="Quran and Hadith Tab Screenshot" /> | <img src="docs/screenshots/03_ibadah_tab.jpg" width="280" alt="Ibadah and Tasbih Tab Screenshot" /> |
 | **1. Prayers Tab (Home)**<br/>Active Waqt hero card, live countdown timer, one-tap status logging (Jama'at / Alone), and 5 daily prayers | **2. Qur'an & Hadith Tab**<br/>Complete 114 Surahs offline, Arabic text, translations, last read bento card & authentic Hadith books | **3. Ibadah & Dhikr Tab**<br/>Tactile haptic digital Tasbih dial (33/100 milestones), 360° Qibla compass & authentic Masnoon Duas |
 
 <br/>
 
 | 📊 Habits & Analytics | ⚙️ Settings & Smart Azan | 📱 Nothing OS Home Widgets |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/04_tracker_tab.png" width="280" alt="Habits and Analytics Tab Screenshot" /> | <img src="docs/screenshots/05_more_tab.png" width="280" alt="Settings and Azan Tab Screenshot" /> | <img src="docs/screenshots/06_home_widgets.png" width="280" alt="Nothing OS Home Screen Widgets Screenshot" /> |
+| <img src="docs/screenshots/04_tracker_tab.jpg" width="280" alt="Habits and Analytics Tab Screenshot" /> | <img src="docs/screenshots/05_more_tab.jpg" width="280" alt="Settings and Azan Tab Screenshot" /> | <img src="docs/screenshots/06_home_widgets.png" width="280" alt="Nothing OS Home Screen Widgets Screenshot" /> |
 | **4. Tracker & Analytics**<br/>21-day consistency streak, weekly completion bar chart, and lifetime Qaza debt counter | **5. Settings & Smart Azan**<br/>Offline Azan foreground service, Muezzin selection (Makkah/Madinah) & one-tap JSON backup | **6. Home Screen Widgets Suite**<br/>4 Nothing OS-inspired Frosted Glass widgets (Active Waqt, 5-Waqt board, Ramadan & Hadith) |
 
 ---
