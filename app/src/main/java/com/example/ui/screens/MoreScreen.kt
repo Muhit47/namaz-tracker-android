@@ -265,7 +265,7 @@ fun MoreScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.restoreBackup(restoreInputText) { success ->
+                        viewModel.restoreBackup(restoreInputText) { success, _ ->
                             if (success) {
                                 showRestoreDialog = false
                                 restoreInputText = ""
@@ -1234,7 +1234,7 @@ fun SettingsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(18.dp),
-                        horizontalAlignment = Alignment.CenterVertically
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Surface(
                             shape = CircleShape,
