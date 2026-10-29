@@ -217,6 +217,8 @@ class PrayerRepository(
     // 7. Backup & Restore
     suspend fun getAllPrayerLogsList(): List<PrayerLogEntity> = prayerLogDao.getAllLogsList()
     suspend fun restorePrayerLogs(logs: List<PrayerLogEntity>) = prayerLogDao.upsertLogs(logs)
+    suspend fun clearAllLogs() = prayerLogDao.clearAllLogs()
+    fun getAllLogs(): Flow<List<PrayerLogEntity>> = prayerLogDao.getAllLogs()
     suspend fun getAllQazaList(): List<QazaRecordEntity> = qazaDao.getAllQazaList()
     suspend fun restoreQazaRecords(records: List<QazaRecordEntity>) = qazaDao.upsertQazas(records)
 }

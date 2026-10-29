@@ -280,8 +280,8 @@ private fun TrackerAnalyticsTab(
                     mainValue = if (isBangla) "${DateUtil.toBanglaDigits(streakDays.toString())} দিন" else "$streakDays Days",
                     descBn = "একটানা নামায আদায়",
                     descEn = "Consecutive prayer streak",
-                    footerBn = "↗ সর্বোচ্চ: ১৮ দিন",
-                    footerEn = "↗ Best: 18 Days",
+                    footerBn = if (streakDays > 0) "↗ বর্তমান: ${DateUtil.toBanglaDigits(streakDays.toString())} দিন" else "আজ থেকেই শুরু করুন",
+                    footerEn = if (streakDays > 0) "↗ Current: $streakDays Days" else "Start today",
                     accentColor = Color(0xFFF97316),
                     lightBg = Color(0xFFFFF7ED),
                     isDark = isDark,
@@ -314,6 +314,7 @@ private fun TrackerAnalyticsTab(
         // B. 7-Day Vertical Bar Chart Card
         item {
             WeeklyActivityBarChartCard(
+                allPrayerLogs = uiState.allPrayerLogs,
                 weeklyRate = weeklyRate,
                 isBangla = isBangla,
                 isDark = isDark,
@@ -325,6 +326,7 @@ private fun TrackerAnalyticsTab(
         // B.1 Monthly Heatmap Grid with Date Click Dialog
         item {
             MonthlyHeatmapCard(
+                allPrayerLogs = uiState.allPrayerLogs,
                 onDayClick = onDayClick,
                 isBangla = isBangla,
                 isDark = isDark,
@@ -544,7 +546,20 @@ private fun AnalyticsHeroCard(
  * 7-Day Vertical Bar Chart Card with Cylindrical Gradient Pill Bars
  */
 @Composable
+private data class WeeklyDayItem(
+    val dayBn: String,
+    val dayEn: String,
+    val score: Int,
+    val isToday: Boolean,
+    val isFriday: Boolean
+)
+
+/**
+ * 7-Day Vertical Bar Chart Card with Cylindrical Gradient Pill Bars
+ */
+@Composable
 private fun WeeklyActivityBarChartCard(
+    allPrayerLogs: List<PrayerLogEntity>,
     weeklyRate: Int,
     isBangla: Boolean,
     isDark: Boolean,
@@ -576,16 +591,37 @@ private fun WeeklyActivityBarChartCard(
         )
     )
 
-    // 7 Days Mock/Calculated Activity (Scores 0 to 5 for Mon to Sun)
-    val daysData = listOf(
-        Triple("সোম", "Mon", 5),
-        Triple("মঙ্গল", "Tue", 4),
-        Triple("বুধ", "Wed", 5),
-        Triple("বৃহঃ", "Thu", 3),
-        Triple("শুক্র", "Fri", 5),
-        Triple("শনি", "Sat", 4),
-        Triple("রবি", "Sun", 4)
-    )
+    val fardhPrayers = remember { setOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha") }
+    val logsByDate = remember(allPrayerLogs) { allPrayerLogs.groupBy { it.date } }
+    val todayIso = remember { DateUtil.getTodayIso() }
+
+    // Real dynamic data for Mon to Sun of current week
+    val daysData = remember(logsByDate) {
+        val cal = Calendar.getInstance()
+        cal.firstDayOfWeek = Calendar.MONDAY
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        val names = listOf(
+            Pair("সোম", "Mon"),
+            Pair("মঙ্গল", "Tue"),
+            Pair("বুধ", "Wed"),
+            Pair("বৃহঃ", "Thu"),
+            Pair("শুক্র", "Fri"),
+            Pair("শনি", "Sat"),
+            Pair("রবি", "Sun")
+        )
+        names.mapIndexed { index, (dayBn, dayEn) ->
+            val dateIso = DateUtil.getIsoForCalendar(cal)
+            val dayLogs = logsByDate[dateIso] ?: emptyList()
+            val score = dayLogs.count {
+                it.prayerName in fardhPrayers && (it.status == "jamaah" || it.status == "on_time")
+            }.coerceIn(0, 5)
+            val isCurrentDay = dateIso == todayIso
+            val isFri = index == 4
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            WeeklyDayItem(dayBn, dayEn, score, isCurrentDay, isFri)
+        }
+    }
+    val totalWeeklyPrayed = daysData.sumOf { it.score }
 
     Surface(
         modifier = Modifier
@@ -635,7 +671,8 @@ private fun WeeklyActivityBarChartCard(
                         color = Color(0xFF06B6D4).copy(alpha = if (isDark) 0.20f else 0.12f)
                     ) {
                         Text(
-                            text = if (isBangla) "৩৫-এর মধ্যে ৩০টি" else "30 of 35 Prayers",
+                            text = if (isBangla) "৩৫-এর মধ্যে ${DateUtil.toBanglaDigits(totalWeeklyPrayed.toString())}টি"
+                                   else "$totalWeeklyPrayed of 35 Prayers",
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7),
@@ -655,18 +692,25 @@ private fun WeeklyActivityBarChartCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    daysData.forEachIndexed { index, (dayBn, dayEn, score) ->
-                        val isToday = index == 6 // Sunday (today)
-                        val isFriday = index == 4
-                        val heightFraction = (score.toFloat() / 5f).coerceIn(0.2f, 1f)
+                    daysData.forEachIndexed { index, item ->
+                        val score = item.score
+                        val isToday = item.isToday
+                        val isFriday = item.isFriday
+                        val targetHeight = if (score > 0) (72.dp.value * (score.toFloat() / 5f).coerceIn(0.2f, 1f)) else 6.dp.value
 
                         val barHeight by animateFloatAsState(
-                            targetValue = 72.dp.value * heightFraction,
+                            targetValue = targetHeight,
                             animationSpec = spring(stiffness = Spring.StiffnessLow),
                             label = "bar_height_$index"
                         )
 
                         val barBrush = when {
+                            score == 0 -> Brush.verticalGradient(
+                                listOf(
+                                    if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFFE2E8F0),
+                                    if (isDark) Color.White.copy(alpha = 0.05f) else Color(0xFFCBD5E1)
+                                )
+                            )
                             isFriday -> Brush.verticalGradient(listOf(Color(0xFF34D399), Color(0xFF10B981)))
                             isToday -> Brush.verticalGradient(listOf(Color(0xFF38BDF8), Color(0xFF0284C7)))
                             else -> Brush.verticalGradient(listOf(Color(0xFF818CF8), Color(0xFF6366F1)))
@@ -678,10 +722,11 @@ private fun WeeklyActivityBarChartCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = if (isBangla) "${DateUtil.toBanglaDigits(score.toString())}/৫" else "$score/5",
+                                text = if (score > 0) (if (isBangla) "${DateUtil.toBanglaDigits(score.toString())}/৫" else "$score/5")
+                                       else (if (isBangla) "০" else "0"),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = subtitleColor
+                                color = if (score > 0) subtitleColor else subtitleColor.copy(alpha = 0.5f)
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -694,7 +739,7 @@ private fun WeeklyActivityBarChartCard(
                                     .clip(RoundedCornerShape(999.dp))
                                     .background(barBrush)
                                     .then(
-                                        if (isToday) Modifier.border(1.5.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(999.dp))
+                                        if (isToday) Modifier.border(1.5.dp, Color(0xFF38BDF8), RoundedCornerShape(999.dp))
                                         else Modifier
                                     )
                             )
@@ -702,7 +747,7 @@ private fun WeeklyActivityBarChartCard(
                             Spacer(modifier = Modifier.height(6.dp))
 
                             Text(
-                                text = if (isBangla) dayBn else dayEn,
+                                text = if (isBangla) item.dayBn else item.dayEn,
                                 fontSize = 10.sp,
                                 fontWeight = if (isToday) FontWeight.Black else FontWeight.SemiBold,
                                 color = if (isToday) Color(0xFF0284C7) else titleColor,
@@ -718,10 +763,6 @@ private fun WeeklyActivityBarChartCard(
     }
 }
 
-/**
- * Apple Health Style Stacked Status Bar Card
- */
-@Composable
 private fun AppleHealthStackedStatusBarCard(
     jamatCount: Int,
     aloneCount: Int,
@@ -1444,6 +1485,7 @@ data class PrayerDayStatus(
 
 @Composable
 fun MonthlyHeatmapCard(
+    allPrayerLogs: List<PrayerLogEntity>,
     onDayClick: (Int) -> Unit,
     isBangla: Boolean,
     isDark: Boolean,
@@ -1453,6 +1495,53 @@ fun MonthlyHeatmapCard(
     val cardShape = RoundedCornerShape(24.dp)
     val weekdays = if (isBangla) listOf("রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র", "শনি")
                    else listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+    val fardhPrayers = remember { setOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha") }
+    val logsByDate = remember(allPrayerLogs) { allPrayerLogs.groupBy { it.date } }
+
+    val cal = remember { Calendar.getInstance() }
+    val year = cal.get(Calendar.YEAR)
+    val month = cal.get(Calendar.MONTH)
+    val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+    val todayDay = cal.get(Calendar.DAY_OF_MONTH)
+
+    val banglaMonths = remember {
+        listOf("জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর")
+    }
+    val englishMonths = remember {
+        listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    }
+    val monthName = if (isBangla) banglaMonths[month.coerceIn(0, 11)] else englishMonths[month.coerceIn(0, 11)]
+    val yearStr = if (isBangla) DateUtil.toBanglaDigits(year.toString()) else year.toString()
+
+    // Calculate real count of days with logged prayers this month
+    val daysTracked = remember(logsByDate) {
+        (1..todayDay).count { d ->
+            val iso = String.format(java.util.Locale.US, "%04d-%02d-%02d", year, month + 1, d)
+            val dayLogs = logsByDate[iso] ?: emptyList()
+            dayLogs.any { it.status != "pending" }
+        }
+    }
+
+    // Grid slots aligned by Sunday
+    val chunkedDays = remember {
+        val firstCal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val firstDayOfWeek = firstCal.get(Calendar.DAY_OF_WEEK) // 1=Sun, ..., 7=Sat
+        val leading = firstDayOfWeek - 1
+        val slots = mutableListOf<Int?>()
+        repeat(leading) { slots.add(null) }
+        for (d in 1..daysInMonth) {
+            slots.add(d)
+        }
+        while (slots.size % 7 != 0) {
+            slots.add(null)
+        }
+        slots.chunked(7)
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -1473,13 +1562,14 @@ fun MonthlyHeatmapCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = if (isBangla) "মাসিক ইবাদত হিটম্যাপ (অক্টোবর ২০২৬)" else "Monthly Prayer Heatmap (October 2026)",
+                            text = if (isBangla) "মাসিক ইবাদত হিটম্যাপ ($monthName $yearStr)" else "Monthly Prayer Heatmap ($monthName $yearStr)",
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 13.sp,
                             color = titleColor
                         )
                         Text(
-                            text = if (isBangla) "২৮ দিন ট্র্যাকিং হিস্ট্রি" else "28 Days Tracking History",
+                            text = if (isBangla) "${DateUtil.toBanglaDigits(daysTracked.toString())} দিন ট্র্যাকিং হিস্ট্রি"
+                                   else "$daysTracked Days Tracking History",
                             fontSize = 10.sp,
                             color = subtitleColor
                         )
@@ -1491,7 +1581,7 @@ fun MonthlyHeatmapCard(
                     border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.30f))
                 ) {
                     Text(
-                        text = if (isBangla) "২৮ দিন" else "28 Days",
+                        text = if (isBangla) "${DateUtil.toBanglaDigits(daysTracked.toString())} দিন" else "$daysTracked Days",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF10B981),
@@ -1521,10 +1611,7 @@ fun MonthlyHeatmapCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 7x4 Grid of 28 Days
-            val daysList = (1..28).toList()
-            val chunkedDays = daysList.chunked(7)
-
+            // Real dynamic Calendar Grid
             chunkedDays.forEach { week ->
                 Row(
                     modifier = Modifier
@@ -1533,70 +1620,55 @@ fun MonthlyHeatmapCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     week.forEach { day ->
-                        val isRose = day % 5 == 0
-                        val isAmber = day % 7 == 0
-                        val dayColor = when {
-                            isRose -> Color(0xFFF43F5E)
-                            isAmber -> Color(0xFFF59E0B)
-                            else -> Color(0xFF10B981)
-                        }
+                        if (day == null) {
+                            Spacer(modifier = Modifier.weight(1f).height(30.dp))
+                        } else {
+                            val iso = String.format(java.util.Locale.US, "%04d-%02d-%02d", year, month + 1, day)
+                            val dayLogs = logsByDate[iso] ?: emptyList()
+                            val score = dayLogs.count {
+                                it.prayerName in fardhPrayers && (it.status == "jamaah" || it.status == "on_time")
+                            }.coerceIn(0, 5)
+                            val hasAnyLogs = dayLogs.any { it.status != "pending" }
+                            val isFuture = day > todayDay
 
-                        Surface(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(30.dp)
-                                .clickable { onDayClick(day) },
-                            shape = RoundedCornerShape(8.dp),
-                            color = dayColor,
-                            shadowElevation = 1.dp
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = if (isBangla) DateUtil.toBanglaDigits(day.toString()) else day.toString(),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White
+                            val (bgColor, textColor) = when {
+                                isFuture -> Pair(
+                                    if (isDark) Color.White.copy(alpha = 0.03f) else Color(0xFFF8FAFC),
+                                    if (isDark) Color.White.copy(alpha = 0.25f) else Color(0xFFCBD5E1)
                                 )
+                                !hasAnyLogs || score == 0 -> Pair(
+                                    if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0),
+                                    if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF64748B)
+                                )
+                                score == 5 -> Pair(Color(0xFF10B981), Color.White)
+                                score in 3..4 -> Pair(Color(0xFFF59E0B), Color.White)
+                                else -> Pair(Color(0xFFF43F5E), Color.White)
+                            }
+
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(30.dp)
+                                    .clickable(enabled = !isFuture) { onDayClick(day) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = bgColor,
+                                border = if (day == todayDay) BorderStroke(1.5.dp, Color(0xFF0284C7))
+                                         else if (isFuture) BorderStroke(0.6.dp, if (isDark) Color.White.copy(alpha = 0.06f) else Color(0xFFE2E8F0))
+                                         else null
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (isBangla) DateUtil.toBanglaDigits(day.toString()) else day.toString(),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (day == todayDay || score > 0) FontWeight.Bold else FontWeight.Medium,
+                                        color = textColor
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Legend
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF10B981)))
-                    Text(if (isBangla) "৫ ওয়াক্ত আদায়" else "5 Done", fontSize = 10.sp, color = subtitleColor)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF59E0B)))
-                    Text(if (isBangla) "কাজা" else "Qaza", fontSize = 10.sp, color = subtitleColor)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF43F5E)))
-                    Text(if (isBangla) "মিস হয়েছে" else "Missed", fontSize = 10.sp, color = subtitleColor)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = if (isBangla) "👆 যেকোনো তারিখে ট্যাপ করে ওই দিনের নামাজের বিস্তারিত দেখুন" else "👆 Tap any date to view prayer breakdown for that day",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF10B981)
-            )
         }
     }
 }

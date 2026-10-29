@@ -174,7 +174,7 @@ private fun IbadahHubContent(
     val context = LocalContext.current
 
     // In-Card Interactive Dhikr Counter State (Default target 100)
-    var dailyDhikrCount by rememberSaveable { mutableIntStateOf(33) }
+    var dailyDhikrCount by rememberSaveable { mutableIntStateOf(0) }
     val dhikrTarget = 100
 
     val titleColor = if (colors.isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)

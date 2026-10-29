@@ -34,6 +34,7 @@ data class NamazUiState(
         true
     ),
     val currentDayLogs: List<PrayerLogEntity> = emptyList(),
+    val allPrayerLogs: List<PrayerLogEntity> = emptyList(),
     val qazaRecords: List<QazaRecordEntity> = emptyList(),
     val totalPrayedToday: Int = 0,
     val currentStreakDays: Int = 0,
@@ -327,9 +328,26 @@ class NamazViewModel(application: Application) : AndroidViewModel(application) {
 
         _uiState.update {
             it.copy(
+                allPrayerLogs = logs,
                 currentStreakDays = streak,
                 weeklyCompletionRate = rate
             )
+        }
+    }
+
+    fun resetAllPrayerLogs(onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.clearAllLogs()
+            _uiState.update {
+                it.copy(
+                    allPrayerLogs = emptyList(),
+                    currentDayLogs = emptyList(),
+                    currentStreakDays = 0,
+                    weeklyCompletionRate = 0,
+                    totalPrayedToday = 0
+                )
+            }
+            onDone()
         }
     }
 

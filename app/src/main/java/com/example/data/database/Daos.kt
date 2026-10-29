@@ -26,6 +26,9 @@ interface PrayerLogDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertLogs(logs: List<PrayerLogEntity>)
+
+    @Query("DELETE FROM prayers_log")
+    suspend fun clearAllLogs()
 }
 
 @Dao

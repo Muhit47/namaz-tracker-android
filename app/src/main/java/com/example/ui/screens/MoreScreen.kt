@@ -600,6 +600,58 @@ fun SettingsScreen(
     onRequestNotificationPermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showResetConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showResetConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirmDialog = false },
+            title = {
+                Text(
+                    text = if (isBangla) "হিস্ট্রি রিসেট করুন" else "Reset Prayer History",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    color = colors.textPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = if (isBangla)
+                        "আপনি কি নিশ্চিত যে সমস্ত নামাযের হিস্ট্রি ও ট্র্যাকিং ডাটা মুছে ফেলতে চান? এটি পুনরায় ফিরিয়ে আনা সম্ভব নয়।"
+                    else
+                        "Are you sure you want to delete all prayer logs and tracking history? This action cannot be undone.",
+                    fontSize = 13.5.sp,
+                    color = colors.textSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetConfirmDialog = false
+                        viewModel.resetAllPrayerLogs {
+                            HapticUtil.vibrateMilestone(context)
+                            android.widget.Toast.makeText(
+                                context,
+                                if (isBangla) "সকল হিস্ট্রি রিসেট করা হয়েছে" else "All prayer history has been reset",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(if (isBangla) "রিসেট" else "Reset", fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirmDialog = false }) {
+                    Text(if (isBangla) "বাতিল" else "Cancel", color = colors.textSecondary)
+                }
+            },
+            containerColor = colors.surfaceCard,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
     Scaffold(
         containerColor = colors.background,
         topBar = {
@@ -1083,7 +1135,7 @@ fun SettingsScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             // Backup
                             Button(
@@ -1093,6 +1145,7 @@ fun SettingsScreen(
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = colors.emerald.copy(alpha = if (isDark) 0.25f else 0.15f)
@@ -1100,10 +1153,11 @@ fun SettingsScreen(
                                 border = BorderStroke(1.dp, colors.emerald.copy(alpha = 0.4f))
                             ) {
                                 Text(
-                                    text = if (isBangla) "📤 ব্যাকআপ JSON" else "📤 Backup JSON",
-                                    fontSize = 12.sp,
+                                    text = if (isBangla) "📤 ব্যাকআপ" else "📤 Backup",
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = colors.emerald
+                                    color = colors.emerald,
+                                    maxLines = 1
                                 )
                             }
 
@@ -1111,6 +1165,7 @@ fun SettingsScreen(
                             Button(
                                 onClick = onOpenRestore,
                                 modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9)
@@ -1118,10 +1173,31 @@ fun SettingsScreen(
                                 border = BorderStroke(1.dp, if (isDark) Color(0xFF334155) else Color(0xFFCBD5E1))
                             ) {
                                 Text(
-                                    text = if (isBangla) "📥 ডাটা রিস্টোর" else "📥 Restore Data",
-                                    fontSize = 12.sp,
+                                    text = if (isBangla) "📥 রিস্টোর" else "📥 Restore",
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)
+                                    color = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A),
+                                    maxLines = 1
+                                )
+                            }
+
+                            // Reset
+                            Button(
+                                onClick = { showResetConfirmDialog = true },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFF43F5E).copy(alpha = if (isDark) 0.25f else 0.15f)
+                                ),
+                                border = BorderStroke(1.dp, Color(0xFFF43F5E).copy(alpha = 0.40f))
+                            ) {
+                                Text(
+                                    text = if (isBangla) "🔄 রিসেট" else "🔄 Reset",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isDark) Color(0xFFFB7185) else Color(0xFFE11D48),
+                                    maxLines = 1
                                 )
                             }
                         }
