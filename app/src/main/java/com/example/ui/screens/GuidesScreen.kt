@@ -522,9 +522,44 @@ fun GuidesScreen(
                     }
                 }
 
+                // ওজু ভঙ্গের ৭টি কারণ (7 Things That Invalidate Wudu)
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    AccordionCard(
+                        title = if (isBangla) "⚠️ ওজু ভঙ্গের ৭টি কারণ" else "⚠️ 7 Things That Invalidate Wudu",
+                        content = {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = if (isBangla) """
+১. পায়খানা বা পেশাবের রাস্তা দিয়ে কোনো কিছু বের হওয়া।
+২. মুখ ভরে বমি হওয়া (খাবার, পানি বা পিত্ত)।
+৩. শরীরের কোনো জায়গা থেকে রক্ত, পুঁজ বা পানি বের হয়ে গড়িয়ে পড়া।
+৪. থুথুর সঙ্গে রক্তের ভাগ সমান বা বেশি হওয়া।
+৫. চিৎ বা কাত হয়ে অথবা কোনো কিছুর সাথে হেলান দিয়ে ঘুমানো।
+৬. পাগল, মাতাল বা অচেতন/বেহুঁশ হওয়া।
+৭. নামাযে (রুকু-সিজদা বিশিষ্ট) উচ্চস্বরে বা অট্টহাসি হাসা।
+""".trimIndent()
+                                    else """
+1. Discharge of anything from the private passages (urine, stool, gas, etc.).
+2. Flowing of blood, pus, or fluid from any part of the body.
+3. Vomiting a mouthful (food, water, or bile).
+4. Spitting blood where blood is equal to or exceeds the saliva.
+5. Sleeping while lying down or leaning heavily against support.
+6. Loss of consciousness, fainting, intoxication, or insanity.
+7. Laughing aloud during any prayer that includes Ruku and Sujood.
+""".trimIndent(),
+                                    fontSize = 12.5.sp,
+                                    lineHeight = 20.sp,
+                                    color = colors.textPrimary
+                                )
+                            }
+                        }
+                    )
+                }
+
                 // Ghusl & Tayammum Accordions
                 item {
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     AccordionCard(
                         title = if (isBangla) "🚿 গোসলের ৩টি ফরজ ও সুন্নাহ পদ্ধতি" else "🚿 3 Fardh of Ghusl & Sunnah Method",
                         content = {

@@ -171,9 +171,9 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             // -------------------------------------------------------------
             // AMBIENT GLOWING LIGHT MESH (Real iOS Glass Refraction Base)
@@ -198,25 +198,13 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(bottom = 120.dp)
             ) {
-                // -------------------------------------------------------------
-                // 1. FLOATING DATE NAVIGATION PILL DOCK
-                // -------------------------------------------------------------
+                // Top margin directly below TopAppBar
                 item {
                     Spacer(modifier = Modifier.height(10.dp))
-                    FloatingDateNavigationDock(
-                        selectedDate = uiState.selectedDate,
-                        calendar = calendar,
-                        isBangla = isBangla,
-                        isToday = isToday,
-                        onPrevClick = { viewModel.changeDateOffset(-1) },
-                        onNextClick = { viewModel.changeDateOffset(1) },
-                        onTodayClick = { viewModel.resetToToday() }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 // -------------------------------------------------------------
-                // 2. ULTRA-MINIMALIST FLOATING LIVE WAQT BAR (Dynamic Island)
+                // 1. ULTRA-MINIMALIST FLOATING LIVE WAQT BAR (Dynamic Island)
                 // -------------------------------------------------------------
                 if (isToday && activeWaqtInfo != null) {
                     val activeLog = activeWaqt?.let { p ->
@@ -351,162 +339,6 @@ fun HomeScreen(
 
     if (showRamadanDuaDialog) {
         RamadanDuaDialog(isBangla = isBangla, onDismiss = { showRamadanDuaDialog = false })
-    }
-}
-
-/**
- * iOS Floating Frosted Glass Date Navigation Dock.
- */
-@Composable
-private fun FloatingDateNavigationDock(
-    selectedDate: String,
-    calendar: Calendar,
-    isBangla: Boolean,
-    isToday: Boolean,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit,
-    onTodayClick: () -> Unit
-) {
-    val colors = FinancyTheme.colors
-    val context = LocalContext.current
-    val dockShape = RoundedCornerShape(999.dp)
-
-    val dockBg = if (colors.isDark) {
-        Brush.linearGradient(
-            listOf(
-                Color.White.copy(alpha = 0.08f),
-                Color.White.copy(alpha = 0.03f)
-            )
-        )
-    } else {
-        Brush.linearGradient(
-            listOf(
-                Color.White.copy(alpha = 0.88f),
-                Color(0xFFF1F5F9).copy(alpha = 0.95f)
-            )
-        )
-    }
-
-    val rimBrush = Brush.linearGradient(
-        listOf(
-            if (colors.isDark) Color.White.copy(alpha = 0.22f) else Color.White,
-            if (colors.isDark) Color.White.copy(alpha = 0.05f) else Color(0xFFCBD5E1).copy(alpha = 0.50f)
-        )
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = if (colors.isDark) 4.dp else 2.dp,
-                shape = dockShape,
-                ambientColor = Color.Black.copy(alpha = 0.15f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
-            )
-            .clip(dockShape)
-            .background(dockBg)
-            .border(BorderStroke(1.dp, rimBrush), dockShape)
-            .padding(horizontal = 6.dp, vertical = 6.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Previous Day Button
-            Surface(
-                shape = CircleShape,
-                color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.White,
-                border = BorderStroke(
-                    0.6.dp,
-                    if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0)
-                ),
-                modifier = Modifier
-                    .size(34.dp)
-                    .testTag("btn_prev_day")
-                    .clickable {
-                        HapticUtil.lightTick(context)
-                        onPrevClick()
-                    }
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Previous Day",
-                        tint = if (colors.isDark) Color(0xFFCBD5E1) else Color(0xFF334155),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            // Center Date and Hijri Information
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = DateUtil.formatDisplayDate(selectedDate, isBangla),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary,
-                    fontSize = 13.5.sp,
-                    textAlign = TextAlign.Center
-                )
-
-                val hijriText = remember(calendar, isBangla) {
-                    DateUtil.getApproximateHijriDate(calendar, isBangla)
-                }
-
-                Text(
-                    text = hijriText,
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.emerald,
-                    textAlign = TextAlign.Center
-                )
-
-                if (!isToday) {
-                    Text(
-                        text = if (isBangla) "আজকের তারিখে ফিরুন" else "Return to Today",
-                        fontSize = 11.sp,
-                        color = colors.emerald,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .clickable {
-                                HapticUtil.lightTick(context)
-                                onTodayClick()
-                            }
-                            .padding(top = 1.dp)
-                    )
-                }
-            }
-
-            // Next Day Button
-            Surface(
-                shape = CircleShape,
-                color = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.White,
-                border = BorderStroke(
-                    0.6.dp,
-                    if (colors.isDark) Color.White.copy(alpha = 0.15f) else Color(0xFFE2E8F0)
-                ),
-                modifier = Modifier
-                    .size(34.dp)
-                    .testTag("btn_next_day")
-                    .clickable {
-                        HapticUtil.lightTick(context)
-                        onNextClick()
-                    }
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Next Day",
-                        tint = if (colors.isDark) Color(0xFFCBD5E1) else Color(0xFF334155),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
     }
 }
 

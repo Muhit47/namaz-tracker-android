@@ -80,8 +80,27 @@ object DateUtil {
         return sb.toString()
     }
 
-    fun getApproximateHijriDate(calendar: Calendar, isBangla: Boolean): String {
-        // Approximate calculation based on epoch 16 July 622 AD
+    data class HijriDate(
+        val day: Int,
+        val monthIndex: Int,
+        val monthNameBn: String,
+        val monthNameEn: String,
+        val year: Int
+    )
+
+    val hijriMonthsEn = listOf(
+        "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+        "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+    )
+
+    val hijriMonthsBn = listOf(
+        "মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি",
+        "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শা'বান",
+        "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ্ব"
+    )
+
+    fun getHijriDate(calendar: Calendar): HijriDate {
         val jd = toJulianDay(calendar)
         val l = jd - 1948440 + 10632
         val n = ((l - 1) / 10631).toInt()
@@ -93,25 +112,42 @@ object DateUtil {
         val m = ((24 * lDoublePrime) / 709).toInt()
         val day = (lDoublePrime - ((709 * m) / 24).toInt()).toInt()
         val year = 30 * n + j - 30
-
-        val hijriMonthsEn = listOf(
-            "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
-            "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
-        )
-
-        val hijriMonthsBn = listOf(
-            "মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি",
-            "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শা'বান",
-            "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ্ব"
-        )
-
         val safeMonthIdx = (m - 1).coerceIn(0, 11)
+
+        return HijriDate(
+            day = day,
+            monthIndex = safeMonthIdx,
+            monthNameBn = hijriMonthsBn[safeMonthIdx],
+            monthNameEn = hijriMonthsEn[safeMonthIdx],
+            year = year
+        )
+    }
+
+    fun getApproximateHijriDate(calendar: Calendar, isBangla: Boolean): String {
+        val h = getHijriDate(calendar)
         return if (isBangla) {
-            "${toBanglaDigits(day.toString())} ${hijriMonthsBn[safeMonthIdx]}, ${toBanglaDigits(year.toString())} হিজরি"
+            "${toBanglaDigits(h.day.toString())} ${h.monthNameBn}, ${toBanglaDigits(h.year.toString())} হিজরি"
         } else {
-            "$day ${hijriMonthsEn[safeMonthIdx]} $year AH"
+            "${h.day} ${h.monthNameEn} ${h.year} AH"
         }
+    }
+
+    fun getDaysUntilNextRamadan(calendar: Calendar = Calendar.getInstance()): Int {
+        val currentHijri = getHijriDate(calendar)
+        if (currentHijri.monthIndex == 8) {
+            return 0
+        }
+        val cal = calendar.clone() as Calendar
+        var days = 0
+        while (days < 365) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            days++
+            val h = getHijriDate(cal)
+            if (h.monthIndex == 8) {
+                return days
+            }
+        }
+        return days
     }
 
     private fun toJulianDay(calendar: Calendar): Long {

@@ -362,6 +362,17 @@ fun MoreHubScreen(
     onNavigateSub: (MoreSubScreen) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showHijriDialog by remember { mutableStateOf(false) }
+
+    if (showHijriDialog) {
+        HijriCalendarDialog(
+            isBangla = isBangla,
+            isDark = isDark,
+            colors = colors,
+            onDismiss = { showHijriDialog = false }
+        )
+    }
+
     Scaffold(
         containerColor = colors.background,
         topBar = {
@@ -415,90 +426,10 @@ fun MoreHubScreen(
             contentPadding = PaddingValues(top = 10.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. SPOTLIGHT HERO CARD: Guides & Rak'ah Table Banner
+            // 1. ISLAMIC TRACKER TOOLS (2x2 Bento Quick Grid)
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNavigateSub(MoreSubScreen.GUIDE) },
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isDark) Color(0xFF131D18) else Color(0xFFFFFBEB)
-                    ),
-                    border = BorderStroke(1.2.dp, AmberAccentDark.copy(alpha = 0.45f))
-                ) {
-                    Column(modifier = Modifier.padding(18.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = AmberAccentDark.copy(alpha = 0.20f),
-                                border = BorderStroke(1.dp, AmberAccentDark.copy(alpha = 0.4f))
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text("📖", fontSize = 12.sp)
-                                    Text(
-                                        text = if (isBangla) "দ্বীনি শিক্ষা ও জ্ঞান হাব" else "Knowledge & Guides Hub",
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 11.sp,
-                                        color = if (isDark) AmberAccentDark else Color(0xFFB45309)
-                                    )
-                                }
-                            }
+                val todayHijri = remember { DateUtil.getHijriDate(Calendar.getInstance()) }
 
-                            Text("➔", fontWeight = FontWeight.Black, color = AmberAccentDark, fontSize = 16.sp)
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            text = if (isBangla) "নামায ও ওযুর সম্পূর্ণ নিয়ম" else "Complete Salah & Wudu Guide",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 17.sp,
-                            color = if (isDark) Color(0xFFF8FAFC) else Color(0xFF0F172A)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = if (isBangla) "সহিহ হাদিসের রেফারেন্সসহ ধারাবাহিক আমল, ৫ ওয়াক্ত ও জুমু'আর রাকাত তালিকা এবং প্রয়োজনীয় দোয়া ভাণ্ডার।"
-                            else "Step-by-step authentic Salah steps, daily prayer & Jumu'ah Rak'ah table, and essential duas.",
-                            fontSize = 12.sp,
-                            lineHeight = 17.sp,
-                            color = if (isDark) Color(0xFF94A3B8) else Color(0xFF475569)
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = AmberAccentDark,
-                            shadowElevation = 3.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (isBangla) "📚 গাইড ও রাকাত তালিকা দেখুন ➔" else "📚 View Guides & Rak'ah Table ➔",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 12.5.sp,
-                                    color = Color.White
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 2. ISLAMIC TRACKER TOOLS (3-Item Quick Grid)
-            item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = if (isBangla) "আমল ও ট্র্যাকিং টুলস" else "Islamic Tracker Tools",
@@ -507,6 +438,7 @@ fun MoreHubScreen(
                         color = colors.textPrimary
                     )
 
+                    // Row 1: Analytics & Digital Tasbih
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -532,7 +464,13 @@ fun MoreHubScreen(
                             modifier = Modifier.weight(1f),
                             isDark = isDark
                         )
+                    }
 
+                    // Row 2: Qibla Compass & Hijri Calendar
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         // Qibla
                         HubToolCard(
                             icon = "🧭",
@@ -540,6 +478,18 @@ fun MoreHubScreen(
                             badge = "${uiState.qiblaBearing.toInt()}°",
                             accentColor = Color(0xFF6366F1),
                             onClick = { onNavigateSub(MoreSubScreen.QIBLA) },
+                            modifier = Modifier.weight(1f),
+                            isDark = isDark
+                        )
+
+                        // Hijri Calendar
+                        HubToolCard(
+                            icon = "🌙",
+                            title = if (isBangla) "হিজরি ক্যালেন্ডার" else "Hijri Calendar",
+                            badge = if (isBangla) "${DateUtil.toBanglaDigits(todayHijri.day.toString())} ${todayHijri.monthNameBn}"
+                            else "${todayHijri.day} ${todayHijri.monthNameEn}",
+                            accentColor = Color(0xFF10B981),
+                            onClick = { showHijriDialog = true },
                             modifier = Modifier.weight(1f),
                             isDark = isDark
                         )
@@ -625,52 +575,7 @@ fun MoreHubScreen(
                 }
             }
 
-            // 4. QUICK DEVELOPER PROFILE STRIP
-            item {
-                Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = if (isDark) Color(0xFF131D18) else Color(0xFFF8FAFC),
-                    border = BorderStroke(1.dp, if (isDark) Color(0xFF22352C) else Color(0xFFCBD5E1)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = colors.emerald,
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text("M", fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.White)
-                                }
-                            }
 
-                            Text(
-                                text = if (isBangla) "মুহিত (Muhit) • Software Engineer" else "Muhit • Software Engineer",
-                                fontSize = 11.5.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textSecondary
-                            )
-                        }
-
-                        Text(
-                            text = AppVersionHelper.getDisplayVersion(isBangla),
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textSecondary
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -1389,4 +1294,238 @@ fun DeveloperLinkPill(
             )
         }
     }
+}
+
+/**
+ * Elegant Interactive Hijri Calendar Dialog with Current Month Grid & Sunnah Fasting Information
+ */
+@Composable
+private fun HijriCalendarDialog(
+    isBangla: Boolean,
+    isDark: Boolean,
+    colors: FinancyColorTokens,
+    onDismiss: () -> Unit
+) {
+    val calendar = remember { Calendar.getInstance() }
+    val todayHijri = remember { DateUtil.getHijriDate(calendar) }
+    val todayGregorianStr = remember(isBangla) { DateUtil.formatDisplayDate(DateUtil.getTodayIso(), isBangla) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = colors.surfaceCard,
+        shape = RoundedCornerShape(26.dp),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = colors.emerald.copy(alpha = if (isDark) 0.22f else 0.14f),
+                    modifier = Modifier.size(38.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("🌙", fontSize = 18.sp)
+                    }
+                }
+                Column {
+                    Text(
+                        text = if (isBangla) "হিজরি ক্যালেন্ডার" else "Hijri Calendar",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 17.sp,
+                        color = colors.textPrimary
+                    )
+                    Text(
+                        text = if (isBangla) "ইসলামিক চান্দ্র বর্ষপঞ্জি" else "Islamic Lunar Calendar",
+                        fontSize = 11.sp,
+                        color = colors.textSecondary
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Today's Highlighted Hijri Hero Card
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = if (isDark) Color(0xFF064E3B).copy(alpha = 0.35f) else Color(0xFFECFDF5),
+                    border = BorderStroke(1.2.dp, colors.emerald.copy(alpha = 0.45f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (isBangla) "আজকের হিজরি তারিখ" else "Today's Hijri Date",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.emerald
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (isBangla)
+                                "${DateUtil.toBanglaDigits(todayHijri.day.toString())} ${todayHijri.monthNameBn}, ${DateUtil.toBanglaDigits(todayHijri.year.toString())} হিজরি"
+                            else
+                                "${todayHijri.day} ${todayHijri.monthNameEn}, ${todayHijri.year} AH",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (isDark) Color(0xFF6EE7B7) else Color(0xFF065F46),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = todayGregorianStr,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = colors.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Month Grid (1 to 29/30) with Ayyam al-Beed marked
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isBangla) "${todayHijri.monthNameBn} মাসের দিনসমূহ" else "Days of ${todayHijri.monthNameEn}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = colors.emeraldSoft
+                        ) {
+                            Text(
+                                text = if (isBangla) "২৯ / ৩০ দিন" else "29 / 30 Days",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.emerald,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 6 columns x 5 rows grid (1..30 days)
+                    val daysList = (1..30).toList()
+                    val rows = daysList.chunked(6)
+
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        rows.forEach { rowDays ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                rowDays.forEach { d ->
+                                    val isCurrentDay = d == todayHijri.day
+                                    val isAyyamAlBeed = d in 13..15
+
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = when {
+                                            isCurrentDay -> colors.emerald
+                                            isAyyamAlBeed -> if (isDark) Color(0xFF0E7490).copy(alpha = 0.35f) else Color(0xFFE0F2FE)
+                                            else -> if (isDark) Color.White.copy(alpha = 0.05f) else Color(0xFFF1F5F9)
+                                        },
+                                        border = BorderStroke(
+                                            if (isCurrentDay || isAyyamAlBeed) 1.dp else 0.5.dp,
+                                            when {
+                                                isCurrentDay -> colors.emerald
+                                                isAyyamAlBeed -> Color(0xFF38BDF8)
+                                                else -> if (isDark) Color.White.copy(alpha = 0.08f) else Color(0xFFE2E8F0)
+                                            }
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 6.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = if (isBangla) DateUtil.toBanglaDigits(d.toString()) else d.toString(),
+                                                fontSize = 11.sp,
+                                                fontWeight = if (isCurrentDay) FontWeight.Black else FontWeight.Bold,
+                                                color = when {
+                                                    isCurrentDay -> Color.White
+                                                    isAyyamAlBeed -> if (isDark) Color(0xFF7DD3FC) else Color(0xFF0369A1)
+                                                    else -> colors.textPrimary
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Sunnah Fasting Information Card
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isDark) Color(0xFF1E293B).copy(alpha = 0.6f) else Color(0xFFF8FAFC),
+                    border = BorderStroke(0.8.dp, if (isDark) Color(0xFF334155) else Color(0xFFE2E8F0)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text("✨", fontSize = 11.sp)
+                            Text(
+                                text = if (isBangla) "আইয়ামে বীজের সুন্নাত রোজা (১৩, ১৪, ১৫)" else "Sunnah Fasting: Ayyam al-Beed (13, 14, 15)",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                color = if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = if (isBangla)
+                                "প্রতি হিজরি মাসের ১৩, ১৪ ও ১৫ তারিখ রোজা রাখা সুন্নাত ও সারা বছর রোজা রাখার সমতুল্য সওয়াব। (সহিহ বুখারি: ১৯৮১)"
+                            else
+                                "Fasting on the 13th, 14th & 15th of each lunar month is Sunnah and equals a lifetime of fasting. (Bukhari: 1981)",
+                            fontSize = 10.5.sp,
+                            color = colors.textSecondary,
+                            lineHeight = 15.sp
+                        )
+                    }
+                }
+
+                // Moon Sighting Note
+                Text(
+                    text = if (isBangla)
+                        "⚠️ চাঁদ দেখার ওপর নির্ভর করে হিজরি তারিখ ১ দিন পরিবর্তন হতে পারে।"
+                    else
+                        "⚠️ Hijri dates may vary by 1 day depending on local moon sighting.",
+                    fontSize = 10.sp,
+                    color = colors.textMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(999.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.emerald,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(if (isBangla) "ঠিক আছে" else "Close", fontWeight = FontWeight.Bold)
+            }
+        }
+    )
 }

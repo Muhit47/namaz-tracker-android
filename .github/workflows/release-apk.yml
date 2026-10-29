@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -101,40 +103,59 @@ jobs:
           path: ${{ steps.package_apk.outputs.apk_path }}
           retention-days: 30
 
+      - name: Generate Dynamic Release Notes from Git
+        id: generate_notes
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "Previous tag detected: $PREV_TAG"
+          
+          TAG_NAME="${{ steps.package_apk.outputs.tag_name }}"
+          
+          cat << EOF > release_body.md
+          ## 🕌 Namaz Tracker Android Release (${TAG_NAME})
+
+          Welcome to the official release of **Namaz Tracker** — a modern, privacy-first Android application designed with an iOS frosted glass aesthetic and Nothing OS minimalist home screen widgets.
+
+          ### 📦 Download & Installation
+          1. Download the **\`Namaz-Tracker-${TAG_NAME}.apk\`** asset attached below.
+          2. Open the downloaded \`.apk\` file on your Android device (Android 7.0+ supported).
+          3. Grant notification & exact alarm permissions to enable accurate Adhan reminders and prayer countdowns.
+
+          ---
+
+          ### 🌟 Highlights & What's New in this Build:
+          EOF
+
+          # Extract commit description (body) of the latest commit if available
+          LATEST_BODY=$(git log -1 --pretty=format:"%b")
+          if [ -n "$LATEST_BODY" ]; then
+            echo "$LATEST_BODY" >> release_body.md
+            echo "" >> release_body.md
+          fi
+
+          # List commits since the previous release tag or recent commits
+          echo "#### 📝 Commit History:" >> release_body.md
+          if [ -n "$PREV_TAG" ]; then
+            git log ${PREV_TAG}..HEAD --pretty=format:"* %s (%h)" --no-merges >> release_body.md
+          else
+            git log -10 --pretty=format:"* %s (%h)" --no-merges >> release_body.md
+          fi
+          echo "" >> release_body.md
+
+          cat << 'EOF' >> release_body.md
+
+          ---
+          *Built with Android Jetpack Compose, Material 3, and Kotlin.*
+          EOF
+
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.package_apk.outputs.tag_name }}
           name: ${{ github.event.inputs.release_name || format('Namaz Tracker {0} - Official Release', steps.package_apk.outputs.tag_name) }}
           files: ${{ steps.package_apk.outputs.apk_path }}
+          body_path: release_body.md
+          generate_release_notes: true
           draft: false
           prerelease: false
           make_latest: true
-          body: |
-            ## 🕌 Namaz Tracker Android Release (${{ steps.package_apk.outputs.tag_name }})
-
-            Welcome to the official release of **Namaz Tracker** — a modern, privacy-first Android application designed with an iOS frosted glass aesthetic and Nothing OS minimalist home screen widgets.
-
-            ### 📦 Download & Installation
-            1. Download the **`Namaz-Tracker-${{ steps.package_apk.outputs.tag_name }}.apk`** asset attached below.
-            2. Open the downloaded `.apk` file on your Android device (Android 7.0+ supported).
-            3. Grant notification & exact alarm permissions to enable accurate Adhan reminders and prayer countdowns.
-
-            ---
-
-            ### ✨ Key Features in this Release:
-            - **🕌 5 Daily Prayers & Visual Countdown:** Dynamic active waqt indicator, real-time countdown, and precise prayer times calculated for your city.
-            - **📖 Quran & Authentic Hadith:** Read Surahs, bookmark verses, search Hadith, and listen to soothing audio recitations.
-            - **📿 Ibadah Suite:** Digital Tasbih counter, Qibla compass with sensor calibration, and daily Dua collection.
-            - **📊 30-Day Prayer Consistency Tracker:** Visual monthly analytics tracking your prayer habits.
-            - **🎨 iOS-Style Frosted Glass Floating Dock:** Strictly balanced and symmetrical navigation buttons with equal dimensions and haptic feedback.
-            - **📱 4-Suite Nothing OS & Frosted Glass Widgets:**
-              - Next Waqt Countdown widget
-              - All-5 Prayer Schedule widget
-              - Ramadan Sehri & Iftar widget
-              - Daily Hadith & Dua of the Day widget
-            - **🌐 English Primary Default:** Clean English interface by default with instant toggle to Bengali.
-            - **🛡️ 100% Offline & Privacy-First:** No tracking, no data collection, zero telemetry.
-
-            ---
-            *Built with Android Jetpack Compose, Material 3, and Kotlin.*

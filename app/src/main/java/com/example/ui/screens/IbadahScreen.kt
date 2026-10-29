@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.components.IosGlassPillButton
+import com.example.ui.theme.AmiriFontFamily
 import com.example.ui.theme.FinancyTheme
 import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
@@ -415,7 +417,18 @@ private fun IbadahHubContent(
                 }
             }
 
-            // Row 3: Salah & Wudu Complete Guide (Spanning 2 columns / Full Width Banner)
+            // Row 3: Ramadan & Fasting Tracker (Spanning 2 columns / Full Width Banner)
+            item {
+                RamadanGlassCard(
+                    prayerTimes = uiState.prayerTimes,
+                    isBangla = isBangla,
+                    isDark = colors.isDark,
+                    titleColor = titleColor,
+                    subtitleColor = subtitleColor
+                )
+            }
+
+            // Row 4: Salah & Wudu Complete Guide (Spanning 2 columns / Full Width Banner)
             item {
                 GuidesGlassBanner(
                     isBangla = isBangla,
@@ -541,17 +554,33 @@ private fun HeroDhikrGlassCard(
                 // Arabic Dhikr Calligraphy
                 Text(
                     text = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ ، سُبْحَانَ اللَّهِ الْعَظِيمِ",
+                    fontFamily = AmiriFontFamily,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isDark) Color(0xFF2DD4BF) else Color(0xFF0F766E),
                     textAlign = TextAlign.Center,
-                    lineHeight = 30.sp,
+                    lineHeight = 32.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                // Pronunciation (উচ্চারণ)
+                Text(
+                    text = if (isBangla)
+                        "উচ্চারণ: সুবহানাল্লাহি ওয়া বিহামদিহী, সুবহানাল্লাহিল আযীম।"
+                    else
+                        "Pronunciation: Subhanallahi wa bihamdihi, Subhanallahil 'Azeem.",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Color(0xFF5EEAD4) else Color(0xFF0D9488),
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Translation
+                // Translation (অর্থ)
                 Text(
                     text = if (isBangla)
                         "\"আল্লাহ্‌র প্রশংসাসহ তাঁর পবিত্রতা ঘোষণা করছি, মহান আল্লাহ অতি পবিত্র।\""
@@ -1061,6 +1090,388 @@ private fun GuidesGlassBanner(
                     )
                 }
             }
+        }
+    }
+}
+
+
+/**
+ * Full Width Bento Banner: Ramadan & Fasting Tracker with live Sehri/Iftar timings,
+ * interactive today's fast tracking, and next Ramadan countdown.
+ */
+@Composable
+private fun RamadanGlassCard(
+    prayerTimes: com.example.util.DailyPrayerTimes,
+    isBangla: Boolean,
+    isDark: Boolean,
+    titleColor: Color,
+    subtitleColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val todayIso = remember { DateUtil.getTodayIso() }
+    val fastingPrefs = remember { context.getSharedPreferences("nt_fasting_prefs", Context.MODE_PRIVATE) }
+
+    // Roza tracking state for today
+    var isFastedToday by remember {
+        mutableStateOf(fastingPrefs.getBoolean("fasting_$todayIso", false))
+    }
+
+    // Monthly fasts count
+    val currentMonthKey = remember { todayIso.substring(0, 7) }
+    var monthlyFastsCount by remember {
+        val count = fastingPrefs.all.count { (k, v) -> k.startsWith("fasting_$currentMonthKey") && v == true }
+        mutableIntStateOf(count)
+    }
+
+    // Days until next Ramadan
+    val daysUntilRamadan = remember { DateUtil.getDaysUntilNextRamadan() }
+    val isRamadanNow = daysUntilRamadan == 0
+
+    val shape = RoundedCornerShape(24.dp)
+    val accentEmerald = Color(0xFF10B981)
+    val accentAmber = Color(0xFFF59E0B)
+
+    val backgroundBrush = if (isDark) {
+        Brush.linearGradient(
+            colors = listOf(
+                accentEmerald.copy(alpha = 0.22f),
+                Color(0xFF0F172A).copy(alpha = 0.82f),
+                Color(0xFF064E3B).copy(alpha = 0.30f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFFECFDF5).copy(alpha = 0.95f),
+                Color(0xFFF0FDF4).copy(alpha = 0.90f),
+                Color.White.copy(alpha = 0.98f)
+            )
+        )
+    }
+
+    val rimBrush = Brush.linearGradient(
+        colors = listOf(
+            accentEmerald.copy(alpha = if (isDark) 0.45f else 0.40f),
+            if (isDark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.85f)
+        )
+    )
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (isDark) 4.dp else 2.dp,
+                shape = shape,
+                ambientColor = if (isDark) Color.Black.copy(alpha = 0.3f) else accentEmerald.copy(alpha = 0.12f),
+                spotColor = accentEmerald.copy(alpha = 0.18f)
+            ),
+        shape = shape,
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(backgroundBrush)
+                .border(BorderStroke(1.2.dp, rimBrush), shape)
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(13.dp)
+            ) {
+                // 1. HEADER ROW: Icon + Title + Countdown Pill
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(42.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = accentEmerald.copy(alpha = if (isDark) 0.22f else 0.15f),
+                            border = BorderStroke(1.dp, accentEmerald.copy(alpha = 0.35f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(text = "🌙", fontSize = 20.sp)
+                            }
+                        }
+
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = if (isBangla) "রমজান ও সিয়াম" else "RAMADAN & FASTING",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDark) Color(0xFF34D399) else Color(0xFF059669),
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isBangla) "মাহে রমজান ও রোজা" else "Ramadan & Fasting Tracker",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = titleColor
+                            )
+                        }
+                    }
+
+                    // Countdown Badge / Status Pill
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = if (isRamadanNow) {
+                            accentEmerald.copy(alpha = if (isDark) 0.25f else 0.18f)
+                        } else {
+                            accentAmber.copy(alpha = if (isDark) 0.22f else 0.15f)
+                        },
+                        border = BorderStroke(
+                            1.dp,
+                            if (isRamadanNow) accentEmerald.copy(alpha = 0.40f) else accentAmber.copy(alpha = 0.40f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = if (isRamadanNow) "✨" else "⏳",
+                                fontSize = 10.sp
+                            )
+                            Text(
+                                text = if (isRamadanNow) {
+                                    if (isBangla) "রমজান চলমান" else "Ramadan Active"
+                                } else {
+                                    if (isBangla) {
+                                        "রমজান আর ${DateUtil.toBanglaDigits(daysUntilRamadan.toString())} দিন"
+                                    } else {
+                                        "$daysUntilRamadan days to Ramadan"
+                                    }
+                                },
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (isRamadanNow) {
+                                    if (isDark) Color(0xFF6EE7B7) else Color(0xFF047857)
+                                } else {
+                                    if (isDark) Color(0xFFFCD34D) else Color(0xFFB45309)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // 2. TIMINGS ROW: Sehri & Iftar Cards Side-by-Side
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Sehri Timing Box
+                    val sehriTime = if (isBangla) DateUtil.toBanglaDigits(prayerTimes.fajr) else prayerTimes.fajr
+                    TimingInfoSubCard(
+                        icon = "🍽️",
+                        title = if (isBangla) "সেহরি শেষ" else "Sehri Ends",
+                        time = sehriTime,
+                        subtitle = if (isBangla) "ফজরের পূর্বে" else "Before Fajr",
+                        accentColor = Color(0xFF0284C7),
+                        isDark = isDark,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Iftar Timing Box
+                    val iftarTime = if (isBangla) DateUtil.toBanglaDigits(prayerTimes.maghrib) else prayerTimes.maghrib
+                    TimingInfoSubCard(
+                        icon = "🥣",
+                        title = if (isBangla) "ইফতারের সময়" else "Iftar Time",
+                        time = iftarTime,
+                        subtitle = if (isBangla) "মাগরিবের আযান" else "At Maghrib",
+                        accentColor = Color(0xFFD97706),
+                        isDark = isDark,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // 3. FASTING TRACKER (আজকে রোজা রেখেছি হিসাব)
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val scale by animateFloatAsState(
+                    targetValue = if (isPressed) 0.97f else 1.0f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                    label = "roza_scale"
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = if (isFastedToday) {
+                        accentEmerald.copy(alpha = if (isDark) 0.22f else 0.15f)
+                    } else {
+                        if (isDark) Color.White.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.70f)
+                    },
+                    border = BorderStroke(
+                        1.dp,
+                        if (isFastedToday) {
+                            accentEmerald.copy(alpha = if (isDark) 0.45f else 0.40f)
+                        } else {
+                            if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFCBD5E1)
+                        }
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .scale(scale)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            val newState = !isFastedToday
+                            isFastedToday = newState
+                            fastingPrefs.edit().putBoolean("fasting_$todayIso", newState).apply()
+                            val count = fastingPrefs.all.count { (k, v) -> k.startsWith("fasting_$currentMonthKey") && v == true }
+                            monthlyFastsCount = count
+                            if (newState) {
+                                HapticUtil.vibrateMilestone(context)
+                            } else {
+                                HapticUtil.lightTick(context)
+                            }
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // Check Circle Icon
+                            Surface(
+                                shape = CircleShape,
+                                color = if (isFastedToday) accentEmerald else if (isDark) Color.White.copy(alpha = 0.10f) else Color(0xFFE2E8F0),
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (isFastedToday) "✓" else "○",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 13.sp,
+                                        color = if (isFastedToday) Color.White else subtitleColor
+                                    )
+                                }
+                            }
+
+                            Column {
+                                Text(
+                                    text = if (isFastedToday) {
+                                        if (isBangla) "আলহামদুলিল্লাহ, আজকের রোজা রেখেছি" else "Alhamdulillah, Fasted Today"
+                                    } else {
+                                        if (isBangla) "আজ রোজা রেখেছেন? ট্যাপ করে হিসাব রাখুন" else "Did you fast today? Tap to record"
+                                    },
+                                    fontSize = 12.sp,
+                                    fontWeight = if (isFastedToday) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                    color = if (isFastedToday) {
+                                        if (isDark) Color(0xFF6EE7B7) else Color(0xFF065F46)
+                                    } else titleColor
+                                )
+                                Text(
+                                    text = if (isFastedToday) {
+                                        if (isBangla) "আল্লাহ্‌ আপনার রোজা কবুল করুন" else "May Allah accept your fast"
+                                    } else {
+                                        if (isBangla) "নফল বা রমজানের রোজা ট্র্যাকিং" else "Nafl / Ramadan Fast Tracking"
+                                    },
+                                    fontSize = 10.sp,
+                                    color = subtitleColor
+                                )
+                            }
+                        }
+
+                        // Monthly count badge
+                        if (monthlyFastsCount > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = accentEmerald.copy(alpha = if (isDark) 0.20f else 0.12f),
+                                border = BorderStroke(0.8.dp, accentEmerald.copy(alpha = 0.30f))
+                            ) {
+                                Text(
+                                    text = if (isBangla) {
+                                        "এই মাসে: ${DateUtil.toBanglaDigits(monthlyFastsCount.toString())}টি"
+                                    } else {
+                                        "Month: $monthlyFastsCount"
+                                    },
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDark) Color(0xFF6EE7B7) else Color(0xFF047857),
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Sub-card for Sehri and Iftar timing display
+ */
+@Composable
+private fun TimingInfoSubCard(
+    icon: String,
+    title: String,
+    time: String,
+    subtitle: String,
+    accentColor: Color,
+    isDark: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (isDark) Color.White.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.70f),
+        border = BorderStroke(
+            1.dp,
+            accentColor.copy(alpha = if (isDark) 0.30f else 0.25f)
+        ),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(text = icon, fontSize = 13.sp)
+                Text(
+                    text = title,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = time,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
+                color = if (isDark) Color.White else Color(0xFF0F172A)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Medium,
+                color = accentColor.copy(alpha = if (isDark) 0.90f else 1.0f)
+            )
         }
     }
 }

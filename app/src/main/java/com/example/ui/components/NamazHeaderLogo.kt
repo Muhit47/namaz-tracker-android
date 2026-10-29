@@ -30,6 +30,6 @@ fun NamazHeaderLogo(
         painter = painterResource(id = logoRes),
         contentDescription = "Namaz Tracker Brand Logo",
         contentScale = ContentScale.Fit,
-        modifier = modifier.height(36.dp)
+        modifier = modifier.height(46.dp)
     )
 }

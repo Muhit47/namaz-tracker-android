@@ -650,7 +650,7 @@ private fun WeeklyActivityBarChartCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp)
+                        .height(140.dp)
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
@@ -661,7 +661,7 @@ private fun WeeklyActivityBarChartCard(
                         val heightFraction = (score.toFloat() / 5f).coerceIn(0.2f, 1f)
 
                         val barHeight by animateFloatAsState(
-                            targetValue = 90.dp.value * heightFraction,
+                            targetValue = 72.dp.value * heightFraction,
                             animationSpec = spring(stiffness = Spring.StiffnessLow),
                             label = "bar_height_$index"
                         )
@@ -705,7 +705,10 @@ private fun WeeklyActivityBarChartCard(
                                 text = if (isBangla) dayBn else dayEn,
                                 fontSize = 10.sp,
                                 fontWeight = if (isToday) FontWeight.Black else FontWeight.SemiBold,
-                                color = if (isToday) Color(0xFF0284C7) else titleColor
+                                color = if (isToday) Color(0xFF0284C7) else titleColor,
+                                maxLines = 1,
+                                softWrap = false,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -1031,15 +1034,33 @@ private fun TrackerCalendarTab(
                             color = titleColor
                         )
                         Spacer(modifier = Modifier.height(2.dp))
+                        val todayIso = DateUtil.getTodayIso()
+                        val (statusText, statusBgColor, statusTextColor) = when {
+                            selectedIso == todayIso -> Triple(
+                                if (isBangla) "আজকের দিন" else "Today",
+                                Color(0xFF10B981).copy(alpha = if (isDark) 0.18f else 0.12f),
+                                if (isDark) Color(0xFF34D399) else Color(0xFF047857)
+                            )
+                            selectedIso > todayIso -> Triple(
+                                if (isBangla) "পরবর্তী হিস্ট্রি" else "Upcoming Record",
+                                Color(0xFF0284C7).copy(alpha = if (isDark) 0.20f else 0.12f),
+                                if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7)
+                            )
+                            else -> Triple(
+                                if (isBangla) "পূর্ববর্তী হিস্ট্রি" else "Past Record",
+                                Color(0xFF6366F1).copy(alpha = if (isDark) 0.18f else 0.12f),
+                                if (isDark) Color(0xFF818CF8) else Color(0xFF4F46E5)
+                            )
+                        }
+
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = Color(0xFF10B981).copy(alpha = if (isDark) 0.18f else 0.12f)
+                            color = statusBgColor
                         ) {
                             Text(
-                                text = if (selectedIso == DateUtil.getTodayIso()) (if (isBangla) "আজকের দিন" else "Today")
-                                else (if (isBangla) "পূর্ববর্তী হিস্ট্রি" else "Past Record"),
+                                text = statusText,
                                 fontSize = 10.sp,
-                                color = if (isDark) Color(0xFF34D399) else Color(0xFF047857),
+                                color = statusTextColor,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
