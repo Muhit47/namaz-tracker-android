@@ -47,6 +47,8 @@ import com.example.ui.viewmodel.NamazUiState
 import com.example.ui.viewmodel.NamazViewModel
 import com.example.util.DateUtil
 import com.example.util.HapticUtil
+import java.util.Calendar
+import java.util.Locale
 
 enum class TrackerSubTab(
     val titleEn: String,
