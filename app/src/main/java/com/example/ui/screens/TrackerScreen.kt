@@ -544,10 +544,6 @@ private fun AnalyticsHeroCard(
     }
 }
 
-/**
- * 7-Day Vertical Bar Chart Card with Cylindrical Gradient Pill Bars
- */
-@Composable
 private data class WeeklyDayItem(
     val dayBn: String,
     val dayEn: String,
@@ -765,6 +761,10 @@ private fun WeeklyActivityBarChartCard(
     }
 }
 
+/**
+ * Apple Health Style Stacked Status Bar Card
+ */
+@Composable
 private fun AppleHealthStackedStatusBarCard(
     jamatCount: Int,
     aloneCount: Int,
