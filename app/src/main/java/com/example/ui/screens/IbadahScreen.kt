@@ -53,7 +53,8 @@ enum class IbadahSubScreen {
     QIBLA,
     PRAYER_GUIDE,
     WUDU_GUIDE,
-    ASMAUL_HUSNA
+    ASMAUL_HUSNA,
+    HAJJ
 }
 
 /**
@@ -155,6 +156,17 @@ fun IbadahScreen(
             exit = fadeOut()
         ) {
             AsmaulHusnaScreen(
+                isBangla = isBangla,
+                onBack = { activeSubScreen = IbadahSubScreen.NONE }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = activeSubScreen == IbadahSubScreen.HAJJ,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            HajjGuideScreen(
                 isBangla = isBangla,
                 onBack = { activeSubScreen = IbadahSubScreen.NONE }
             )
@@ -437,6 +449,17 @@ private fun IbadahHubContent(
                     subtitleColor = subtitleColor,
                     onOpenSalah = { onSelect(IbadahSubScreen.PRAYER_GUIDE) },
                     onOpenWudu = { onSelect(IbadahSubScreen.WUDU_GUIDE) }
+                )
+            }
+
+            // Row 5: Hajj & Umrah Complete Guide (Spanning 2 columns / Full Width Banner)
+            item {
+                HajjGlassBanner(
+                    isBangla = isBangla,
+                    isDark = colors.isDark,
+                    titleColor = titleColor,
+                    subtitleColor = subtitleColor,
+                    onOpenHajj = { onSelect(IbadahSubScreen.HAJJ) }
                 )
             }
         }
@@ -1089,6 +1112,147 @@ private fun GuidesGlassBanner(
                         contentPadding = PaddingValues(vertical = 8.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * iOS 18 Heavy Glassmorphic Banner for Hajj & Umrah Complete Guide (হজ ও ওমরাহ পূর্ণাঙ্গ নির্দেশিকা)
+ */
+@Composable
+private fun HajjGlassBanner(
+    isBangla: Boolean,
+    isDark: Boolean,
+    titleColor: Color,
+    subtitleColor: Color,
+    onOpenHajj: () -> Unit
+) {
+    val shape = RoundedCornerShape(24.dp)
+    val accentEmerald = Color(0xFF059669)
+    val accentGold = Color(0xFFD97706)
+
+    val backgroundBrush = if (isDark) {
+        Brush.linearGradient(
+            colors = listOf(
+                accentEmerald.copy(alpha = 0.22f),
+                Color(0xFF0F172A).copy(alpha = 0.85f)
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFFECFDF5).copy(alpha = 0.95f),
+                Color(0xFFFFFBEB).copy(alpha = 0.90f)
+            )
+        )
+    }
+
+    val rimBrush = Brush.linearGradient(
+        colors = listOf(
+            accentGold.copy(alpha = if (isDark) 0.45f else 0.50f),
+            if (isDark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.85f)
+        )
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (isDark) 4.dp else 2.dp,
+                shape = shape,
+                ambientColor = if (isDark) Color.Black.copy(alpha = 0.35f) else accentEmerald.copy(alpha = 0.12f),
+                spotColor = accentEmerald.copy(alpha = 0.20f)
+            ),
+        shape = shape,
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(backgroundBrush)
+                .border(BorderStroke(1.2.dp, rimBrush), shape)
+                .clickable { onOpenHajj() }
+                .padding(16.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(42.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = accentEmerald.copy(alpha = if (isDark) 0.25f else 0.15f),
+                            border = BorderStroke(1.dp, accentEmerald.copy(alpha = 0.40f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(text = "🕋", fontSize = 20.sp)
+                            }
+                        }
+
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = if (isBangla) "পবিত্র সফর ও ইবাদত" else "HOLY PILGRIMAGE",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDark) Color(0xFF34D399) else Color(0xFF047857),
+                                    letterSpacing = 0.5.sp
+                                )
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = accentGold.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        text = if (isBangla) "পূর্ণাঙ্গ গাইড" else "Full Guide",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isDark) Color(0xFFFBBF24) else Color(0xFF92400E),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isBangla) "হজ ও ওমরাহ পূর্ণাঙ্গ নির্দেশিকা" else "Hajj & Umrah Complete Guide",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = titleColor
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = if (isBangla)
+                        "ইহরাম, ৫ দিনের আমল, মীকাত, রওজা যিয়ারত, মাসনুন দোয়া ও তাওয়াফ কাউন্টার"
+                    else
+                        "Timeline, Umrah rites, Miqat, Madinah Ziyarah, Duas & Tawaf Counter",
+                    fontSize = 11.5.sp,
+                    color = subtitleColor
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                IosGlassPillButton(
+                    text = if (isBangla) "🕋 বিস্তারিত হজ নির্দেশিকা খুলুন" else "🕋 Open Complete Hajj Guide",
+                    onClick = onOpenHajj,
+                    fontSize = 12.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 9.dp)
+                )
             }
         }
     }
