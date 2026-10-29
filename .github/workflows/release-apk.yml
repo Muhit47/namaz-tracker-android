@@ -41,27 +41,18 @@ jobs:
       - name: Make Gradlew Executable
         run: chmod +x gradlew
 
-      - name: Prepare Keystore for Signing
+      - name: Verify Permanent Release Keystore
         run: |
-          if [ ! -f my-upload-key.jks ]; then
-            echo "Generating release signing keystore..."
-            keytool -genkey -v -keystore my-upload-key.jks \
-              -alias upload \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -storepass "${STORE_PASSWORD:-namaztracker123}" \
-              -keypass "${KEY_PASSWORD:-namaztracker123}" \
-              -dname "CN=NamazTracker, OU=Mobile, O=IslamicApp, L=Dhaka, S=Dhaka, C=BD"
+          if [ ! -f keystore/namaz-release.jks ]; then
+            echo "ERROR: Permanent release keystore not found in keystore/namaz-release.jks!"
+            exit 1
           fi
-        env:
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'namaztracker123' }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'namaztracker123' }}
+          echo "Verified permanent release keystore: keystore/namaz-release.jks"
 
       - name: Build Release APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace
         env:
-          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          KEYSTORE_PATH: ${{ github.workspace }}/keystore/namaz-release.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD || 'namaztracker123' }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'namaztracker123' }}
 

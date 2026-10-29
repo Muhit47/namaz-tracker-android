@@ -18,7 +18,7 @@ object AppVersionHelper {
         get() = try {
             BuildConfig.VERSION_CODE
         } catch (e: Throwable) {
-            18
+            19
         }
 
     fun getDisplayVersion(isBangla: Boolean): String {
