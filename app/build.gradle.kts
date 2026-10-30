@@ -42,7 +42,7 @@ android {
   defaultConfig {
     applicationId = "com.namaztracker.app"
     minSdk = 24
-    targetSdk = 36
+    targetSdk = 35
     versionCode = currentVersionCode
     versionName = currentVersionName
 
@@ -58,6 +58,9 @@ android {
       storePassword = System.getenv("STORE_PASSWORD") ?: "namaztracker123"
       keyAlias = "upload"
       keyPassword = System.getenv("KEY_PASSWORD") ?: "namaztracker123"
+      enableV1Signing = true
+      enableV2Signing = true
+      enableV3Signing = true
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")

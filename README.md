@@ -3,9 +3,9 @@
 # 🕌 Namaz Tracker
 ### Modern Offline-First Islamic Companion & Spiritual Habit Tracker for Android
 
-[![Download APK](https://img.shields.io/badge/Download-Latest%20APK%20(v3.1.0)-10B981?style=for-the-badge&logo=android)](https://github.com/Muhit47/namaz-tracker-android/releases)
-[![Version](https://img.shields.io/badge/version-3.1.0%20(Build%2019)-emerald?style=for-the-badge&logo=android)](version.properties)
-[![Android](https://img.shields.io/badge/Android-API%2024%20to%2036-green?style=for-the-badge&logo=android)](app/build.gradle.kts)
+[![Download APK](https://img.shields.io/badge/Download-Latest%20APK%20(v3.3.1)-10B981?style=for-the-badge&logo=android)](https://github.com/Muhit47/namaz-tracker-android/releases)
+[![Version](https://img.shields.io/badge/version-3.3.1%20(Build%2022)-emerald?style=for-the-badge&logo=android)](version.properties)
+[![Android](https://img.shields.io/badge/Android-API%2024%20to%2035-green?style=for-the-badge&logo=android)](app/build.gradle.kts)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue?style=for-the-badge&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
 [![Room DB](https://img.shields.io/badge/Room%20DB-100%25%20Offline-orange?style=for-the-badge&logo=sqlite)](app/src/main/assets/)
